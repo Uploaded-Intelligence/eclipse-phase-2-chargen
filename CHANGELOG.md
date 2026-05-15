@@ -2,6 +2,41 @@
 
 All notable changes to this project. Format follows the spirit of [Keep a Changelog](https://keepachangelog.com/), versioned by milestone.
 
+## [0.6] — 2026-05-16 — "Bodies & Becoming"
+
+### Added
+- **22 new morphs** transcribed from corebook (p054–p069), bringing the catalog from 21 to 45 entries total — including **Swarmanoid** (the user's specifically-flagged missing morph), **Neo-Octopus / octomorph** (eight-armed cephalopod with chameleon skin + ink attack), **Reaper** (12 MP combat disc, Heavy Frame, four weapon mounts), **Fury** / **Ghost** / **Remade** (advanced biomorphs), **Neotenic** / **Ruster** (common biomorphs), **Neo-Bonobo** / **Neo-Neanderthal** / **Neo-Orangutan** (uplift biomorphs), **Basic Pod** / **Novacrab** / **Shaper Pod** (pods), **Spare** / **Dragonfly** / **Slitheroid** / **Galatea** / **Steel Morph** / **Arachnoid** (synthmorphs), and 4 **Flexbot** variants (Crafter / Fighter / Rogue / Wizard, modular).
+- **Three optional morph schema fields:** `armor:{energy,kinetic}` for synthmorphs with built-in Frame armor (Light 6/4, Medium 8/6, Heavy 12/10); `notes:""` for special attacks / size / hive notes; `swarm:true` flag (Swarmanoid only) that branches wound math.
+- **Category filter pills** on the morph picker (Step 12): `ALL · BIOMORPH · UPLIFT · POD · SYNTH · FLEXBOT · INFOMORPH` with live count badges. State persisted to `STATE.meta.morphFilter`.
+- **MP-budget status strip** above the picker: live "AFFORDABLE: 27 / 45 MORPHS" computed against the player's MP budget, with cost-ascending sort.
+- **`// SWARM FORM` badge** on the Studio sheet morph banner when Swarmanoid is selected — surfaces distributed-damage semantics next to the morph name.
+- **`// DIGITAL FORM` badge** on the Studio sheet morph banner for infomorphs (Digimorph / Ikon / Operator / Agent) — clarifies the "no body" framing.
+- **`test-morph-catalog.js`** — 35 new assertions covering catalog completeness, per-category counts, required-field shape, WT integrity (swarm flag), Swarmanoid / Reaper / Octomorph edge cases, `studioPcFromState` pass-through, Lexicon coverage, and a permanent regression test for the v0.5.3-class projection bug (hyperelite + default aptitudes → non-empty `pc.skills`).
+
+### Fixed (data drift in existing 21 morphs)
+Cross-referenced every existing morph entry against `data/raw/morphs/p054–p069.txt`. Confirmed drift fixed in:
+- **Bouncer** — WT/DUR/DR all bumped to corebook values (6/30/45 → 7/35/53); pools.Flex was 0, corebook says 2; movement "Walker 4/20" → "Walker 4/12"; added Cold Tolerance + Prehensile Feet ware; added Limberness L1 trait
+- **Hibernoid** — pools.Vigor was 1, corebook says 0; Flex was 0, says 2; ware list rebuilt
+- **Menton** — ware list reconciled (corebook is minimal — Mnemonics is the core augmentation)
+- **Olympian** — WT/DUR/DR were 7/35/53, corebook says 8/40/60; pools.Flex was 0, says 1
+- **Sylph** — ware reduced to corebook canonical (5 items)
+- **Worker Pod / Pleasure Pod / Security Pod** — multiple stat/pool/ware reconciles; Security Pod swapped Industrial Armor → Bioweave Armor (+2/+3); Pleasure Pod added Scent Alteration + Sex Switch ware
+- **Neo-Avian** — Insight pool 1→2, Flex 1→0, ware expanded substantially (added Claws, Direction Sense, Enhanced Vision, Prehensile Feet, Wings); Exotic Morphology L1 → L3; added Non-Human Biochemistry L2
+- **Neo-Gorilla** — WT/DUR/DR 8/40/60 → 9/45/68; Insight 1→0, Flex 0→1; movement 4/16 → 4/12; ware expanded; added Non-Human Biochemistry
+- **Case** — movement "Walker 4/20" → "Walker 4/12"; added Lidar + Mnemonics + Puppet Sock ware; added Exotic Morphology L1 + Inherent Flaws traits; added Light Frame (Armor 6/4) notes + armor field
+- **Synth** — WT/DUR/DR 6/30/60 → 8/40/80; pools.Vigor 2→1, Flex 0→1; ware rebuilt; added Light Frame armor
+- **Savant** — WT/DUR/DR 5/25/50 → 7/35/70; pools.Vigor 0→1; ware rebuilt; added Light Frame armor
+- **Digimorph / Ikon / Operator / Agent** — ware rename `Mnemonic Augmentation` → `Mnemonics` (corebook shorthand); Operator's Insight pool corrected 4→3
+- **Vocabulary unification:** `Mnemonic Augmentation` → `Mnemonics`, `Basic Mesh Inserts` / `Basic Biomods` → `Mesh Inserts` / `Biomods` throughout
+
+### Changed (engine)
+- **Wound math branches on `morph.swarm`** in `buildVitalSignsCard` and `studioSetDamage`. Swarmanoid (WT=0 sentinel) gets `woundCount=0`, `woundCap=1`, no `damage / WT` divide-by-zero, no `wounds × -10` Action Test penalty cascade. The swarm takes accumulated damage against DUR; when damage ≥ DUR the swarm is "broken".
+- **`studioPcFromState` morph projection** now passes through `id`, `subtype`, `notes`, `swarm`, `WT`, `DUR`, `DR` in addition to the existing fields. Backward-compatible defaults preserved.
+
+### Total counts
+- **45 morphs** (was 21) — corebook canonical, 4 Flexbot variants modeled as discrete entries
+- **357 test assertions** (was 322) — `test-morph-catalog.js` adds 35 new
+
 ## [0.5.3] — 2026-05-16
 
 ### Fixed

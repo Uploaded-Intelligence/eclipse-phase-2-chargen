@@ -1035,27 +1035,64 @@ const RULEBOOK_DATA = {
   },
 
   morphs: {
+    /* === BIOMORPHS — common humanoid (corebook p054-p058) === */
     flat:{id:"flat",name:"Flat",type:"biomorph",tier:"common",cost:0,WT:6,DUR:30,DR:45,pools:{Insight:0,Moxie:0,Vigor:0,Flex:0},movement:"Walker 4/20",ware:["Cortical Stack"],traits:[],blurb:"Baseline unmodified human. Rare outside bioconservative enclaves.",vibes:["smart"]},
     splicer:{id:"splicer",name:"Splicer",type:"biomorph",tier:"common",cost:1,WT:6,DUR:30,DR:45,pools:{Insight:0,Moxie:0,Vigor:0,Flex:1},movement:"Walker 4/20",ware:["Biomods","Cortical Stack","Mesh Inserts"],traits:[],blurb:"Genefixed humans — optimized for looks and health. The majority of transhumanity.",vibes:["versatile"]},
     exalt:{id:"exalt",name:"Exalt",type:"biomorph",tier:"common",cost:2,WT:7,DUR:35,DR:53,pools:{Insight:1,Moxie:1,Vigor:1,Flex:0},movement:"Walker 4/20",ware:["Biomods","Cortical Stack","Mesh Inserts"],traits:[],blurb:"Enhanced human — healthier, smarter, more attractive.",vibes:["versatile"]},
-    bouncer:{id:"bouncer",name:"Bouncer",type:"biomorph",tier:"common",cost:4,WT:6,DUR:30,DR:45,pools:{Insight:1,Moxie:0,Vigor:2,Flex:0},movement:"Walker 4/20",ware:["Biomods","Cortical Stack","Grip Pads","Mesh Inserts","Oxygen Reserve","Vacuum Sealing"],traits:[],blurb:"Microgravity-adapted morph with grip pads and vacuum sealing.",vibes:["stealth","versatile"]},
+    neotenic:{id:"neotenic",name:"Neotenic",type:"biomorph",tier:"common",cost:2,WT:6,DUR:30,DR:45,pools:{Insight:2,Moxie:1,Vigor:1,Flex:0},movement:"Walker 4/12",ware:["Biomods","Circadian Regulation","Cortical Stack","Mesh Inserts"],traits:[{name:"Exotic Morphology",level:1}],notes:"Small size.",blurb:"Child-morphed frame bred for compact habitats. Agile, inquisitive, resource-light.",vibes:["smart","versatile"]},
+    ruster:{id:"ruster",name:"Ruster",type:"biomorph",tier:"common",cost:3,WT:7,DUR:35,DR:53,pools:{Insight:0,Moxie:1,Vigor:1,Flex:1},movement:"Walker 4/20",ware:["Biomods","Cold Tolerance","Cortical Stack","Enhanced Respiration","Mesh Inserts","Radiation Sense"],traits:[],blurb:"Martian-adapted with thermoregulation and enhanced respiration. Survives thin air.",vibes:["versatile"]},
+    bouncer:{id:"bouncer",name:"Bouncer",type:"biomorph",tier:"common",cost:4,WT:7,DUR:35,DR:53,pools:{Insight:1,Moxie:0,Vigor:1,Flex:2},movement:"Walker 4/12",ware:["Biomods","Cold Tolerance","Cortical Stack","Grip Pads","Mesh Inserts","Oxygen Reserve","Prehensile Feet"],traits:[{name:"Limberness",level:1}],blurb:"Microgravity-adapted morph with grip pads and prehensile feet.",vibes:["stealth","versatile"]},
     futura:{id:"futura",name:"Futura",type:"biomorph",tier:"common",cost:4,WT:7,DUR:35,DR:53,pools:{Insight:2,Moxie:4,Vigor:1,Flex:0},movement:"Walker 4/20",ware:["Biomods","Cortical Stack","Endocrine Control","Enhanced Hearing","Enhanced Vision","Mental Speed","Mesh Inserts"],traits:[],blurb:"Designed by Cognite — social, smart, fast.",vibes:["social","smart"]},
-    hibernoid:{id:"hibernoid",name:"Hibernoid",type:"biomorph",tier:"common",cost:4,WT:7,DUR:35,DR:53,pools:{Insight:2,Moxie:1,Vigor:1,Flex:0},movement:"Walker 4/20",ware:["Biomods","Cortical Stack","Hibernation","Mesh Inserts","Oxygen Reserve","Toxin Filters"],traits:[],blurb:"Long-duration deep-space morph with hibernation.",vibes:["smart"]},
-    menton:{id:"menton",name:"Menton",type:"biomorph",tier:"common",cost:4,WT:7,DUR:35,DR:53,pools:{Insight:3,Moxie:1,Vigor:1,Flex:1},movement:"Walker 4/20",ware:["Biomods","Cortical Stack","Eidetic Memory","Hyper-Linguist","Math Boost","Mental Speed","Mesh Inserts"],traits:[],blurb:"Cognitively-upgraded — eidetic memory, hyper-linguistic, math boost.",vibes:["smart"]},
-    olympian:{id:"olympian",name:"Olympian",type:"biomorph",tier:"common",cost:4,WT:7,DUR:35,DR:53,pools:{Insight:1,Moxie:1,Vigor:3,Flex:0},movement:"Walker 4/20",ware:["Biomods","Cortical Stack","Enhanced Respiration","Mesh Inserts","Muscle Augmentation","Toxin Filters"],traits:[],blurb:"Physically optimized — endurance, speed, strength.",vibes:["combat","versatile"]},
-    sylph:{id:"sylph",name:"Sylph",type:"biomorph",tier:"common",cost:4,WT:7,DUR:35,DR:53,pools:{Insight:1,Moxie:3,Vigor:1,Flex:0},movement:"Walker 4/20",ware:["Biomods","Clean Metabolism","Cortical Stack","Endocrine Control","Enhanced Pheromones","Medichines","Mesh Inserts"],traits:[{name:"Striking Looks",level:2}],blurb:"Designed for beauty and social charisma.",vibes:["social"]},
-    "neo-avian":{id:"neo-avian",name:"Neo-Avian",type:"biomorph",subtype:"uplift",tier:"common",cost:0,WT:5,DUR:25,DR:38,pools:{Insight:1,Moxie:1,Vigor:0,Flex:1},movement:"Walker 2/8, Winged 8/40",ware:["Biomods","Cortical Stack","Mesh Inserts"],traits:[{name:"Exotic Morphology",level:1}],blurb:"Uplifted ravens, crows, parrots — small, intelligent, flight.",vibes:["stealth","smart"]},
-    "neo-gorilla":{id:"neo-gorilla",name:"Neo-Gorilla",type:"biomorph",subtype:"uplift",tier:"common",cost:3,WT:8,DUR:40,DR:60,pools:{Insight:1,Moxie:0,Vigor:3,Flex:0},movement:"Walker 4/16",ware:["Biomods","Cortical Stack","Mesh Inserts"],traits:[{name:"Exotic Morphology",level:1}],blurb:"Uplifted gorillas — strong, intimidating, surprisingly gentle.",vibes:["combat"]},
-    "case":{id:"case",name:"Case",type:"synthmorph",tier:"common",cost:0,WT:5,DUR:25,DR:50,pools:{Insight:0,Moxie:0,Vigor:0,Flex:0},movement:"Walker 4/20",ware:["Access Jacks","Basic Mesh Inserts","Cortical Stack","Cyberbrain","Mnemonic Augmentation"],traits:[],blurb:"Cheap, ubiquitous synthmorph — the body of last resort.",vibes:["versatile"]},
-    synth:{id:"synth",name:"Synth",type:"synthmorph",tier:"common",cost:3,WT:6,DUR:30,DR:60,pools:{Insight:0,Moxie:0,Vigor:2,Flex:0},movement:"Walker 4/20",ware:["Access Jacks","Cortical Stack","Cyberbrain","Lidar","Mnemonic Augmentation","Puppet Sock","Radar"],traits:[],blurb:"Standard general-purpose synthmorph.",vibes:["combat","versatile"]},
-    savant:{id:"savant",name:"Savant",type:"synthmorph",tier:"common",cost:4,WT:5,DUR:25,DR:50,pools:{Insight:3,Moxie:0,Vigor:0,Flex:1},movement:"Walker 4/20",ware:["Access Jacks","Basic Mesh Inserts","Cortical Stack","Cyberbrain","Industrial Armor","Lidar","Mnemonic Augmentation"],traits:[],blurb:"Cognition-optimized synthmorph for researchers.",vibes:["smart"]},
-    digimorph:{id:"digimorph",name:"Digimorph",type:"infomorph",tier:"common",cost:0,WT:5,DUR:25,DR:50,pools:{Insight:0,Moxie:0,Vigor:0,Flex:0},movement:"—",ware:["Mnemonic Augmentation"],traits:[{name:"Digital Speed"},{name:"Exotic Morphology",level:3}],blurb:"Barebones infomorph for ego storage and mesh existence.",vibes:["versatile"]},
-    ikon:{id:"ikon",name:"Ikon",type:"infomorph",tier:"common",cost:1,WT:6,DUR:30,DR:60,pools:{Insight:1,Moxie:3,Vigor:0,Flex:0},movement:"—",ware:["Copylock","Memory Lock","Mnemonic Augmentation"],traits:[{name:"Digital Speed"},{name:"Exotic Morphology",level:3}],blurb:"Public-facing infomorph for socialites, performers.",vibes:["social"]},
-    operator:{id:"operator",name:"Operator",type:"infomorph",tier:"common",cost:2,WT:7,DUR:35,DR:70,pools:{Insight:4,Moxie:0,Vigor:0,Flex:1},movement:"—",ware:["Drone Rig","Mnemonic Augmentation","Oracles"],traits:[{name:"Digital Speed"},{name:"Exotic Morphology",level:3}],blurb:"Hacker-focused infomorph.",vibes:["smart","stealth"]},
-    agent:{id:"agent",name:"Agent",type:"infomorph",tier:"common",cost:2,WT:8,DUR:40,DR:80,pools:{Insight:4,Moxie:0,Vigor:0,Flex:0},movement:"—",ware:["Enhanced Security","E-Veil","Mnemonic Augmentation"],traits:[{name:"Digital Speed"},{name:"Exotic Morphology",level:3}],blurb:"Infomorph optimized for infosec roles — pen-testing, hacking, network security.",vibes:["smart","stealth"]},
-    worker_pod:{id:"worker_pod",name:"Worker Pod",type:"pod",tier:"common",cost:3,WT:6,DUR:30,DR:45,pools:{Insight:0,Moxie:0,Vigor:2,Flex:0},movement:"Walker 4/20",ware:["Access Jacks","Basic Biomods","Basic Mesh Inserts","Cortical Stack","Cyberbrain","Industrial Armor","Puppet Sock"],traits:[],blurb:"Industrial pod for labor work — strong, sturdy.",vibes:["combat","versatile"]},
-    pleasure_pod:{id:"pleasure_pod",name:"Pleasure Pod",type:"pod",tier:"common",cost:4,WT:6,DUR:30,DR:45,pools:{Insight:0,Moxie:2,Vigor:1,Flex:0},movement:"Walker 4/20",ware:["Access Jacks","Basic Biomods","Basic Mesh Inserts","Clean Metabolism","Cortical Stack","Cyberbrain","Endocrine Control","Enhanced Pheromones","Puppet Sock"],traits:[{name:"Striking Looks",level:1}],blurb:"Designed for sex work, hospitality, and social services.",vibes:["social"]},
-    security_pod:{id:"security_pod",name:"Security Pod",type:"pod",tier:"common",cost:5,WT:7,DUR:35,DR:53,pools:{Insight:1,Moxie:0,Vigor:2,Flex:0},movement:"Walker 4/20",ware:["Access Jacks","Basic Biomods","Basic Mesh Inserts","Cortical Stack","Cyberbrain","Enhanced Senses","Industrial Armor","Muscle Augmentation","Puppet Sock"],traits:[],blurb:"Hardened pod for security and combat work.",vibes:["combat"]}
+    hibernoid:{id:"hibernoid",name:"Hibernoid",type:"biomorph",tier:"common",cost:4,WT:7,DUR:35,DR:53,pools:{Insight:1,Moxie:1,Vigor:0,Flex:2},movement:"Walker 4/20",ware:["Biomods","Circadian Regulation","Clean Metabolism","Cold Tolerance","Cortical Stack","Hibernation","Mesh Inserts"],traits:[],blurb:"Long-duration deep-space morph with hibernation.",vibes:["smart"]},
+    menton:{id:"menton",name:"Menton",type:"biomorph",tier:"common",cost:4,WT:7,DUR:35,DR:53,pools:{Insight:3,Moxie:1,Vigor:1,Flex:1},movement:"Walker 4/20",ware:["Biomods","Cortical Stack","Eidetic Memory","Hyper-Linguist","Math Boost","Mental Speed","Mesh Inserts","Mnemonics"],traits:[],blurb:"Cognitively-upgraded — eidetic memory, hyper-linguistic, math boost.",vibes:["smart"]},
+    olympian:{id:"olympian",name:"Olympian",type:"biomorph",tier:"common",cost:4,WT:8,DUR:40,DR:60,pools:{Insight:1,Moxie:1,Vigor:3,Flex:1},movement:"Walker 4/20",ware:["Biomods","Cortical Stack","Enhanced Respiration","Mesh Inserts","Muscle Augmentation","Toxin Filters"],traits:[],blurb:"Physically optimized — endurance, speed, strength.",vibes:["combat","versatile"]},
+    sylph:{id:"sylph",name:"Sylph",type:"biomorph",tier:"common",cost:4,WT:6,DUR:30,DR:45,pools:{Insight:1,Moxie:3,Vigor:1,Flex:1},movement:"Walker 4/20",ware:["Biomods","Clean Metabolism","Cortical Stack","Enhanced Pheromones","Mesh Inserts"],traits:[{name:"Striking Looks",level:2}],blurb:"Designed for beauty and social charisma.",vibes:["social"]},
+
+    /* === BIOMORPHS — advanced (corebook p059) === */
+    fury:{id:"fury",name:"Fury",type:"biomorph",tier:"common",cost:6,WT:10,DUR:50,DR:75,pools:{Insight:1,Moxie:1,Vigor:4,Flex:2},movement:"Walker 4/20",ware:["Biomods","Bioweave Armor (+2/+3)","Claws","Cortical Stack","Enhanced Vision","Mesh Inserts"],traits:[{name:"Enhanced Behavior",level:2}],armor:{energy:2,kinetic:3},notes:"Combat-bred biomorph. Bioweave Armor adds +2 energy / +3 kinetic.",blurb:"Combat morph — aggressive, strong-willed, pack-oriented. Bred for war.",vibes:["combat"]},
+    ghost:{id:"ghost",name:"Ghost",type:"biomorph",tier:"common",cost:6,WT:9,DUR:45,DR:68,pools:{Insight:2,Moxie:1,Vigor:3,Flex:2},movement:"Walker 4/20",ware:["Biomods","Chameleon Skin","Cortical Stack","Grip Pads","Mesh Inserts"],traits:[{name:"Enhanced Behavior",level:2}],notes:"Patience trait and adaptive camouflage.",blurb:"Stealth infiltrator with adaptive skin. Reflexive, patient, problem-solving mind.",vibes:["stealth","smart"]},
+    remade:{id:"remade",name:"Remade",type:"biomorph",tier:"common",cost:7,WT:9,DUR:45,DR:68,pools:{Insight:2,Moxie:2,Vigor:2,Flex:2},movement:"Walker 4/20",ware:["Biomods","Circadian Regulation","Clean Metabolism","Cold Tolerance","Cortical Stack","Enhanced Respiration","Enhanced Vision","Mesh Inserts"],traits:[{name:"Exotic Morphology",level:1}],notes:"Humans 2.0 — taller, hairless, larger cranium, wider eyes.",blurb:"Optimized redesign of baseline humanity. Popular with Ultimates. Noticeably non-human aesthetics.",vibes:["versatile","smart"]},
+
+    /* === UPLIFT BIOMORPHS (corebook p062-p063) === */
+    "neo-avian":{id:"neo-avian",name:"Neo-Avian",type:"biomorph",subtype:"uplift",tier:"common",cost:0,WT:5,DUR:25,DR:38,pools:{Insight:2,Moxie:1,Vigor:0,Flex:0},movement:"Walker 2/8, Winged 8/40",ware:["Biomods","Claws","Cortical Stack","Direction Sense","Enhanced Vision","Mesh Inserts","Prehensile Feet","Wings"],traits:[{name:"Exotic Morphology",level:3},{name:"Non-Human Biochemistry",level:2}],notes:"Beak/Claw Attack (DV 2d6). Small size.",blurb:"Uplifted ravens, crows, parrots — small, intelligent, flight.",vibes:["stealth","smart"]},
+    "neo-bonobo":{id:"neo-bonobo",name:"Neo-Bonobo/Neo-Chimp",type:"biomorph",subtype:"uplift",tier:"common",cost:1,WT:6,DUR:30,DR:45,pools:{Insight:0,Moxie:2,Vigor:1,Flex:0},movement:"Walker 4/12",ware:["Biomods","Cortical Stack","Enhanced Smell","Mesh Inserts","Prehensile Feet"],traits:[{name:"Exotic Morphology",level:1},{name:"Non-Human Biochemistry",level:1}],blurb:"Uplifted hominids with long arms and climbing prowess.",vibes:["versatile","social"]},
+    "neo-neanderthal":{id:"neo-neanderthal",name:"Neo-Neanderthal",type:"biomorph",subtype:"uplift",tier:"common",cost:2,WT:7,DUR:35,DR:53,pools:{Insight:0,Moxie:1,Vigor:2,Flex:1},movement:"Walker 4/20",ware:["Biomods","Cortical Stack","Mesh Inserts"],traits:[{name:"Non-Human Biochemistry",level:1}],blurb:"Neanderthal lineage uplifted — heavy-boned, strong, distinctive.",vibes:["combat","versatile"]},
+    "neo-gorilla":{id:"neo-gorilla",name:"Neo-Gorilla",type:"biomorph",subtype:"uplift",tier:"common",cost:3,WT:9,DUR:45,DR:68,pools:{Insight:0,Moxie:0,Vigor:3,Flex:1},movement:"Walker 4/12",ware:["Biomods","Cortical Stack","Enhanced Smell","Mesh Inserts","Prehensile Feet"],traits:[{name:"Exotic Morphology",level:1},{name:"Non-Human Biochemistry",level:1}],blurb:"Uplifted gorillas — strong, intimidating, surprisingly gentle.",vibes:["combat"]},
+    "neo-octopus":{id:"neo-octopus",name:"Neo-Octopus",type:"biomorph",subtype:"uplift",tier:"common",cost:3,WT:6,DUR:30,DR:45,pools:{Insight:1,Moxie:1,Vigor:1,Flex:2},movement:"Swim 4/20, Thrust Vector 4/12, Walker 2/8",ware:["360-Degree Vision","Biomods","Chameleon Skin","Cortical Stack","Gills","Mesh Inserts","Polarization Vision"],traits:[{name:"Exotic Morphology",level:3},{name:"Limberness",level:2},{name:"Non-Human Biochemistry",level:2}],notes:"Eight prehensile arms. Beak Attack (DV 1d10). Ink Attack (Athletics, blinding, 5m area in water/microgravity).",blurb:"Eight-armed cephalopod — master of disguise and microgravity.",vibes:["stealth","versatile"]},
+    "neo-orangutan":{id:"neo-orangutan",name:"Neo-Orangutan",type:"biomorph",subtype:"uplift",tier:"common",cost:3,WT:7,DUR:35,DR:53,pools:{Insight:1,Moxie:1,Vigor:2,Flex:0},movement:"Walker 4/12",ware:["Biomods","Cortical Stack","Enhanced Smell","Mesh Inserts","Prehensile Feet"],traits:[{name:"Exotic Morphology",level:1},{name:"Limberness",level:1},{name:"Non-Human Biochemistry",level:1}],notes:"Reach (+10).",blurb:"Long-armed uplift — contemplative, solitary, deliberate.",vibes:["versatile"]},
+
+    /* === PODS (corebook p060-p061) === */
+    basic_pod:{id:"basic_pod",name:"Basic Pod",type:"pod",tier:"common",cost:1,WT:6,DUR:30,DR:45,pools:{Insight:0,Moxie:0,Vigor:1,Flex:0},movement:"Walker 4/20",ware:["Access Jacks","Biomods","Cortical Stack","Cyberbrain","Mesh Inserts","Mnemonics","Puppet Sock"],traits:[{name:"Planned Obsolescence",level:1}],blurb:"Stripped-down original pod design — cheap, dependent, utterly functional.",vibes:["versatile"]},
+    worker_pod:{id:"worker_pod",name:"Worker Pod",type:"pod",tier:"common",cost:3,WT:7,DUR:35,DR:53,pools:{Insight:0,Moxie:0,Vigor:2,Flex:1},movement:"Walker 4/20",ware:["Access Jacks","Biomods","Cortical Stack","Cyberbrain","Mesh Inserts","Mnemonics","Puppet Sock"],traits:[],blurb:"Industrial pod for labor work — strong, sturdy, designed to keep working.",vibes:["combat","versatile"]},
+    novacrab:{id:"novacrab",name:"Novacrab",type:"pod",tier:"common",cost:4,WT:9,DUR:45,DR:68,pools:{Insight:0,Moxie:0,Vigor:3,Flex:0},movement:"Walker 4/20",ware:["Access Jacks","Biomods","Carapace Armor (+6/+7)","Cold Tolerance","Cortical Stack","Cyberbrain","Enhanced Respiration","Gills","Mesh Inserts","Mnemonics","Oxygen Reserve","Puppet Sock","Vacuum Sealing"],traits:[{name:"Exotic Morphology",level:3},{name:"Non-Human Biochemistry",level:2}],armor:{energy:6,kinetic:7},notes:"Claw Attack (DV 2d10). Vacuum-rated.",blurb:"Chitinous crustacean engineered for vacuum and hazmat — climbs anything.",vibes:["combat","versatile"]},
+    pleasure_pod:{id:"pleasure_pod",name:"Pleasure Pod",type:"pod",tier:"common",cost:4,WT:6,DUR:30,DR:45,pools:{Insight:0,Moxie:3,Vigor:0,Flex:0},movement:"Walker 4/20",ware:["Access Jacks","Biomods","Clean Metabolism","Cortical Stack","Cyberbrain","Enhanced Pheromones","Mesh Inserts","Mnemonics","Puppet Sock","Scent Alteration","Sex Switch"],traits:[],blurb:"Designed for sex work, hospitality, and social services.",vibes:["social"]},
+    security_pod:{id:"security_pod",name:"Security Pod",type:"pod",tier:"common",cost:5,WT:7,DUR:35,DR:53,pools:{Insight:1,Moxie:0,Vigor:2,Flex:1},movement:"Walker 4/20",ware:["Access Jacks","Biomods","Bioweave Armor (+2/+3)","Claws","Cortical Stack","Cyberbrain","Eelware","Enhanced Hearing","Enhanced Vision","Mesh Inserts","Mnemonics","Puppet Sock"],traits:[],armor:{energy:2,kinetic:3},blurb:"Hardened pod for security and combat work.",vibes:["combat"]},
+    shaper_pod:{id:"shaper_pod",name:"Shaper Pod",type:"pod",tier:"common",cost:5,WT:7,DUR:35,DR:53,pools:{Insight:1,Moxie:2,Vigor:0,Flex:0},movement:"Walker 4/20",ware:["Access Jacks","Biomods","Chameleon Skin","Cortical Stack","Cyberbrain","Mesh Inserts","Mnemonics","Nanotat ID Flux","Puppet Sock","Sex Switch","Skinflex"],traits:[],blurb:"Infiltration pod with changeable features — spies' favorite tool.",vibes:["smart","stealth"]},
+
+    /* === SYNTHMORPHS (corebook p065-p067) === */
+    "case":{id:"case",name:"Case",type:"synthmorph",tier:"common",cost:0,WT:5,DUR:25,DR:50,pools:{Insight:0,Moxie:0,Vigor:0,Flex:0},movement:"Walker 4/12",ware:["Access Jacks","Cortical Stack","Cyberbrain","Lidar","Mesh Inserts","Mnemonics","Puppet Sock"],traits:[{name:"Exotic Morphology",level:1},{name:"Inherent Flaws"}],armor:{energy:6,kinetic:4},notes:"Light Frame (Armor 6/4).",blurb:"Cheap, ubiquitous synthmorph — the body of last resort.",vibes:["versatile"]},
+    spare:{id:"spare",name:"Spare",type:"synthmorph",tier:"common",cost:0,WT:3,DUR:15,DR:30,pools:{Insight:0,Moxie:1,Vigor:0,Flex:0},movement:"Walker 4/12",ware:["Access Jacks","Cortical Stack","Cyberbrain","Grip Pads","Lidar","Mesh Inserts","Mnemonics","Puppet Sock","Skinlink","Stress Control"],traits:[{name:"Exotic Morphology",level:3}],armor:{energy:6,kinetic:4},notes:"Light Frame (Armor 6/4). Small size.",blurb:"Flatpack emergency resleeving — pop it open, plug your stack in, survive.",vibes:["versatile"]},
+    dragonfly:{id:"dragonfly",name:"Dragonfly",type:"synthmorph",tier:"common",cost:1,WT:5,DUR:25,DR:50,pools:{Insight:1,Moxie:0,Vigor:1,Flex:0},movement:"Walker 2/8, Winged 8/32",ware:["Access Jacks","Cortical Stack","Cyberbrain","Mesh Inserts","Mnemonics","Prehensile Tail","Puppet Sock","Radar","Wings"],traits:[{name:"Exotic Morphology",level:3}],armor:{energy:6,kinetic:4},notes:"Light Frame (Armor 6/4). Small size.",blurb:"Meter-long flex-shell with independent rotary wings — hovers, maneuvers, silent flight.",vibes:["stealth","versatile"]},
+    swarmanoid:{id:"swarmanoid",name:"Swarmanoid",type:"synthmorph",tier:"common",cost:2,WT:0,DUR:40,DR:80,swarm:true,pools:{Insight:2,Moxie:0,Vigor:0,Flex:0},movement:"Hopper 4/12, Rotor 4/20, Walker 2/8",ware:["360-Degree Vision","Access Jacks","Cortical Stack","Cyberbrain","Lidar","Mesh Inserts","Mnemonics","Puppet Sock"],traits:[{name:"Exotic Morphology",level:3}],notes:"Swarm Attack (DV 1d6, ignores armor, blinding). Comes with swarmanoid hive (p342). No discrete wounds — distributed damage tracked against DUR.",blurb:"Hundreds of insect-sized microbots coordinated as a swarm — cyberbrain and sensors distributed across the cluster.",vibes:["stealth","smart"]},
+    synth:{id:"synth",name:"Synth",type:"synthmorph",tier:"common",cost:3,WT:8,DUR:40,DR:80,pools:{Insight:0,Moxie:0,Vigor:1,Flex:1},movement:"Walker 4/20",ware:["Access Jacks","Cortical Stack","Cyberbrain","Lidar","Mesh Inserts","Mnemonics","Puppet Sock"],traits:[{name:"Exotic Morphology",level:1}],armor:{energy:6,kinetic:4},notes:"Light Frame (Armor 6/4).",blurb:"Standard general-purpose synthmorph.",vibes:["combat","versatile"]},
+    savant:{id:"savant",name:"Savant",type:"synthmorph",tier:"common",cost:4,WT:7,DUR:35,DR:70,pools:{Insight:3,Moxie:0,Vigor:1,Flex:1},movement:"Walker 4/20",ware:["Access Jacks","Cortical Stack","Cyberbrain","Lidar","Mesh Inserts","Mnemonics","Puppet Sock"],traits:[{name:"Exotic Morphology",level:1}],armor:{energy:6,kinetic:4},notes:"Light Frame (Armor 6/4).",blurb:"Cognition-optimized synthmorph for researchers.",vibes:["smart"]},
+    galatea:{id:"galatea",name:"Galatea",type:"synthmorph",tier:"common",cost:5,WT:8,DUR:40,DR:80,pools:{Insight:1,Moxie:2,Vigor:1,Flex:1},movement:"Walker 4/20",ware:["Access Jacks","Chameleon Skin","Cortical Stack","Cyberbrain","Enhanced Hearing","Lidar","Mesh Inserts","Mnemonics","Puppet Sock"],traits:[{name:"Exotic Morphology",level:1}],armor:{energy:6,kinetic:4},notes:"Light Frame (Armor 6/4).",blurb:"High-end social shell — expensive aesthetics, charm-optimized neural architecture.",vibes:["social"]},
+    slitheroid:{id:"slitheroid",name:"Slitheroid",type:"synthmorph",tier:"common",cost:5,WT:9,DUR:45,DR:90,pools:{Insight:0,Moxie:1,Vigor:3,Flex:0},movement:"Roller 8/32, Snake 4/12",ware:["Access Jacks","Cortical Stack","Cyberbrain","Enhanced Vision","Mesh Inserts","Mnemonics","Puppet Sock","Retracting Limbs"],traits:[{name:"Exotic Morphology",level:2}],armor:{energy:8,kinetic:6},notes:"Medium Frame (Armor 8/6).",blurb:"Segmented serpentine frame — undulates, coils, rolls. Unusual perspective on mobility.",vibes:["combat","versatile"]},
+    steel_morph:{id:"steel_morph",name:"Steel Morph",type:"synthmorph",tier:"common",cost:5,WT:8,DUR:40,DR:80,pools:{Insight:0,Moxie:1,Vigor:3,Flex:1},movement:"Walker 4/20",ware:["Access Jacks","Cortical Stack","Cyberbrain","Lidar","Mesh Inserts","Mnemonics","Puppet Sock"],traits:[{name:"Exotic Morphology",level:1}],armor:{energy:8,kinetic:6},notes:"Medium Frame (Armor 8/6).",blurb:"Physical-capability upscale — stronger, more durable than standard synthmorphs.",vibes:["combat","versatile"]},
+    arachnoid:{id:"arachnoid",name:"Arachnoid",type:"synthmorph",tier:"common",cost:6,WT:11,DUR:55,DR:110,pools:{Insight:1,Moxie:0,Vigor:3,Flex:0},movement:"Hopper 4/12, Thrust Vector 8/40, Walker 4/20, Wheeled 8/40",ware:["Access Jacks","Cortical Stack","Cyberbrain","Lidar","Magnetic System","Mesh Inserts","Mnemonics","Pneumatics","Puppet Sock","Retracting Limbs"],traits:[{name:"Exotic Morphology",level:3}],armor:{energy:8,kinetic:6},notes:"Medium Frame (Armor 8/6).",blurb:"Arthropod-inspired multi-limbed platform — versatile locomotion in varied gravity.",vibes:["combat","versatile"]},
+    reaper:{id:"reaper",name:"Reaper",type:"synthmorph",tier:"common",cost:12,WT:12,DUR:60,DR:120,pools:{Insight:1,Moxie:0,Vigor:6,Flex:1},movement:"Hopper 4/20, Ionic 8/40, Thrust Vector 8/40, Walker 4/20",ware:["360-Degree Vision","Access Jacks","Anti-Glare","Cortical Stack","Cyberbrain","Enhanced Vision","Magnetic System","Mesh Inserts","Mnemonics","Pneumatics","Puppet Sock","Radar","Retracting Limbs","T-Ray Emitter","Weapon Mount (Articulated, 4)"],traits:[{name:"Exotic Morphology",level:3}],armor:{energy:12,kinetic:10},notes:"Heavy Frame (Armor 12/10). Combat disc with 4 weapon pods. Vectored thrust + ionic drive for microgravity and distance.",blurb:"Armored disc — infamous combat morph with four weapon mounts and vectored thrust.",vibes:["combat"]},
+
+    /* === FLEXBOTS — modular synthmorphs (corebook p066) === */
+    flexbot_crafter:{id:"flexbot_crafter",name:"Flexbot (Crafter)",type:"synthmorph",subtype:"flexbot",tier:"common",cost:2,WT:4,DUR:20,DR:40,pools:{Insight:1,Moxie:0,Vigor:0,Flex:0},movement:"Thrust Vector 8/40, Walker 4/12",ware:["Access Jacks","Cortical Stack","Cyberbrain","Engineer Swarm Hive","Fixer Swarm Hive","Lidar","Mesh Inserts","Mnemonics","Modular Design","Puppet Sock","Shape Adjusting"],traits:[{name:"Exotic Morphology",level:3}],armor:{energy:6,kinetic:4},notes:"Light Frame (Armor 6/4). Small size. Modular — can combine with other flexbots.",blurb:"Modular engineering unit — construction, fabrication, assembly tasks.",vibes:["smart"]},
+    flexbot_fighter:{id:"flexbot_fighter",name:"Flexbot (Fighter)",type:"synthmorph",subtype:"flexbot",tier:"common",cost:3,WT:6,DUR:30,DR:60,pools:{Insight:0,Moxie:0,Vigor:1,Flex:0},movement:"Thrust Vector 8/40, Walker 4/12",ware:["Access Jacks","Cortical Stack","Cyberbrain","Lidar","Mesh Inserts","Mnemonics","Modular Design","Pneumatics","Puppet Sock","Shape Adjusting","Weapon Mount (2)"],traits:[{name:"Exotic Morphology",level:3}],armor:{energy:6,kinetic:4},notes:"Light Frame (Armor 6/4). Small size. Modular — can combine with other flexbots.",blurb:"Combat-optimized modular unit — configurable for tactical operations.",vibes:["combat"]},
+    flexbot_rogue:{id:"flexbot_rogue",name:"Flexbot (Rogue)",type:"synthmorph",subtype:"flexbot",tier:"common",cost:2,WT:4,DUR:20,DR:40,pools:{Insight:0,Moxie:0,Vigor:1,Flex:0},movement:"Thrust Vector 8/40, Walker 4/12",ware:["Access Jacks","Chameleon Skin","Cortical Stack","Cyberbrain","Lidar","Mesh Inserts","Mnemonics","Modular Design","Puppet Sock","Radar Absorbent","Shape Adjusting"],traits:[{name:"Exotic Morphology",level:3}],armor:{energy:6,kinetic:4},notes:"Light Frame (Armor 6/4). Small size. Modular — can combine with other flexbots.",blurb:"Stealth-configured modular unit — covert infiltration and surveillance.",vibes:["stealth"]},
+    flexbot_wizard:{id:"flexbot_wizard",name:"Flexbot (Wizard)",type:"synthmorph",subtype:"flexbot",tier:"common",cost:2,WT:4,DUR:20,DR:40,pools:{Insight:1,Moxie:0,Vigor:0,Flex:0},movement:"Thrust Vector 8/40, Walker 4/12",ware:["Access Jacks","Cortical Stack","Cyberbrain","Lidar","Mesh Inserts","Mnemonics","Modular Design","Puppet Sock","Radio Booster","Shape Adjusting","Sniffer App","Tracker App"],traits:[{name:"Exotic Morphology",level:3}],armor:{energy:6,kinetic:4},notes:"Light Frame (Armor 6/4). Small size. Modular — can combine with other flexbots.",blurb:"Infosec-optimized modular unit — hacking, comms, penetration.",vibes:["smart"]},
+
+    /* === INFOMORPHS (corebook p069) === */
+    digimorph:{id:"digimorph",name:"Digimorph",type:"infomorph",tier:"common",cost:0,WT:5,DUR:25,DR:50,pools:{Insight:0,Moxie:0,Vigor:0,Flex:0},movement:"—",ware:["Mnemonics"],traits:[{name:"Digital Speed"},{name:"Exotic Morphology",level:3}],blurb:"Barebones infomorph for ego storage and mesh existence.",vibes:["versatile"]},
+    ikon:{id:"ikon",name:"Ikon",type:"infomorph",tier:"common",cost:1,WT:6,DUR:30,DR:60,pools:{Insight:1,Moxie:3,Vigor:0,Flex:0},movement:"—",ware:["Copylock","Memory Lock","Mnemonics"],traits:[{name:"Digital Speed"},{name:"Exotic Morphology",level:3}],blurb:"Public-facing infomorph for socialites, performers.",vibes:["social"]},
+    operator:{id:"operator",name:"Operator",type:"infomorph",tier:"common",cost:2,WT:7,DUR:35,DR:70,pools:{Insight:3,Moxie:0,Vigor:0,Flex:1},movement:"—",ware:["Drone Rig","Mnemonics","Oracles"],traits:[{name:"Digital Speed"},{name:"Exotic Morphology",level:3}],blurb:"Drone-operator infomorph for remote control and multi-vehicle coordination.",vibes:["smart"]},
+    agent:{id:"agent",name:"Agent",type:"infomorph",tier:"common",cost:2,WT:8,DUR:40,DR:80,pools:{Insight:4,Moxie:0,Vigor:0,Flex:0},movement:"—",ware:["Enhanced Security","E-Veil","Mnemonics"],traits:[{name:"Digital Speed"},{name:"Exotic Morphology",level:3}],blurb:"Infomorph optimized for infosec roles — pen-testing, hacking, network security.",vibes:["smart"]}
   },
 
   egoTraits: {
@@ -2718,7 +2755,53 @@ const RULEBOOK_REFERENCE = {
       "page": 68
     }
   },
-  "morphs": {},
+  "morphs": {
+    "flat":{name:"Flat",cost:0,WT:6,DUR:30,DR:45,blurb:"Baseline unmodified human. Rare outside bioconservative enclaves."},
+    "splicer":{name:"Splicer",cost:1,WT:6,DUR:30,DR:45,blurb:"Genefixed humans — optimized for looks and health. The majority of transhumanity."},
+    "exalt":{name:"Exalt",cost:2,WT:7,DUR:35,DR:53,blurb:"Enhanced human — healthier, smarter, more attractive."},
+    "neotenic":{name:"Neotenic",cost:2,WT:6,DUR:30,DR:45,blurb:"Child-morphed frame bred for compact habitats. Agile, inquisitive, resource-light."},
+    "ruster":{name:"Ruster",cost:3,WT:7,DUR:35,DR:53,blurb:"Martian-adapted with thermoregulation and enhanced respiration. Survives thin air."},
+    "bouncer":{name:"Bouncer",cost:4,WT:7,DUR:35,DR:53,blurb:"Microgravity-adapted morph with grip pads and prehensile feet."},
+    "futura":{name:"Futura",cost:4,WT:7,DUR:35,DR:53,blurb:"Designed by Cognite — social, smart, fast."},
+    "hibernoid":{name:"Hibernoid",cost:4,WT:7,DUR:35,DR:53,blurb:"Long-duration deep-space morph with hibernation."},
+    "menton":{name:"Menton",cost:4,WT:7,DUR:35,DR:53,blurb:"Cognitively-upgraded — eidetic memory, hyper-linguistic, math boost."},
+    "olympian":{name:"Olympian",cost:4,WT:8,DUR:40,DR:60,blurb:"Physically optimized — endurance, speed, strength."},
+    "sylph":{name:"Sylph",cost:4,WT:6,DUR:30,DR:45,blurb:"Designed for beauty and social charisma."},
+    "fury":{name:"Fury",cost:6,WT:10,DUR:50,DR:75,blurb:"Combat morph — aggressive, strong-willed, pack-oriented. Bred for war."},
+    "ghost":{name:"Ghost",cost:6,WT:9,DUR:45,DR:68,blurb:"Stealth infiltrator with adaptive skin. Reflexive, patient, problem-solving mind."},
+    "remade":{name:"Remade",cost:7,WT:9,DUR:45,DR:68,blurb:"Optimized redesign of baseline humanity. Popular with Ultimates. Noticeably non-human aesthetics."},
+    "neo-avian":{name:"Neo-Avian",cost:0,WT:5,DUR:25,DR:38,blurb:"Uplifted ravens, crows, parrots — small, intelligent, flight."},
+    "neo-bonobo":{name:"Neo-Bonobo/Neo-Chimp",cost:1,WT:6,DUR:30,DR:45,blurb:"Uplifted hominids with long arms and climbing prowess."},
+    "neo-neanderthal":{name:"Neo-Neanderthal",cost:2,WT:7,DUR:35,DR:53,blurb:"Neanderthal lineage uplifted — heavy-boned, strong, distinctive."},
+    "neo-gorilla":{name:"Neo-Gorilla",cost:3,WT:9,DUR:45,DR:68,blurb:"Uplifted gorillas — strong, intimidating, surprisingly gentle."},
+    "neo-octopus":{name:"Neo-Octopus",cost:3,WT:6,DUR:30,DR:45,blurb:"Eight-armed cephalopod — master of disguise and microgravity."},
+    "neo-orangutan":{name:"Neo-Orangutan",cost:3,WT:7,DUR:35,DR:53,blurb:"Long-armed uplift — contemplative, solitary, deliberate."},
+    "basic_pod":{name:"Basic Pod",cost:1,WT:6,DUR:30,DR:45,blurb:"Stripped-down original pod design — cheap, dependent, utterly functional."},
+    "worker_pod":{name:"Worker Pod",cost:3,WT:7,DUR:35,DR:53,blurb:"Industrial pod for labor work — strong, sturdy, designed to keep working."},
+    "novacrab":{name:"Novacrab",cost:4,WT:9,DUR:45,DR:68,blurb:"Chitinous crustacean engineered for vacuum and hazmat — climbs anything."},
+    "pleasure_pod":{name:"Pleasure Pod",cost:4,WT:6,DUR:30,DR:45,blurb:"Designed for sex work, hospitality, and social services."},
+    "security_pod":{name:"Security Pod",cost:5,WT:7,DUR:35,DR:53,blurb:"Hardened pod for security and combat work."},
+    "shaper_pod":{name:"Shaper Pod",cost:5,WT:7,DUR:35,DR:53,blurb:"Infiltration pod with changeable features — spies' favorite tool."},
+    "case":{name:"Case",cost:0,WT:5,DUR:25,DR:50,blurb:"Cheap, ubiquitous synthmorph — the body of last resort."},
+    "spare":{name:"Spare",cost:0,WT:3,DUR:15,DR:30,blurb:"Flatpack emergency resleeving — pop it open, plug your stack in, survive."},
+    "dragonfly":{name:"Dragonfly",cost:1,WT:5,DUR:25,DR:50,blurb:"Meter-long flex-shell with independent rotary wings — hovers, maneuvers, silent flight."},
+    "swarmanoid":{name:"Swarmanoid",cost:2,WT:0,DUR:40,DR:80,blurb:"Hundreds of insect-sized microbots coordinated as a swarm — cyberbrain and sensors distributed across the cluster."},
+    "synth":{name:"Synth",cost:3,WT:8,DUR:40,DR:80,blurb:"Standard general-purpose synthmorph."},
+    "savant":{name:"Savant",cost:4,WT:7,DUR:35,DR:70,blurb:"Cognition-optimized synthmorph for researchers."},
+    "galatea":{name:"Galatea",cost:5,WT:8,DUR:40,DR:80,blurb:"High-end social shell — expensive aesthetics, charm-optimized neural architecture."},
+    "slitheroid":{name:"Slitheroid",cost:5,WT:9,DUR:45,DR:90,blurb:"Segmented serpentine frame — undulates, coils, rolls."},
+    "steel_morph":{name:"Steel Morph",cost:5,WT:8,DUR:40,DR:80,blurb:"Physical-capability upscale — stronger, more durable than standard synthmorphs."},
+    "arachnoid":{name:"Arachnoid",cost:6,WT:11,DUR:55,DR:110,blurb:"Arthropod-inspired multi-limbed platform — versatile locomotion in varied gravity."},
+    "reaper":{name:"Reaper",cost:12,WT:12,DUR:60,DR:120,blurb:"Armored disc — infamous combat morph with four weapon mounts and vectored thrust."},
+    "flexbot_crafter":{name:"Flexbot (Crafter)",cost:2,WT:4,DUR:20,DR:40,blurb:"Modular engineering unit — construction, fabrication, assembly tasks."},
+    "flexbot_fighter":{name:"Flexbot (Fighter)",cost:3,WT:6,DUR:30,DR:60,blurb:"Combat-optimized modular unit — configurable for tactical operations."},
+    "flexbot_rogue":{name:"Flexbot (Rogue)",cost:2,WT:4,DUR:20,DR:40,blurb:"Stealth-configured modular unit — covert infiltration and surveillance."},
+    "flexbot_wizard":{name:"Flexbot (Wizard)",cost:2,WT:4,DUR:20,DR:40,blurb:"Infosec-optimized modular unit — hacking, comms, penetration."},
+    "digimorph":{name:"Digimorph",cost:0,WT:5,DUR:25,DR:50,blurb:"Barebones infomorph for ego storage and mesh existence."},
+    "ikon":{name:"Ikon",cost:1,WT:6,DUR:30,DR:60,blurb:"Public-facing infomorph for socialites, performers."},
+    "operator":{name:"Operator",cost:2,WT:7,DUR:35,DR:70,blurb:"Drone-operator infomorph for remote control and multi-vehicle coordination."},
+    "agent":{name:"Agent",cost:2,WT:8,DUR:40,DR:80,blurb:"Infomorph optimized for infosec roles — pen-testing, hacking, network security."}
+  },
   "know_fields": {
     "_meta": {
       "note": "Setting context for Know skill fields. 'setting' explains what the knowledge means in EP2 universe. 'hooks' offers 2-3 roleplay angles. Page references point to the canonical book entry; page 0 means the term is named in lists but synthesized from setting chapters. Canonical Know skill list: p52-53.",
@@ -4333,19 +4416,27 @@ function studioPcFromState() {
 
   // Morph: resolve from RULEBOOK_DATA.morphs[chosen]. Many morphs in our data
   // don't carry an .armor field — default to {energy:0, kinetic:0}.
+  // v0.6: pass through notes, swarm flag, subtype, WT/DUR/DR for downstream readers.
   const morphId = STATE.morph.chosen;
   const morphData = morphId ? RULEBOOK_DATA.morphs[morphId] : null;
   const morph = morphData ? {
+    id: morphId,
     name: morphData.name || morphId,
     type: (morphData.type || "morph").toUpperCase(),
+    subtype: morphData.subtype || null,
     movementRate: morphData.movement || morphData.movementRate || "",
     ware: (morphData.ware || []).map(w => typeof w === "string" ? { name: w } : w),
     morphTraits: (morphData.traits || []).map(t => typeof t === "string"
       ? { name: t, level: 1 }
       : { name: t.name, level: t.level || 1 }),
-    armor: morphData.armor || { energy: 0, kinetic: 0 }
+    armor: morphData.armor || { energy: 0, kinetic: 0 },
+    notes: morphData.notes || "",
+    swarm: !!morphData.swarm,
+    WT: morphData.WT,
+    DUR: morphData.DUR,
+    DR: morphData.DR
   } : {
-    name:"", type:"", movementRate:"", ware:[], morphTraits:[], armor:{energy:0,kinetic:0}
+    id:"", name:"", type:"", subtype:null, movementRate:"", ware:[], morphTraits:[], armor:{energy:0,kinetic:0}, notes:"", swarm:false, WT:0, DUR:0, DR:0
   };
 
   // Ego traits — from cp.positiveTraits + cp.negativeTraits.
@@ -4519,16 +4610,22 @@ function studioSetDamage(v) {
   // Studio's setDamage takes raw damage; we store it in play.wounds (historical
   // name, IS the raw value). Auto-bumps woundsTaken to floor(damage/WT) capped at
   // max(current, derived) and ≤9 (Studio's behavior).
+  // v0.6: swarm morphs distribute damage — woundsTaken stays at 0; only raw damage accumulates.
   const ms = derived.morphStats();
-  const WT = (ms && ms.morph && ms.morph.WT) || 1;
+  const isSwarm = !!(ms && ms.morph && ms.morph.swarm);
+  const WT = isSwarm ? 1 : ((ms && ms.morph && ms.morph.WT) || 1);
   const DR = (ms && ms.morph && ms.morph.DR) || 9999;
   dispatch(s => {
     const next = typeof v === "function" ? v(s.play.wounds || 0) : v;
     const damage = Math.max(0, Math.min(DR, next));
-    const auto = Math.floor(damage / WT);
-    const current = s.play.woundsTaken || 0;
     s.play.wounds = damage;
-    s.play.woundsTaken = Math.max(current, Math.min(auto, 9));
+    if (isSwarm) {
+      s.play.woundsTaken = 0;
+    } else {
+      const auto = Math.floor(damage / WT);
+      const current = s.play.woundsTaken || 0;
+      s.play.woundsTaken = Math.max(current, Math.min(auto, 9));
+    }
   });
 }
 
@@ -4998,16 +5095,20 @@ function buildLayout() {
 function buildVitalSignsCard(ds, ms) {
   const damage = STATE.play.wounds || 0;
   const stress = STATE.play.stress || 0;
-  const WT = ms.morph.WT || 1;
+  // v0.6: swarm morphs (Swarmanoid) take distributed damage — no discrete wounds.
+  // WT is stored as 0 on swarmanoid; we use 1 as divisor sentinel and force woundCount/Cap = 0/1
+  // so the wound math doesn't NaN and the wound penalty chain (×-10 each) is bypassed downstream.
+  const isSwarm = !!(ms.morph && ms.morph.swarm);
+  const WT = isSwarm ? 1 : (ms.morph.WT || 1);
   const DUR = ms.morph.DUR || 0;
   const DR  = ms.morph.DR  || 0;
   const TT  = ds.traumaThreshold || 1;
   const LUC = ds.lucidity || 0;
   const IR  = ds.insanityRating || 0;
 
-  const woundCount   = Math.floor(damage / WT);
+  const woundCount   = isSwarm ? 0 : Math.floor(damage / WT);
   const traumaCount  = Math.floor(stress / TT);
-  const woundCap     = (DUR > 0) ? Math.max(1, Math.floor(DUR / WT)) : 4;
+  const woundCap     = isSwarm ? 1 : ((DUR > 0) ? Math.max(1, Math.floor(DUR / WT)) : 4);
   const traumaCap    = (LUC > 0) ? Math.max(1, Math.floor(LUC / TT)) : 4;
 
   const damageState = damage >= DR ? "danger" : (damage >= DUR ? "warn" : "");
@@ -6058,7 +6159,11 @@ function buildStudioIdentityHero(pc) {
     ),
     pc.morph.name ? h("div", { style:{display:"inline-flex",alignSelf:"flex-end",alignItems:"stretch",gap:"4px"} },
       h("div", { style:{background:"var(--st-green)",color:"#fff",padding:"6px 22px 6px 16px",clipPath:"polygon(0 0, calc(100% - 14px) 0, 100% 100%, 0 100%)",fontWeight:900,fontSize:"14px",letterSpacing:"2.5px",lineHeight:1,textTransform:"uppercase",display:"inline-block"}, "data-tip":"morphs."+(STATE.morph.chosen||"") }, pc.morph.name),
-      pc.morph.type ? h("div", { style:{background:"#0a3038",color:"#fff",padding:"6px 12px 6px 20px",clipPath:"polygon(14px 0, 100% 0, 100% 100%, 0 100%)",fontWeight:800,fontSize:"10px",letterSpacing:"2px",lineHeight:1,textTransform:"uppercase",display:"inline-flex",alignItems:"center"}, "data-tip":"morph_types."+(pc.morph.type||"").toLowerCase() }, pc.morph.type) : null
+      pc.morph.type ? h("div", { style:{background:"#0a3038",color:"#fff",padding:"6px 12px 6px 20px",clipPath:"polygon(14px 0, 100% 0, 100% 100%, 0 100%)",fontWeight:800,fontSize:"10px",letterSpacing:"2px",lineHeight:1,textTransform:"uppercase",display:"inline-flex",alignItems:"center"}, "data-tip":"morph_types."+(pc.morph.type||"").toLowerCase() }, pc.morph.type) : null,
+      // v0.6: SWARM FORM badge — swarmanoid (distributed-damage morph). Cyan accent.
+      pc.morph.swarm ? h("div", { style:{background:"#072430",color:"#7fd4e2",padding:"6px 12px 6px 20px",clipPath:"polygon(14px 0, 100% 0, 100% 100%, 0 100%)",fontWeight:800,fontSize:"9.5px",letterSpacing:"1.8px",lineHeight:1,textTransform:"uppercase",display:"inline-flex",alignItems:"center",fontFamily:'"Share Tech Mono", ui-monospace, monospace',border:"1px solid #1d8493",boxShadow:"0 0 10px rgba(127,212,226,0.25)"} }, "// SWARM FORM") : null,
+      // v0.6: DIGITAL FORM badge — infomorphs (no physical body). Cyan accent.
+      (pc.morph.type === "INFOMORPH") ? h("div", { style:{background:"#072430",color:"#7fd4e2",padding:"6px 12px 6px 20px",clipPath:"polygon(14px 0, 100% 0, 100% 100%, 0 100%)",fontWeight:800,fontSize:"9.5px",letterSpacing:"1.8px",lineHeight:1,textTransform:"uppercase",display:"inline-flex",alignItems:"center",fontFamily:'"Share Tech Mono", ui-monospace, monospace',border:"1px solid #1d8493",boxShadow:"0 0 10px rgba(127,212,226,0.25)"} }, "// DIGITAL FORM") : null
     ) : null
   );
   col.appendChild(bannerRow);
@@ -7563,15 +7668,74 @@ function step12Morph() {
   frag.appendChild(h("p", {class:"lead"}, "Pick a starting morph. Default budget: 6 MP" + (econ.resourcesLvl ? " (+" + econ.resourcesLvl + " from Resources)" : "") + " = " + econ.budget + " MP."));
   frag.appendChild(h("div", {class:"why"}, "Each morph is a body — biological, synthetic, digital, or pod. Filter by what you can afford and what kind of work it does. Leftover MP becomes Flex at 2:1 (max 3 Flex)."));
 
-  // Filters
-  const filterRow = h("div", {style:{display:"flex",gap:"6px",flexWrap:"wrap",marginBottom:"12px"}});
-  // (For v0.1 filters are visual only on this list — we display all common; advanced gated)
-  filterRow.appendChild(h("span", {class:"muted",style:{fontSize:"12px",alignSelf:"center"}}, "showing common morphs · toggle Advanced in header for more"));
+  // v0.6: filter UX — the catalog grew to 43+ morphs (corebook canonical), so the
+  // picker now categorizes, counts, sorts by cost ascending, and surfaces a live
+  // affordability badge. Filter state lives in STATE.meta.morphFilter (default ALL).
+  const currentFilter = STATE.meta.morphFilter || "ALL";
+  const allMorphs = Object.values(RULEBOOK_DATA.morphs).filter(m => m.tier === "common" || STATE.meta.advancedMode);
+  const categorize = (m) => {
+    if (m.type === "infomorph") return "INFOMORPH";
+    if (m.type === "pod") return "POD";
+    if (m.subtype === "uplift") return "UPLIFT";
+    if (m.subtype === "flexbot") return "FLEXBOT";
+    if (m.type === "synthmorph") return "SYNTH";
+    return "BIOMORPH";
+  };
+  const counts = { ALL: allMorphs.length };
+  allMorphs.forEach(m => { const c = categorize(m); counts[c] = (counts[c] || 0) + 1; });
+  const affordable = allMorphs.filter(m => m.cost <= econ.budget).length;
+
+  // MP-budget status strip
+  frag.appendChild(h("div", {style:{
+    display:"flex", alignItems:"center", gap:"14px", flexWrap:"wrap",
+    padding:"8px 14px", marginBottom:"10px",
+    background:"linear-gradient(180deg, #0a242c 0%, #07181d 100%)",
+    border:"1px solid var(--accent)", borderRadius:"2px",
+    fontFamily:'"Share Tech Mono", ui-monospace, monospace',
+    fontSize:"11px", letterSpacing:"1.6px", color:"rgba(220,235,238,0.85)"
+  }},
+    h("span", {style:{color:"#7fd4e2"}}, "// YOUR BUDGET:"),
+    h("b", {style:{color:"#fff",fontSize:"14px"}}, econ.budget + " MP"),
+    h("span", {style:{color:"rgba(220,235,238,0.4)"}}, "·"),
+    h("span", null, "AFFORDABLE:"),
+    h("b", {style:{color:"var(--good)",fontSize:"14px"}}, affordable + " / " + allMorphs.length + " MORPHS"),
+    h("span", {style:{color:"rgba(220,235,238,0.4)"}}, "·"),
+    h("span", {style:{color:"rgba(220,235,238,0.55)"}}, "sorted by cost ▾")
+  ));
+
+  // Category filter pills
+  const filterRow = h("div", {style:{display:"flex",gap:"6px",flexWrap:"wrap",marginBottom:"12px",overflowX:"auto",paddingBottom:"2px"}});
+  const categories = ["ALL", "BIOMORPH", "UPLIFT", "POD", "SYNTH", "FLEXBOT", "INFOMORPH"];
+  categories.forEach(cat => {
+    const active = currentFilter === cat;
+    const n = counts[cat] || 0;
+    if (cat !== "ALL" && n === 0) return;
+    filterRow.appendChild(h("button", {
+      style: {
+        padding: "6px 12px",
+        background: active ? "#1d8493" : "#0a242c",
+        color: active ? "#06141a" : "rgba(220,235,238,0.85)",
+        border: "1px solid " + (active ? "#7fd4e2" : "#1d8493"),
+        borderRadius: "2px",
+        fontFamily: '"Share Tech Mono", ui-monospace, monospace',
+        fontSize: "11px", letterSpacing: "1.8px", fontWeight: 700,
+        textTransform: "uppercase", cursor: "pointer", flex: "0 0 auto",
+        boxShadow: active ? "0 0 12px rgba(127,212,226,0.35)" : "none"
+      },
+      onClick: () => dispatch(s => { s.meta.morphFilter = cat; })
+    }, cat + " (" + n + ")"));
+  });
   frag.appendChild(filterRow);
 
+  // Filter + sort by cost ascending. Empty-state for filters with no matches.
+  const filteredMorphs = currentFilter === "ALL" ? allMorphs : allMorphs.filter(m => categorize(m) === currentFilter);
+  const sortedMorphs = [...filteredMorphs].sort((a, b) => a.cost - b.cost);
+
   const grid = h("div", {style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:"10px"}});
-  Object.values(RULEBOOK_DATA.morphs).forEach(m => {
-    if (m.tier === "advanced" && !STATE.meta.advancedMode) return;
+  if (sortedMorphs.length === 0) {
+    grid.appendChild(h("div", {style:{padding:"20px",textAlign:"center",color:"rgba(220,235,238,0.5)",fontStyle:"italic"}}, "No morphs in this category. Try ALL or toggle advancedMode."));
+  }
+  sortedMorphs.forEach(m => {
     const overBudget = m.cost > econ.budget;
     const sel = STATE.morph.chosen === m.id;
     const card = h("div", {class: "morph-card" + (sel ? " selected" : "") + (overBudget ? " over-budget" : ""), onClick: () => dispatch(s => { s.morph.chosen = m.id; })});

@@ -19,6 +19,10 @@ Thumbs.db
 .claude-design/
 data/raw/
 
+# Corebook PDF — never redistribute, even by accident
+EclipsePhase2_corebook.pdf
+*.pdf
+
 # Local-only dev artifacts (older screenshots kept locally for posterity)
 preview-step1.png
 v0.2.0-jalta-migrated.png
