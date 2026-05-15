@@ -1,0 +1,24 @@
+# Vercel
+.vercel
+
+# Dev artifacts
+node_modules/
+*.log
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Local-only dev references (Claude Design React source, raw rules text)
+.claude-design/
+data/raw/
+
+# Local-only dev artifacts (older screenshots kept locally for posterity)
+preview-step1.png
+v0.2.0-jalta-migrated.png
