@@ -2,6 +2,47 @@
 
 All notable changes to this project. Format follows the spirit of [Keep a Changelog](https://keepachangelog.com/), versioned by milestone.
 
+## [0.11.0] — 2026-05-17 — "Nanofab · Armaments Codex"
+
+User's escalation in three beats: *"add the Freeze gun and the vortex gun"* → *"i want a whole 'armoury menu' with all the weapons, so players have 'stuff to look forwards to'. It's literally game dev. else we're stuck with Firewall issued pistols"* → *"what about missiles, grenades, etc etc? It should be a comprehensively robust ARMAMENTS/Nanofab-weapons-menu."*
+
+**Why it mattered.** The catalog was thin (~10 weapon entries) — every PC ended up with a Medium Pistol and a knife. The world has *enormous* combat-toolkit reach; the tool saw ~13% of it. Browsing the codex IS the dopamine loop, per [[feedback_game-dev-catalogs]]. Tools that surface "stuff to look forwards to" feel like games you're playing, not forms you're filling out.
+
+**What shipped:**
+
+- **63 new armament entries** across **11 sub-categories**: kinetic firearms (9), beam weapons (5), spray weapons (5 incl. **Freezer** + **Vortex Ring Gun**), seeker launchers (3), melee (3), implants (3), grenades (8), missiles (7), explosives + mines (6), ammunition types (7), weapon mods (6). Plus the 10 existing entries backfilled with `weapon.type` + structured `cost` field. **Total: ~73 armament entries.**
+- **Type-discriminated schema** — `weapon.type` ∈ `firearm | beam | spray | melee | implant | grenade | missile | explosive | mine | ammo | mod`. Type-specific fields: `radius`, `delay`, `payload`, `trigger`, `launcherCompat`, `compatibility`, `modifies`. All additive; no schema-version bump.
+- **Non-lethal status mechanics** as first-class data. Each non-lethal weapon (Freezer, Vortex, Stunner, Microwave Agonizer, Flash-Bang, EMP, Smoke, Shock Glove, Eelware, Shock Organ) carries a `status: { kind, save, escape, notes }` block surfaced inline as a `▾ On hit / ▾ Escape` reminder. Newbie GMs get the rule visible, not a book-flip.
+- **`weapon_traits` sub-tree** — 21 controlled-vocabulary trait keys (`ap`, `smart-linked`, `non-lethal`, `concealable`, `burst-capable`, `full-auto`, `homing`, `knockdown`, `suppressed`, `gyromounted`, `reach`, `monomolecular`, `flechette`, `shock`, `fire`, `heavy`, `long-range`, `implant`, `area-control`, `two-handed`, `hollow-point`). Each tooltipped.
+- **Nanofab · Armaments panel** in the play-mode right rail between Combat ALI and Roll Log. Two tabs: **CODEX** (default — full blueprint library, 70+ entries grouped by class) ↔ **MY LOADOUT** (weapons currently in `pc.gear`). Codex grouped headers per class with "blueprints · owned" counts.
+- **Rich per-weapon cards** — class-tone left border, type-appropriate stat chips (DV / Range / Ammo / Modes for weapons; Blast / Delay / Trigger / Payload for munitions; Effect for ammo/mods), trait badges, defender-response line, range-band readout (PB +10 / Close 0 / At-Range −10 / Beyond), status-effect block for non-lethals.
+- **Ownership chips** (Equipped / In Loadout / Available / Restricted / Illegal) — resolved per-card by checking `pc.gear` + parsing `cost` for `/R/` or `/X/` markers.
+- **Tier badges** — parsed from `cost` field. Min/Mod/Maj × R/X formatted into "Mod · R · 2 GP" pill, color-tinted by tier.
+- **Fab badges** — reuses `characterHasFabber(pc)` (the existing detector). Each card shows "Fabricatable" (PC's fab size suffices) or "Needs Compact/Medium/Large Fabber". Codex filter `[FAB-READY]` hides anything the PC can't print right now. Codex becomes a tech tree motivated by fabber acquisition progression.
+- **Filter chips** — class (12), lethality (2), ownership (Owned Only), fab (Fab-Ready). Pure `data-*` attribute CSS-driven hiding; no re-render on click.
+- **~120 lines of new CSS** for tabs, filter chips, card data-attribute selectors, mobile reflow.
+- **+147 new test assertions** (733 → 880). Catalog presence, stat coherence, helper renderers, fab logic, codex source-shape, ownership resolution, back-compat (all 10 legacy entries render through the new card path).
+
+**Schema additions (all backwards-compatible, no migration):**
+- `weapon.type` — type discriminator (defaults to `"firearm"` when missing on legacy data)
+- `weapon.nonLethal` — boolean
+- `weapon.status` — `{ kind, save, escape, notes }` for non-lethals
+- `weapon.traits` — string[] referencing `weapon_traits` keys
+- `weapon.radius`, `weapon.delay`, `weapon.payload`, `weapon.trigger`, `weapon.throwRange`, `weapon.placement`, `weapon.launcherCompat`, `weapon.compatibility`, `weapon.modifies`, `weapon.guidance` — type-specific stats
+- entry-level `cost` — promoted from prose `short` text to structured field (Min/Mod/Maj × R/X × GP)
+
+**Captured as memory:**
+- [[feedback_game-dev-catalogs]] — for RPG/identity/plurality tools, catalogs as browseable codexes of "stuff to look forwards to," not just filters over what the user owns. Breadth-first scope: the user prefers one comprehensive wave to many small slices.
+- [[feedback_team-over-party-vocabulary]] reinforced — mili-scifi register (armaments, loadout, restricted, fabricatable) holds the framing.
+- [[project_ep2-rules-context]] — adds nanofab catalog as part of "the world is the rules; surface it."
+
+**What's NOT in v0.11 (KIV):**
+- "Print" / "Acquire" buttons that add codex entries to loadout — requires GP budgeting (v0.11.1)
+- "Load Ammo" / "Attach Mod" binding between blueprints
+- Aim-action / Smart-link toggles that *apply* +10/+30 to rolls
+- Active status-effect tracker on Round Tracker (auto-decay reminders for prone/stunned/grappled)
+- Compare-side-by-side mode, codex text search, persisted filter state
+
 ## [0.10.10] — 2026-05-17 — "EGO · MORPH headers, in EP2 vocabulary"
 
 **Two corrections to v0.10.9 in one wave.** The user looked at the new HP↔STRESS divider and said: *"dont like this 'divider' design. It's too 'small' and just looks so out of place. Also theres no 'Morph' 'header' to complement the 'Ego' 'header' (not mind)."*
