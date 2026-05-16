@@ -2,6 +2,39 @@
 
 All notable changes to this project. Format follows the spirit of [Keep a Changelog](https://keepachangelog.com/), versioned by milestone.
 
+## [0.10.4] — 2026-05-16 — "Quiet Sync"
+
+**The cost-aware live sync.** Wave D shipped the team-room infrastructure but had two distinct problems: (1) player edits never auto-propagated after the initial join push (functional gap — teammates saw a frozen snapshot), and (2) the 60s polling drained KV commands even when the team was idle or the user had walked away. v0.10.4 fixes both with three orthogonal mechanisms.
+
+### Fixed
+- **Player edits now auto-propagate to teammates** (the functional gap). v0.10.3 only pushed your character once at create/join time; subsequent edits stayed local. v0.10.4 hooks `dispatch()` to push (debounced 5s) whenever you mutate STATE. Teammates see the update on their next poll cycle (within ~70s end-to-end).
+
+### Added
+- **Hash-gated auto-push.** Hash key = LZ-compressed `{ego, play}` slice (the player-owned fields). Before pushing, compare against the last-pushed hash; if identical, **skip the network call entirely** (zero KV cost). No-op UI interactions (scrolling, opening tooltips, switching modes) don't trigger any push. Only real edits hit the wire.
+- **Adaptive poll cadence.** Polling starts at 60s (snappy) but slows when no one's pushing: → 5min after 3 consecutive idle polls (~3min wall-clock), → 15min after 10 idle polls. Any member update resets back to 60s. User input (typing, scrolling, etc.) also resets. Idle teams cost almost nothing in KV reads.
+- **AFK suspend.** Tracks user input via document `pointerdown`/`keydown`/`touchstart`/`wheel`. If no input for 5 minutes AND the tab is hidden, the poll chain **stops entirely** — no push, no read, no KV cost. Resumes on any input or visibility-visible event, with an immediate one-shot fetch so you see the latest the moment you return.
+- The poll-cycle architecture migrated from `setInterval(60000)` to a recursive `setTimeout` so the interval can vary tick-to-tick without churn.
+
+### Cost projection (5-player team, 60s default poll)
+
+| Scenario | Before (v0.10.3) | After (v0.10.4) |
+|---|---|---|
+| Active 4h session, regular edits | ~7,200 cmds (edits didn't propagate) | ~3,000 cmds, edits propagate |
+| 4h with long idle stretches | ~7,200 | ~1,000 (5-15min slowdown) |
+| Laptop overnight (8h idle) | ~2,880 | ~30 (suspend after 5min) |
+| Tab in background all day | already 0 (visibility-paused) | same |
+
+Free-tier daily budget (~10K/day) realistically covers 3+ active sessions/day after the fix.
+
+### Caveats
+- **Visible-but-AFK case** (laptop on, tab visible, user away): no suspend. Keeps polling at the adaptive cadence (which drops to 15min after long idle). If you need stronger control, just close the tab.
+- **Hash-skip miss**: every dispatch updates `meta.savedAt`, so any actual mutation yields a different hash. The skip catches *re-renders without dispatches* (scroll, tooltip, mode switch), which is most of the no-op surface. Future polish could strip `meta.savedAt` from the hash key for tighter dedup.
+
+### Cross-cutting principle
+**Sync where there's change, rest where there's stillness.** v0.10.4 makes the cost shape track the actual collaboration shape: edits propagate fast, idle teams stay cheap, sleeping computers don't burn anyone's free tier.
+
+---
+
 ## [0.10.3] — 2026-05-16 — "Team Rooms · The Link IS the Invitation"
 
 **Wave D of v0.10. The relief lands.** No more "drag-and-drop a JSON file." Click "🟢 Create Team Room", share the URL, and your teammates are in. Each member sees every other member's live sheet, updating every 60 seconds. The team page becomes a shared experience, not a GM dashboard.

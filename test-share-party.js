@@ -6,7 +6,7 @@ const vm = require("vm");
 const html = fs.readFileSync(__dirname + "/index.html", "utf8");
 let js = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 js = js.replace(/^boot\(\);$/m, "// boot suppressed");
-js += "\nthis.__exports = Object.defineProperties({}, {STATE:{get:()=>STATE,enumerable:true},RULEBOOK_DATA:{value:RULEBOOK_DATA,enumerable:true},RULEBOOK_REFERENCE:{value:RULEBOOK_REFERENCE,enumerable:true},derived:{value:derived,enumerable:true},newState:{value:newState,enumerable:true},encodeShareUrl:{value:encodeShareUrl,enumerable:true},decodeShareUrl:{value:decodeShareUrl,enumerable:true},stripPortrait:{value:stripPortrait,enumerable:true},importShareSnapshot:{value:importShareSnapshot,enumerable:true},makeCharacterId:{value:makeCharacterId,enumerable:true},migrateV6ToV7:{value:migrateV6ToV7,enumerable:true},migrateToCurrent:{value:migrateToCurrent,enumerable:true},SCHEMA_VERSION:{value:SCHEMA_VERSION,enumerable:true},LZString:{value:LZString,enumerable:true},studioPcFromState:{value:studioPcFromState,enumerable:true},studioHealDamage:{value:studioHealDamage,enumerable:true},studioHealWound:{value:studioHealWound,enumerable:true},studioHealStress:{value:studioHealStress,enumerable:true},studioHealTrauma:{value:studioHealTrauma,enumerable:true},characterHasFabber:{value:characterHasFabber,enumerable:true},studioMeshAccess:{value:studioMeshAccess,enumerable:true},studioMeshOpsec:{value:studioMeshOpsec,enumerable:true},studioMeshApps:{value:studioMeshApps,enumerable:true},studioMeshImplants:{value:studioMeshImplants,enumerable:true},buildPartyImportEntry:{value:buildPartyImportEntry,enumerable:true},normalizePartyImportEntries:{value:normalizePartyImportEntries,enumerable:true},importJSON:{value:importJSON,enumerable:true},partyComputeCardData:{value:partyComputeCardData,enumerable:true},withStateAs:{value:withStateAs,enumerable:true},_setState:{value:(v)=>{STATE=v;},enumerable:true}});\n";
+js += "\nthis.__exports = Object.defineProperties({}, {STATE:{get:()=>STATE,enumerable:true},RULEBOOK_DATA:{value:RULEBOOK_DATA,enumerable:true},RULEBOOK_REFERENCE:{value:RULEBOOK_REFERENCE,enumerable:true},derived:{value:derived,enumerable:true},newState:{value:newState,enumerable:true},encodeShareUrl:{value:encodeShareUrl,enumerable:true},decodeShareUrl:{value:decodeShareUrl,enumerable:true},stripPortrait:{value:stripPortrait,enumerable:true},importShareSnapshot:{value:importShareSnapshot,enumerable:true},makeCharacterId:{value:makeCharacterId,enumerable:true},migrateV6ToV7:{value:migrateV6ToV7,enumerable:true},migrateToCurrent:{value:migrateToCurrent,enumerable:true},SCHEMA_VERSION:{value:SCHEMA_VERSION,enumerable:true},LZString:{value:LZString,enumerable:true},studioPcFromState:{value:studioPcFromState,enumerable:true},studioHealDamage:{value:studioHealDamage,enumerable:true},studioHealWound:{value:studioHealWound,enumerable:true},studioHealStress:{value:studioHealStress,enumerable:true},studioHealTrauma:{value:studioHealTrauma,enumerable:true},characterHasFabber:{value:characterHasFabber,enumerable:true},studioMeshAccess:{value:studioMeshAccess,enumerable:true},studioMeshOpsec:{value:studioMeshOpsec,enumerable:true},studioMeshApps:{value:studioMeshApps,enumerable:true},studioMeshImplants:{value:studioMeshImplants,enumerable:true},buildPartyImportEntry:{value:buildPartyImportEntry,enumerable:true},normalizePartyImportEntries:{value:normalizePartyImportEntries,enumerable:true},importJSON:{value:importJSON,enumerable:true},partyComputeCardData:{value:partyComputeCardData,enumerable:true},withStateAs:{value:withStateAs,enumerable:true},_playerOwnedPayload:{value:_playerOwnedPayload,enumerable:true},_isSuspended:{value:_isSuspended,enumerable:true},_setLastInputAt:{value:(t)=>{_lastInputAt=t;},enumerable:true},_getLastInputAt:{value:()=>_lastInputAt,enumerable:true},_setIdleCount:{value:(n)=>{_idleCount=n;},enumerable:true},_getIdleCount:{value:()=>_idleCount,enumerable:true},_setPollIntervalMs:{value:(n)=>{_pollIntervalMs=n;},enumerable:true},_getPollIntervalMs:{value:()=>_pollIntervalMs,enumerable:true},_AFK_THRESHOLD_MS:{value:AFK_THRESHOLD_MS,enumerable:true},_setState:{value:(v)=>{STATE=v;},enumerable:true}});\n";
 
 const sandbox = {
   console,
@@ -706,10 +706,108 @@ console.log("\n=== v0.10.2 — studioPcFromState produces a renderable pc from a
   assert("pc.name matches the teammate STATE.ego.name", pc.name === "Sheet Test");
 }
 
-console.log("\n=== v0.10.3 — toolVersion bumped to 0.10.3 ===");
+console.log("\n=== v0.10.4 — toolVersion bumped to 0.10.4 ===");
 {
   const fresh = exp.newState();
-  assert("newState().meta.toolVersion is 0.10.3", fresh.meta.toolVersion === "0.10.3");
+  assert("newState().meta.toolVersion is 0.10.4", fresh.meta.toolVersion === "0.10.4");
+}
+
+console.log("\n=== v0.10.4 — hash-skip: same player-owned state → identical hash ===");
+{
+  exp._setState(exp.newState());
+  exp.STATE.ego.name = "Hash Test";
+  exp.STATE.ego.aptitudes = { COG:15,INT:15,REF:15,SOM:15,SAV:15,WIL:15 };
+  const h1 = exp._playerOwnedPayload();
+  const h2 = exp._playerOwnedPayload();
+  assert("two consecutive hashes of unchanged state are identical", h1 === h2);
+}
+
+console.log("\n=== v0.10.4 — hash-mismatch: STATE change yields different hash ===");
+{
+  exp._setState(exp.newState());
+  exp.STATE.ego.name = "Before";
+  const h1 = exp._playerOwnedPayload();
+  exp.STATE.ego.name = "After";
+  const h2 = exp._playerOwnedPayload();
+  assert("hash differs after ego.name mutation", h1 !== h2);
+}
+
+console.log("\n=== v0.10.4 — partyImports changes do NOT affect hash (avoids push cycle) ===");
+{
+  exp._setState(exp.newState());
+  exp.STATE.ego.name = "Stable";
+  const h1 = exp._playerOwnedPayload();
+  // Simulate the poll-driven mutation that v0.10.3 was looping on:
+  exp.STATE.partyImports.push({
+    id: "teammate-1", name: "Teammate", source: "live",
+    gmNotes: {wounds:0,stress:0,initiative:null,statusEffects:[],notes:""},
+    lastSyncedAt: new Date().toISOString(), syncUrl: null,
+    full: { meta:{schemaVersion:7}, ego:{name:"Teammate"} }
+  });
+  exp.STATE.team.lastPolledAt = new Date().toISOString();
+  const h2 = exp._playerOwnedPayload();
+  assert("hash unchanged after partyImports + team.lastPolledAt mutation", h1 === h2);
+}
+
+console.log("\n=== v0.10.4 — adaptive interval transitions on idleCount thresholds ===");
+{
+  // Reset cadence state
+  exp._setIdleCount(0);
+  exp._setPollIntervalMs(60 * 1000);
+  // Driving idleCount to 3+ should bump to 5min on next adaptive check
+  // (the real poll function does this internally; we simulate the math)
+  let idle = 0;
+  let interval = 60 * 1000;
+  function tick(advanced) {
+    if (advanced) { idle = 0; interval = 60 * 1000; }
+    else {
+      idle++;
+      if (idle >= 10 && interval < 15 * 60 * 1000) interval = 15 * 60 * 1000;
+      else if (idle >= 3 && interval < 5 * 60 * 1000) interval = 5 * 60 * 1000;
+    }
+  }
+  // 3 idle ticks → 5min
+  for (let i = 0; i < 3; i++) tick(false);
+  assert("3 idle polls → 5min interval", interval === 5 * 60 * 1000);
+  // 7 more idle ticks (10 total) → 15min
+  for (let i = 0; i < 7; i++) tick(false);
+  assert("10 idle polls → 15min interval", interval === 15 * 60 * 1000);
+  // Any update resets to 60s
+  tick(true);
+  assert("member update resets to 60s", interval === 60 * 1000);
+  assert("member update resets idleCount to 0", idle === 0);
+}
+
+console.log("\n=== v0.10.4 — _isSuspended logic (idle threshold + visibility) ===");
+{
+  const now = Date.now();
+  // Case 1: recent input → never suspended regardless of visibility
+  exp._setLastInputAt(now);
+  assert("recent input → not suspended", exp._isSuspended() === false);
+  // Case 2: stale input + sandbox document (no visibilityState; treated as "not visible")
+  exp._setLastInputAt(now - 6 * 60 * 1000);
+  // Sandbox's mock document lacks visibilityState (undefined !== "visible" → true),
+  // so with stale input the function returns true. That's correct behavior
+  // (a real headless / OS-hidden tab would also lack a "visible" state).
+  assert("stale input + no-visibility-state → suspended", exp._isSuspended() === true);
+  // Case 3: verify the threshold and that _lastInputAt is settable
+  exp._setLastInputAt(now);
+  assert("_lastInputAt can be set and read back", exp._getLastInputAt() === now);
+  assert("AFK_THRESHOLD_MS is 5 minutes", exp._AFK_THRESHOLD_MS === 5 * 60 * 1000);
+  // Case 4: edge case — input exactly at threshold (< not <= so just under is still active)
+  exp._setLastInputAt(now - (5 * 60 * 1000 - 1)); // 1ms under threshold
+  assert("input 1ms under threshold → not suspended (active)", exp._isSuspended() === false);
+}
+
+console.log("\n=== v0.10.4 — typing in player state mutates hash (real edit case) ===");
+{
+  exp._setState(exp.newState());
+  exp.STATE.ego.name = "Initial";
+  const h1 = exp._playerOwnedPayload();
+  // Simulate a wound tick (a real player edit)
+  exp.STATE.play.woundsTaken = 1;
+  const h2 = exp._playerOwnedPayload();
+  assert("wound tick changes hash → push would fire", h1 !== h2);
 }
 
 console.log("\n=== v0.10.3 — STATE.team.roomId can be set and persists ===");

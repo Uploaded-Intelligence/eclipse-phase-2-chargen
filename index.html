@@ -4001,7 +4001,7 @@ function makeCharacterId() {
 }
 
 const newState = () => ({
-  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.10.3", mode:"chargen" },
+  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.10.4", mode:"chargen" },
   // v0.10: team-room metadata. Roomless local play has all nulls + empty teamName.
   // teamName persists locally even before joining a room (set it once, it sticks).
   team:{ roomId:null, teamName:"", lastPolledAt:null },
@@ -5136,6 +5136,13 @@ function dispatch(mutator, opts) {
   // v0.10: opts.skipRerender lets text-input handlers commit without losing focus
   // (rerender would re-mount the input and drop the cursor). Always saves.
   if (!opts || !opts.skipRerender) rerender();
+  // v0.10.4: schedule auto-push if in a team room (debounced 5s, hash-skipped).
+  // Hash is over STATE.ego + STATE.play only so poll-driven partyImports updates
+  // don't trigger pushes. Gated against AFK suspend + hidden tab inside the
+  // debounced callback.
+  if (typeof scheduleAutoPushLive === "function" && STATE.team && STATE.team.roomId) {
+    scheduleAutoPushLive();
+  }
 }
 
 const scheduleSave = debounce(() => {
@@ -5754,6 +5761,128 @@ async function pushSelfQuietly() {
   }
 }
 
+/* ============================================================== */
+/* v0.10.4 Quiet Sync — event-driven push + adaptive read + AFK   */
+/* ============================================================== */
+
+/* Producer state */
+let _lastPushedPayload = null;      // hash of last pushed payload (player-owned slice)
+
+/* Consumer state (poll cadence) */
+let _idleCount = 0;                 // consecutive polls with no member updatedAt advance
+let _pollIntervalMs = 60 * 1000;    // current poll interval
+
+/* AFK state */
+let _lastInputAt = Date.now();
+const AFK_THRESHOLD_MS = 5 * 60 * 1000;   // 5 minutes
+let _inputTrackersInstalled = false;
+
+/* _playerOwnedPayload — the bytes that represent the player's authored state.
+   Excludes partyImports (which the poller mutates) and team.lastPolledAt (which
+   updates on every poll). Used both as the hash key and as the wire payload —
+   compressing once is cheaper than compressing twice. */
+function _playerOwnedPayload() {
+  // Note: we still push the FULL STATE in maybeAutoPushSelf below — this slice
+  // is only the *hash key*. That way teammates receiving via poll see the full
+  // state but the producer can detect no-op edits cheaply.
+  return LZString.compressToEncodedURIComponent(JSON.stringify({
+    ego: STATE.ego,
+    play: STATE.play
+  }));
+}
+
+/* _isSuspended — AFK detection. True when no user input for AFK_THRESHOLD_MS
+   AND tab is not visible. Both conditions required: if the user is reading
+   the page (visible but no input), we keep syncing; if they switched tabs
+   briefly (hidden but recent input), we keep syncing. */
+function _isSuspended() {
+  const idleMs = Date.now() - _lastInputAt;
+  if (typeof document === "undefined") return false; // node sandbox
+  return idleMs > AFK_THRESHOLD_MS && document.visibilityState !== "visible";
+}
+
+/* maybeAutoPushSelf — push current STATE to /api/share/{characterId} ONLY if
+   the player-owned slice has changed since the last push. Otherwise skip
+   entirely (zero KV cost). */
+async function maybeAutoPushSelf() {
+  if (!STATE.team || !STATE.team.roomId) return;
+  if (!STATE.ego.characterId) return;
+  const hashKey = _playerOwnedPayload();
+  if (hashKey === _lastPushedPayload) return;   // no-op: skip
+  try {
+    const fullPayload = LZString.compressToEncodedURIComponent(JSON.stringify(STATE));
+    const resp = await fetch("/api/share/" + encodeURIComponent(STATE.ego.characterId), {
+      method: "POST", headers: {"content-type":"application/json"},
+      body: JSON.stringify({
+        data: fullPayload,
+        name: STATE.ego.name || "Unnamed",
+        updatedAt: new Date().toISOString()
+      })
+    });
+    if (resp.ok) {
+      _lastPushedPayload = hashKey;
+    } else {
+      console.warn("[auto-push] non-ok status:", resp.status);
+    }
+  } catch (e) {
+    console.warn("[auto-push]", e && e.message);
+  }
+}
+
+/* scheduleAutoPushLive — debounced 5s wrapper around maybeAutoPushSelf.
+   Gated on visibility + not-suspended; called from dispatch() tail. */
+const scheduleAutoPushLive = debounce(() => {
+  if (!STATE.team || !STATE.team.roomId) return;
+  if (_isSuspended()) return;
+  if (typeof document !== "undefined" && document.visibilityState !== "visible") return;
+  maybeAutoPushSelf();
+}, 5000);
+
+/* _trackInput — bumps _lastInputAt on any user input. If the team-room timer
+   was suspended (handle is null while roomId is set), resume it with an
+   immediate one-shot poll. */
+function _trackInput() {
+  _lastInputAt = Date.now();
+  if (STATE.team && STATE.team.roomId && !_teamRoomPollHandle) {
+    _idleCount = 0;
+    _pollIntervalMs = 60 * 1000;
+    try { pollTeamRoomOnce(); } catch (e) { console.warn("[input resume]", e && e.message); }
+    _scheduleNextPoll();
+  }
+}
+
+/* _installInputTrackers — idempotent. Hooks document input events to refresh
+   the AFK timer. Called once from boot. */
+function _installInputTrackers() {
+  if (_inputTrackersInstalled || typeof document === "undefined") return;
+  ["pointerdown","keydown","touchstart","wheel"].forEach(ev =>
+    document.addEventListener(ev, _trackInput, { passive: true, capture: true })
+  );
+  _inputTrackersInstalled = true;
+}
+
+/* _scheduleNextPoll — recursive setTimeout for adaptive cadence. Reads the
+   current _pollIntervalMs at scheduling time so changes propagate. */
+function _scheduleNextPoll() {
+  if (_teamRoomPollHandle) { clearTimeout(_teamRoomPollHandle); _teamRoomPollHandle = null; }
+  if (!STATE.team || !STATE.team.roomId) return;
+  _teamRoomPollHandle = setTimeout(async () => {
+    // Re-check all gates at tick time
+    const visible = typeof document === "undefined" || document.visibilityState === "visible";
+    const drawerOpen = typeof document !== "undefined" && !!document.getElementById("team-member-drawer-root");
+    const suspended = _isSuspended();
+    if (visible && !drawerOpen && !suspended) {
+      try { await pollTeamRoomOnce(); } catch (e) { console.warn("[poll tick]", e && e.message); }
+    }
+    // Suspend = stop the chain entirely; _trackInput / visibility resume re-arm it.
+    if (suspended) {
+      _teamRoomPollHandle = null;
+      return;
+    }
+    _scheduleNextPoll();
+  }, _pollIntervalMs);
+}
+
 /* showTeamRoomCreatedModal — small confirmation modal with the joinable URL. */
 function showTeamRoomCreatedModal() {
   const roomId = STATE.team && STATE.team.roomId;
@@ -5978,6 +6107,19 @@ async function pollTeamRoomOnce() {
     if (metaChanged || anyMemberUpdated) {
       rerender();
     }
+
+    // v0.10.4 Mechanism 2: adaptive cadence based on remote activity.
+    if (anyMemberUpdated || metaChanged) {
+      _idleCount = 0;
+      _pollIntervalMs = 60 * 1000;          // reset to snappy
+    } else {
+      _idleCount++;
+      if (_idleCount >= 10 && _pollIntervalMs < 15 * 60 * 1000) {
+        _pollIntervalMs = 15 * 60 * 1000;   // long idle → 15 min
+      } else if (_idleCount >= 3 && _pollIntervalMs < 5 * 60 * 1000) {
+        _pollIntervalMs = 5 * 60 * 1000;    // mild idle → 5 min
+      }
+    }
   } catch (e) {
     // Polling errors shouldn't surface to the user as toasts — they happen
     // silently. Show offline indicator on next render cycle.
@@ -5987,32 +6129,39 @@ async function pollTeamRoomOnce() {
 
 function startTeamRoomPolling() {
   stopTeamRoomPolling();
+  // v0.10.4: reset cadence state on every fresh start (create/join/resume)
+  _idleCount = 0;
+  _pollIntervalMs = 60 * 1000;
+  _lastInputAt = Date.now();  // entering a room counts as "active"
   // Immediate one-shot
   pollTeamRoomOnce();
-  // 60s interval; pause when tab hidden
-  const intervalMs = 60 * 1000;
-  _teamRoomPollHandle = setInterval(() => {
-    if (document.visibilityState !== "visible") return; // pause when hidden
-    // Also pause if drawer is open (R17 in plan)
-    if (document.getElementById("team-member-drawer-root")) return;
-    pollTeamRoomOnce();
-  }, intervalMs);
-
+  // Recursive setTimeout for adaptive cadence
+  _scheduleNextPoll();
   // On tab becoming visible again, do an immediate one-shot
-  document.addEventListener("visibilitychange", _teamRoomVisibilityHandler);
+  if (typeof document !== "undefined") {
+    document.addEventListener("visibilitychange", _teamRoomVisibilityHandler);
+  }
 }
 
 function stopTeamRoomPolling() {
   if (_teamRoomPollHandle) {
-    clearInterval(_teamRoomPollHandle);
+    clearTimeout(_teamRoomPollHandle);
     _teamRoomPollHandle = null;
   }
-  document.removeEventListener("visibilitychange", _teamRoomVisibilityHandler);
+  if (typeof document !== "undefined") {
+    document.removeEventListener("visibilitychange", _teamRoomVisibilityHandler);
+  }
 }
 
 function _teamRoomVisibilityHandler() {
   if (document.visibilityState === "visible" && STATE.team && STATE.team.roomId) {
+    // v0.10.4: visibility resume = reset cadence to snappy + immediate fetch.
+    _idleCount = 0;
+    _pollIntervalMs = 60 * 1000;
+    _lastInputAt = Date.now();
     pollTeamRoomOnce();
+    // If timer chain died from suspend, re-arm it.
+    if (!_teamRoomPollHandle) _scheduleNextPoll();
   }
 }
 
@@ -10737,6 +10886,9 @@ function boot() {
   try { handleShareHash(); } catch(e) { console.warn("share hash handler failed:", e); }
   try { handleLiveParam(); } catch(e) { console.warn("live param handler failed:", e); }
   try { handleTeamParam(); } catch(e) { console.warn("team param handler failed:", e); }
+  // v0.10.4: install AFK input trackers once. Idempotent; safe across reloads
+  // (event listeners are per-document, document is fresh on each load).
+  try { _installInputTrackers(); } catch(e) { console.warn("input tracker install failed:", e); }
   // v0.10 Wave D: if already in a team room from localStorage, resume polling
   if (STATE.team && STATE.team.roomId) {
     try { startTeamRoomPolling(); } catch(e) { console.warn("team poll resume failed:", e); }
