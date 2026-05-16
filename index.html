@@ -4035,7 +4035,7 @@ function makeCharacterId() {
 }
 
 const newState = () => ({
-  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.10.7", mode:"chargen" },
+  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.10.8", mode:"chargen" },
   // v0.10: team-room metadata. Roomless local play has all nulls + empty teamName.
   // teamName persists locally even before joining a room (set it once, it sticks).
   team:{ roomId:null, teamName:"", lastPolledAt:null },
@@ -6775,18 +6775,95 @@ function buildStudioSectionIcon(kind, size) {
   return _svg('<svg width="'+size+'" height="'+size+'" viewBox="0 0 16 16" style="display:block;flex:0 0 auto;color:#fff">'+body+'</svg>');
 }
 
+/* ── PoolGlyph — per-pool SVG silhouette ────────────────────────
+   v0.10.8: ported faithfully from Claude Design's StatGlyph component
+   (eclipse-studio.jsx lines 824-883). Each pool gets its own frame shape
+   — INSIGHT circle, MOXIE pentagon, VIGOR hexagon, FLEX diamond — so the
+   shape alone telegraphs the pool (load-bearing for colourblind players).
+   Used both as a small inline glyph in the meter header and as a large
+   faded watermark anchored to the top-right of the meter card. */
+function buildStudioPoolGlyph(k, size, color) {
+  size = size || 48;
+  color = color || "currentColor";
+  const inner = "#ffffff";
+  const open = '<svg viewBox="0 0 48 48" width="' + size + '" height="' + size + '" style="display:block;flex:0 0 auto">';
+  const close = '</svg>';
+  if (k === "insight") return _svg(open
+    + '<circle cx="24" cy="24" r="22" fill="' + color + '"/>'
+    + '<g fill="none" stroke="' + inner + '" stroke-width="2" stroke-linecap="round">'
+    + '<path d="M24 8v3M24 37v3M8 24h3M37 24h3"/>'
+    + '<path d="M24 14v5M24 29v5M14 24h5M29 24h5"/>'
+    + '<path d="M16.5 16.5l3 3M28.5 28.5l3 3M31.5 16.5l-3 3M16.5 31.5l3-3"/>'
+    + '</g>'
+    + '<circle cx="24" cy="24" r="3.2" fill="' + inner + '"/>'
+    + close);
+  if (k === "moxie") return _svg(open
+    + '<polygon points="24,3 45,18 37,44 11,44 3,18" fill="' + color + '"/>'
+    + '<g fill="' + inner + '">'
+    + '<ellipse cx="24" cy="25" rx="1.6" ry="11"/>'
+    + '<path d="M22 16 C13 14 9 18 9 22 C9 27 14 28 21 26 Q22 22 22 16 Z"/>'
+    + '<path d="M26 16 C35 14 39 18 39 22 C39 27 34 28 27 26 Q26 22 26 16 Z"/>'
+    + '<path d="M22 28 C15 27 12 30 12 33 C12 36 17 36 22 34 Q22 31 22 28 Z"/>'
+    + '<path d="M26 28 C33 27 36 30 36 33 C36 36 31 36 26 34 Q26 31 26 28 Z"/>'
+    + '<circle cx="22" cy="14" r="0.9"/><circle cx="26" cy="14" r="0.9"/>'
+    + '</g>'
+    + close);
+  if (k === "vigor") return _svg(open
+    + '<polygon points="24,2 43,13 43,35 24,46 5,35 5,13" fill="' + color + '"/>'
+    + '<g fill="' + inner + '" stroke="' + inner + '" stroke-width="0.6" stroke-linejoin="round">'
+    + '<path d="M13 35 L15 12 L19 12 L18 35 Z"/>'
+    + '<path d="M21 35 L22 8 L26 8 L25 35 Z"/>'
+    + '<path d="M28 35 L30 10 L34 11 L32 35 Z"/>'
+    + '<rect x="11" y="32" width="24" height="6" rx="1"/>'
+    + '</g>'
+    + close);
+  if (k === "flex") return _svg(open
+    + '<polygon points="24,2 46,24 24,46 2,24" fill="' + color + '"/>'
+    + '<g fill="' + inner + '">'
+    + '<path d="M24 11 L26 22 L37 24 L26 26 L24 37 L22 26 L11 24 L22 22 Z"/>'
+    + '<circle cx="24" cy="24" r="1.8" fill="' + color + '"/>'
+    + '</g>'
+    + '<g fill="none" stroke="' + inner + '" stroke-width="1.8" stroke-linecap="round">'
+    + '<path d="M16 14l2.5 2.5M32 14l-2.5 2.5M16 34l2.5-2.5M32 34l-2.5-2.5"/>'
+    + '</g>'
+    + close);
+  return _svg(open + close);
+}
+
 /* ── PoolMeter — segmented sliding bar ──────────────────────────
    v0.10.5: opts.readOnly disables interaction (used by team-card render
-   for FILE imports — the player ows their own pool state on /api/share). */
+   for FILE imports — the player owns their own pool state on /api/share).
+   v0.10.8: restored Claude Design's iconography — watermark glyph at top-right,
+   inline glyph at left of header, subtle tone-tinted background gradient.
+   The gradient + border tinting use `tone + "10"` / `tone + "55"` literal
+   string concatenation, which is why `tone` MUST be a literal hex (not a
+   var() ref) — see v0.10.7 changelog for the failure mode. */
 function buildStudioPoolMeter({ label, k, pool, tone, source, readOnly }) {
   const segs = Math.max(pool.max, 1);
   const remaining = Math.max(0, pool.max - pool.spent);
   const meter = h("div", {
     class: "studio-pool-meter" + (readOnly ? " studio-readonly" : ""),
-    style: { color: tone, background: "linear-gradient(180deg, "+tone+"10 0%, var(--st-paper) 60%)" },
+    style: {
+      color: tone,
+      // tone+"10" = 6% alpha tone on top of paper → subtle tinted background
+      // (only valid because tone is now a literal hex; see v0.10.7).
+      background: "linear-gradient(180deg, " + tone + "10 0%, var(--st-paper) 60%)",
+      // tone+"55" = 33% alpha outer border, softer than the full-saturation
+      // border-left accent stripe.
+      border: "1px solid " + tone + "55"
+    },
     "data-tip": "pools." + (label[0].toUpperCase() + label.slice(1).toLowerCase())
   });
+  // Watermark glyph — large faded silhouette anchored to the top-right.
+  // Echoes the rulebook iconography quietly behind the data. The pool's
+  // frame-shape (Insight circle, Moxie pentagon, Vigor hexagon, Flex diamond)
+  // is recognisable even at 12% opacity. Per Claude Design's PoolMeter.
+  meter.appendChild(h("div", {
+    style: { position:"absolute", right:"-10px", top:"-6px", opacity:"0.12", color: tone, pointerEvents:"none" }
+  }, buildStudioPoolGlyph(k, 64, tone)));
+  // Header row — inline glyph (26px) + label/source block + remaining/max counter.
   meter.appendChild(h("div", { class: "studio-pool-head" },
+    buildStudioPoolGlyph(k, 26, tone),
     h("div", { style: { flex: 1, minWidth: 0 } },
       h("div", { class: "studio-pool-label", style: { color: tone } }, label),
       h("div", { class: "studio-pool-source" }, source || "")
@@ -6819,11 +6896,16 @@ function buildStudioPoolMeter({ label, k, pool, tone, source, readOnly }) {
 function buildStudioPoolRow(pc, opts) {
   opts = opts || {};
   const row = h("div", { style:{display:"grid",gridTemplateColumns:"repeat(4, 1fr)",gap:"10px"} });
+  // v0.10.8: literal hex tones (not var() refs) so PoolMeter's `tone + "10"`
+  // / `tone + "55"` alpha-concat patterns produce valid 8-digit hex. Hexes
+  // here match the global `--insight` / `--moxie` / `--vigor` / `--flex`
+  // CSS variables (line 30) exactly — same palette, just inlined to dodge
+  // the var()+suffix token-merge bug documented in v0.10.7.
   const pools = [
-    { label:"INSIGHT", k:"insight", tone:"var(--st-insight)", source:"COG · INT" },
-    { label:"MOXIE",   k:"moxie",   tone:"var(--st-moxie)",   source:"SAV · WIL · REP" },
-    { label:"VIGOR",   k:"vigor",   tone:"var(--st-vigor)",   source:"REF · SOM" },
-    { label:"FLEX",    k:"flex",    tone:"var(--st-flex)",    source:"Ego Flex" }
+    { label:"INSIGHT", k:"insight", tone:"#2563eb", source:"COG · INT" },
+    { label:"MOXIE",   k:"moxie",   tone:"#9333ea", source:"SAV · WIL · REP" },
+    { label:"VIGOR",   k:"vigor",   tone:"#dc2626", source:"REF · SOM" },
+    { label:"FLEX",    k:"flex",    tone:"#0f9d58", source:"Ego Flex" }
   ];
   pools.forEach(p => row.appendChild(buildStudioPoolMeter({ ...p, pool: pc.pools[p.k], readOnly: opts.readOnly })));
   return row;

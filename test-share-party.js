@@ -6,7 +6,7 @@ const vm = require("vm");
 const html = fs.readFileSync(__dirname + "/index.html", "utf8");
 let js = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 js = js.replace(/^boot\(\);$/m, "// boot suppressed");
-js += "\nthis.__exports = Object.defineProperties({}, {STATE:{get:()=>STATE,enumerable:true},RULEBOOK_DATA:{value:RULEBOOK_DATA,enumerable:true},RULEBOOK_REFERENCE:{value:RULEBOOK_REFERENCE,enumerable:true},derived:{value:derived,enumerable:true},newState:{value:newState,enumerable:true},encodeShareUrl:{value:encodeShareUrl,enumerable:true},decodeShareUrl:{value:decodeShareUrl,enumerable:true},stripPortrait:{value:stripPortrait,enumerable:true},importShareSnapshot:{value:importShareSnapshot,enumerable:true},makeCharacterId:{value:makeCharacterId,enumerable:true},migrateV6ToV7:{value:migrateV6ToV7,enumerable:true},migrateToCurrent:{value:migrateToCurrent,enumerable:true},SCHEMA_VERSION:{value:SCHEMA_VERSION,enumerable:true},LZString:{value:LZString,enumerable:true},studioPcFromState:{value:studioPcFromState,enumerable:true},studioHealDamage:{value:studioHealDamage,enumerable:true},studioHealWound:{value:studioHealWound,enumerable:true},studioHealStress:{value:studioHealStress,enumerable:true},studioHealTrauma:{value:studioHealTrauma,enumerable:true},studioSetDamage:{value:studioSetDamage,enumerable:true},studioSetWounds:{value:studioSetWounds,enumerable:true},studioSetStress:{value:studioSetStress,enumerable:true},studioSetTraumas:{value:studioSetTraumas,enumerable:true},characterHasFabber:{value:characterHasFabber,enumerable:true},studioMeshAccess:{value:studioMeshAccess,enumerable:true},studioMeshOpsec:{value:studioMeshOpsec,enumerable:true},studioMeshApps:{value:studioMeshApps,enumerable:true},studioMeshImplants:{value:studioMeshImplants,enumerable:true},buildPartyImportEntry:{value:buildPartyImportEntry,enumerable:true},normalizePartyImportEntries:{value:normalizePartyImportEntries,enumerable:true},importJSON:{value:importJSON,enumerable:true},partyComputeCardData:{value:partyComputeCardData,enumerable:true},buildPartyMemberCard:{value:buildPartyMemberCard,enumerable:true},buildStudioVitalSignsCard:{value:buildStudioVitalSignsCard,enumerable:true},buildStudioDamageBar:{value:buildStudioDamageBar,enumerable:true},buildStudioMindBar:{value:buildStudioMindBar,enumerable:true},buildStudioVitalityBar:{value:buildStudioVitalityBar,enumerable:true},buildStudioPoolMeter:{value:buildStudioPoolMeter,enumerable:true},buildStudioPoolRow:{value:buildStudioPoolRow,enumerable:true},buildStudioAptitudeStrip:{value:buildStudioAptitudeStrip,enumerable:true},buildStudioReputation:{value:buildStudioReputation,enumerable:true},withStateAs:{value:withStateAs,enumerable:true},_playerOwnedPayload:{value:_playerOwnedPayload,enumerable:true},_isSuspended:{value:_isSuspended,enumerable:true},_setLastInputAt:{value:(t)=>{_lastInputAt=t;},enumerable:true},_getLastInputAt:{value:()=>_lastInputAt,enumerable:true},_setIdleCount:{value:(n)=>{_idleCount=n;},enumerable:true},_getIdleCount:{value:()=>_idleCount,enumerable:true},_setPollIntervalMs:{value:(n)=>{_pollIntervalMs=n;},enumerable:true},_getPollIntervalMs:{value:()=>_pollIntervalMs,enumerable:true},_AFK_THRESHOLD_MS:{value:AFK_THRESHOLD_MS,enumerable:true},_setState:{value:(v)=>{STATE=v;},enumerable:true}});\n";
+js += "\nthis.__exports = Object.defineProperties({}, {STATE:{get:()=>STATE,enumerable:true},RULEBOOK_DATA:{value:RULEBOOK_DATA,enumerable:true},RULEBOOK_REFERENCE:{value:RULEBOOK_REFERENCE,enumerable:true},derived:{value:derived,enumerable:true},newState:{value:newState,enumerable:true},encodeShareUrl:{value:encodeShareUrl,enumerable:true},decodeShareUrl:{value:decodeShareUrl,enumerable:true},stripPortrait:{value:stripPortrait,enumerable:true},importShareSnapshot:{value:importShareSnapshot,enumerable:true},makeCharacterId:{value:makeCharacterId,enumerable:true},migrateV6ToV7:{value:migrateV6ToV7,enumerable:true},migrateToCurrent:{value:migrateToCurrent,enumerable:true},SCHEMA_VERSION:{value:SCHEMA_VERSION,enumerable:true},LZString:{value:LZString,enumerable:true},studioPcFromState:{value:studioPcFromState,enumerable:true},studioHealDamage:{value:studioHealDamage,enumerable:true},studioHealWound:{value:studioHealWound,enumerable:true},studioHealStress:{value:studioHealStress,enumerable:true},studioHealTrauma:{value:studioHealTrauma,enumerable:true},studioSetDamage:{value:studioSetDamage,enumerable:true},studioSetWounds:{value:studioSetWounds,enumerable:true},studioSetStress:{value:studioSetStress,enumerable:true},studioSetTraumas:{value:studioSetTraumas,enumerable:true},characterHasFabber:{value:characterHasFabber,enumerable:true},studioMeshAccess:{value:studioMeshAccess,enumerable:true},studioMeshOpsec:{value:studioMeshOpsec,enumerable:true},studioMeshApps:{value:studioMeshApps,enumerable:true},studioMeshImplants:{value:studioMeshImplants,enumerable:true},buildPartyImportEntry:{value:buildPartyImportEntry,enumerable:true},normalizePartyImportEntries:{value:normalizePartyImportEntries,enumerable:true},importJSON:{value:importJSON,enumerable:true},partyComputeCardData:{value:partyComputeCardData,enumerable:true},buildPartyMemberCard:{value:buildPartyMemberCard,enumerable:true},buildStudioVitalSignsCard:{value:buildStudioVitalSignsCard,enumerable:true},buildStudioDamageBar:{value:buildStudioDamageBar,enumerable:true},buildStudioMindBar:{value:buildStudioMindBar,enumerable:true},buildStudioVitalityBar:{value:buildStudioVitalityBar,enumerable:true},buildStudioPoolMeter:{value:buildStudioPoolMeter,enumerable:true},buildStudioPoolRow:{value:buildStudioPoolRow,enumerable:true},buildStudioPoolGlyph:{value:buildStudioPoolGlyph,enumerable:true},buildStudioAptitudeStrip:{value:buildStudioAptitudeStrip,enumerable:true},buildStudioReputation:{value:buildStudioReputation,enumerable:true},withStateAs:{value:withStateAs,enumerable:true},_playerOwnedPayload:{value:_playerOwnedPayload,enumerable:true},_isSuspended:{value:_isSuspended,enumerable:true},_setLastInputAt:{value:(t)=>{_lastInputAt=t;},enumerable:true},_getLastInputAt:{value:()=>_lastInputAt,enumerable:true},_setIdleCount:{value:(n)=>{_idleCount=n;},enumerable:true},_getIdleCount:{value:()=>_idleCount,enumerable:true},_setPollIntervalMs:{value:(n)=>{_pollIntervalMs=n;},enumerable:true},_getPollIntervalMs:{value:()=>_pollIntervalMs,enumerable:true},_AFK_THRESHOLD_MS:{value:AFK_THRESHOLD_MS,enumerable:true},_setState:{value:(v)=>{STATE=v;},enumerable:true}});\n";
 
 const sandbox = {
   console,
@@ -709,7 +709,7 @@ console.log("\n=== v0.10.2 — studioPcFromState produces a renderable pc from a
 console.log("\n=== v0.10.4 — toolVersion bumped to 0.10.4 ===");
 {
   const fresh = exp.newState();
-  assert("newState().meta.toolVersion is 0.10.7", fresh.meta.toolVersion === "0.10.7");
+  assert("newState().meta.toolVersion is 0.10.8", fresh.meta.toolVersion === "0.10.8");
 }
 
 console.log("\n=== v0.10.4 — hash-skip: same player-owned state → identical hash ===");
@@ -1150,6 +1150,91 @@ console.log("\n=== v0.10.7 — regression: damage bar still renders for non-zero
     threw === null, threw ? (threw.message || String(threw)) : "");
   assert("buildStudioDamageBar returns a DOM-like node",
     !!result, "result=" + result);
+}
+
+// v0.10.8 — Restored Claude Design's pool iconography (frame-shape glyphs +
+// watermark backgrounds) that was lost in the v0.5.3 React→vanilla port.
+// Also fixed the same var()+suffix bug class from v0.10.7 that was silently
+// killing the pool meter's background tint gradient.
+
+console.log("\n=== v0.10.8 — buildStudioPoolGlyph exposed and renders for all four pools ===");
+{
+  assert("buildStudioPoolGlyph is exposed",
+    typeof exp.buildStudioPoolGlyph === "function");
+
+  ["insight", "moxie", "vigor", "flex"].forEach(k => {
+    let threw = null;
+    let result = null;
+    try { result = exp.buildStudioPoolGlyph(k, 26, "#2563eb"); }
+    catch (e) { threw = e; }
+    assert("buildStudioPoolGlyph('" + k + "') renders without throwing",
+      threw === null, threw ? (threw.message || String(threw)) : "");
+    assert("buildStudioPoolGlyph('" + k + "') returns a DOM-like node",
+      !!result);
+  });
+
+  // Source-check: each kind branch is present
+  const gSrc = exp.buildStudioPoolGlyph.toString();
+  assert("buildStudioPoolGlyph source has an 'insight' branch",
+    gSrc.indexOf('"insight"') !== -1);
+  assert("buildStudioPoolGlyph source has a 'moxie' branch",
+    gSrc.indexOf('"moxie"') !== -1);
+  assert("buildStudioPoolGlyph source has a 'vigor' branch",
+    gSrc.indexOf('"vigor"') !== -1);
+  assert("buildStudioPoolGlyph source has a 'flex' branch",
+    gSrc.indexOf('"flex"') !== -1);
+}
+
+console.log("\n=== v0.10.8 — PoolMeter restored the iconography (watermark + inline glyph) ===");
+{
+  const mSrc = exp.buildStudioPoolMeter.toString();
+  // PoolMeter calls buildStudioPoolGlyph twice: once for the small inline
+  // glyph (size 26) and once for the large faded watermark (size 64).
+  const glyphCalls = (mSrc.match(/buildStudioPoolGlyph\(/g) || []).length;
+  assert("buildStudioPoolMeter calls buildStudioPoolGlyph at least twice (inline + watermark)",
+    glyphCalls >= 2, "found " + glyphCalls + " call(s)");
+  assert("buildStudioPoolMeter source contains 'opacity' for the watermark (faded)",
+    /opacity:\s*"0\.12"/.test(mSrc));
+}
+
+console.log("\n=== v0.10.8 — PoolRow now passes literal hex tones (var()+suffix bug avoided) ===");
+{
+  const rSrc = exp.buildStudioPoolRow.toString();
+  // Each pool entry should have a literal-hex tone, not a var() ref.
+  assert("PoolRow source has literal hex #2563eb for INSIGHT",
+    rSrc.indexOf("#2563eb") !== -1);
+  assert("PoolRow source has literal hex #9333ea for MOXIE",
+    rSrc.indexOf("#9333ea") !== -1);
+  assert("PoolRow source has literal hex #dc2626 for VIGOR",
+    rSrc.indexOf("#dc2626") !== -1);
+  assert("PoolRow source has literal hex #0f9d58 for FLEX",
+    rSrc.indexOf("#0f9d58") !== -1);
+  // And no var()-based tone refs (would silently break the gradient concat)
+  assert("PoolRow no longer passes var(--st-insight) as tone",
+    rSrc.indexOf('"var(--st-insight)"') === -1);
+}
+
+console.log("\n=== v0.10.8 — full pool meter renders without throwing ===");
+{
+  exp._setState(exp.newState());
+  exp.STATE.morph.chosen = "exalt";
+  const pc = exp.studioPcFromState();
+  let threw = null;
+  let result = null;
+  try {
+    result = exp.buildStudioPoolMeter({
+      label: "INSIGHT",
+      k: "insight",
+      pool: pc.pools.insight,
+      tone: "#2563eb",
+      source: "COG · INT",
+      readOnly: false
+    });
+  } catch (e) { threw = e; }
+  assert("buildStudioPoolMeter with full args doesn't throw",
+    threw === null, threw ? (threw.message || String(threw)) : "");
+  assert("buildStudioPoolMeter returns a DOM-like node",
+    !!result);
 }
 
 console.log("\n=========================================");

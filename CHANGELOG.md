@@ -2,6 +2,35 @@
 
 All notable changes to this project. Format follows the spirit of [Keep a Changelog](https://keepachangelog.com/), versioned by milestone.
 
+## [0.10.8] — 2026-05-17 — "Pool Iconography Restored"
+
+**The pool meters got their faces back.** Each pool now has its own SVG glyph — INSIGHT (circle frame with crosshair), MOXIE (pentagon with face glyphs), VIGOR (hexagon with vertical bars), FLEX (diamond with 4-point star) — rendered both as a small inline glyph in the meter header and as a large faded watermark anchored to the meter's top-right corner. *Each pool gets its own frame shape so the shape alone telegraphs the pool*, even at 12% opacity behind the data, even to a colourblind player.
+
+### Why this matters
+The user pointed at the live tool: *"why does the current design for some reason 'scrap' the beautiful designs that Claude Design did?"* The answer was honest: the v0.5.3 initial public release was a **"Vanilla-JS port of Claude Design's Studio React components"**, and during the port the iconography was the casualty. The React source used a `<StatGlyph kind={...} />` component with inline SVG paths per pool. The port collapsed the component tree into a single-file vanilla `index.html` and dropped the glyphs — probably because porting them was more work than the functional structure, and "add icons later" never came. Seven months later, the user shipped me the Claude Design tarball and asked for the design back. v0.10.8 does the port faithfully from the original `eclipse-studio.jsx` source.
+
+This is exactly the **"craft over easy path"** failure mode in [[feedback_craft-over-easy-path]] — the fastest path to ship omitted the things hardest to translate, and they stayed omitted by default. The fix is to go back to the source artifacts.
+
+### Added
+- **`buildStudioPoolGlyph(k, size, color)`** — new function (line ~6780) returning the SVG node for a pool icon. Ports the four glyph designs from `eclipse-studio.jsx` lines 824–883 character-for-character. 48×48 viewBox, scalable via the size parameter.
+- **Watermark glyph** on each pool meter — large (64px) faded (opacity 0.12) silhouette anchored to top-right. Quiet rulebook iconography behind the numbers.
+- **Inline glyph** in each pool meter's header — small (26px) full-colour silhouette to the left of the label/source block. Per Claude Design's PoolMeter (eclipse-studio.jsx line 152).
+
+### Fixed
+- **Pool meter's background tint gradient was never rendering** — same var()+suffix bug class as v0.10.7. `buildStudioPoolMeter` had `background: "linear-gradient(180deg, "+tone+"10 0%, ...)"`. With `tone = "var(--st-insight)"`, this produced invalid CSS (HASH + IDENT token stream after var() substitution). The gradient was dropped; meters fell back to plain paper background. Fixed by passing literal hex tones from `buildStudioPoolRow` (matching the existing `--insight: #2563eb`, `--moxie: #9333ea`, `--vigor: #dc2626`, `--flex: #0f9d58` palette exactly).
+- **Outer border now uses a softer alpha-tinted tone** (`border: 1px solid <hex>55` = 33% alpha) instead of the CSS rule's full-saturation `currentColor`. Matches Claude Design's softer outline aesthetic.
+
+### What did NOT change
+- **The parallelogram segment shape stays** — Claude Design's source has `clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)'` exactly matching the current implementation. The "clean rectangles" in the user's reference screenshot were a mockup capture artifact; the live Claude Design canvas uses the same skew.
+- **Pool colour palette** — already matched the Claude Design source (`#2563eb`, `#9333ea`, `#dc2626`, `#0f9d58`). Just inlined as literal hex strings instead of routed through CSS variables (to dodge the v0.10.7 var()+suffix bug).
+- **CSS rules** (`.studio-sheet .studio-pool-meter`, `.studio-pool-head`, `.studio-pool-segs`, etc.) — kept; the new inline styles override what differs but the class-based styling continues to apply where it overlaps. No CSS removed.
+- **No data-model change.** Pool max/spent fields untouched.
+
+### Tests
+- 15 new source-check + smoke-render assertions in `test-share-party.js` covering: all four glyph kinds render; PoolMeter calls buildStudioPoolGlyph twice (inline + watermark); PoolRow passes literal hex tones; full meter renders without throwing.
+
+---
+
 ## [0.10.7] — 2026-05-17 — "The Green Bar Was Never Rendering"
 
 **A one-character class of bug — `cc` suffixed onto a `var()` — silently invalidating the damage bar's gradient for months.** The user kept reporting "HP visualisation is broken"; we kept fixing downstream symptoms (the wound count, the team-card embed, the section reorder). The actual bug was always in the gradient string itself, identical on studio and team surfaces, only visible by direct pixel inspection.
