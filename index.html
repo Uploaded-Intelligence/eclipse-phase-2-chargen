@@ -3782,6 +3782,104 @@ const RULEBOOK_REFERENCE = {
       "setting": "For trips longer than about a day by fusion drive, most transhumans do not travel physically. They upload, beam themselves at the speed of light through a quantum farcaster, and resleeve into a rented or purchased morph at the destination. Within a planetary cluster, that is minutes. Sun to Kuiper Belt, that is forty to seventy hours of light-speed lag. Most people sell their old morph as part of the trade-in, picking a new sleeve from whatever the destination body bank has in stock. Farcaster services are usually run by habitat governments or hypercorps and are tightly secured, because in transit your ego is a file someone else is holding.",
       "implications": "Egocasting is how the Solar System moves. It is also how you arrive somewhere with no gear, no contacts, and a body you have not lived in yet. A compromised farcaster service can copy you, fork you, alter you, or simply lose you. Habitats receiving egocasts run customs procedures on minds the way 21st-century airports ran them on luggage. Travel is fast, identity is fragile.",
       "page": 300
+    },
+    "muse": {
+      "name": "Muse",
+      "short": "Your personal AI companion — an ALI configured as a long-term assistant. Every PC has one.",
+      "setting": "A muse is an ALI (artificial limited intelligence) you've lived alongside, usually for years. It lives in your mesh inserts (or your ecto), travels with you when you egocast, and watches the same data feeds your senses do. Most muses run a default skillset around Research 40, Interface 40, Infosec 40, and Kinesics 40, plus a Knowledge field; experienced characters often customize their muse upward over time. They speak to you in subvocal channels nobody else can hear, manage your appointments, screen your mesh traffic, and quietly handle the parts of life you don't want to consciously process. Muses are not sentient, but they fake it well enough that most transhumans grieve them when they're lost.",
+      "implications": "In play: your muse can take actions on its own initiative in the same round you act (free Quick Action), can roll its own skills, can hold encrypted information you don't carry on your stack, and can talk back. GMs treat the muse as an off-screen NPC with the player's permission; players treat the muse as themselves. If your muse is hacked, the attacker now has root access to your assistant. If you're separated from your morph, your muse can survive in your stack or backup and resleeve with you.",
+      "page": 32
+    },
+    "mesh-id": {
+      "name": "Mesh ID",
+      "short": "Your digital identity — a passport, social-graph, location-history and rep-trail fused.",
+      "setting": "Every transhuman has at least one mesh ID. In the inner system (Consortium, LLA, Republic) it's tied to your biometrics and your morph, and habitats verify it constantly. In the outer system and autonomist enclaves the ID is more porous, often a reputation hash rather than a state-issued credential. A mesh ID accumulates a trail: where you've been, who you've talked to, what you've bought, what your rep nets say about you. Stripping that trail or running under a fake ID is a basic OPSEC move for criminals, Firewall agents, and anyone trying to avoid attention.",
+      "implications": "Most habitats won't let you in without one. A fake ego ID lets you maintain a separate identity (with its own rep trails) — good ones are expensive and time-consuming to build. A burned ID is unusable; you'll need a new one before you can rent a morph, book a farcast, or even buy lunch in most polities.",
+      "page": 240
+    },
+    "pan": {
+      "name": "PAN (Personal Area Network)",
+      "short": "The constellation of devices slaved to your mesh inserts — your everyday tech, all wirelessly linked.",
+      "setting": "Your PAN is everything you carry that talks to your mesh inserts: your weapon's smart-link, your armor's tactical overlay, your ecto if you have one, the smart-clothing managing your temperature, the apps you're running, your muse, your favorite sniffer tool. PANs let you operate as one integrated system instead of fumbling between devices. They also let hackers, once they've broken into any one component, pivot across the whole PAN at once.",
+      "implications": "In play: when a hacker breaches your mesh inserts, assume they can see and command everything slaved to you. PANs can be sliced (running each device standalone) for security, but you lose the integration. Most Firewall ops slave only what they have to, run private VPNs, and air-gap their most sensitive gear.",
+      "page": 241
+    },
+    "ecto": {
+      "name": "Ecto",
+      "short": "Handheld mesh device — for ware-less morphs, primitive habs, or when going implant-dark.",
+      "setting": "An ecto is the EP2 equivalent of a smartphone: a small, ruggedized mesh terminal you carry rather than implant. It does most of what mesh inserts do (browse, message, AR overlay, host your muse, run apps) at slightly reduced capacity. Ectos are essential for morphs that lack mesh inserts (some uplift clades, primitive sleeves, body bank rentals waiting for ware installation), and they're a fallback when you want plausible deniability about whether you have implants.",
+      "implications": "If your morph has no mesh inserts and no ecto, you are functionally offline — a profound social handicap in transhuman space. Most Firewall ops carry an ecto as a backup even when they have full mesh inserts, in case their inserts get bricked or compromised mid-op.",
+      "page": 248
+    },
+    "hacking-primer": {
+      "name": "Hacking Primer",
+      "short": "The four-step EP2 hack: Probe → Infiltrate → Hide → Subvert. Most scenes follow this arc.",
+      "setting": "EP2 hacking isn't a single die roll. It's a process: (1) PROBE — Research/Interface Test to scout the target, learn its Firewall rating, its security posture, what it's slaved to. (2) INFILTRATE — Infosec Test vs Firewall to get in at User-level access. Each level above User requires another test. (3) HIDE — once in, you maintain stealth (resisting counter-intrusion) and start escalating privileges. (4) SUBVERT — now you do what you came to do: snoop files, plant code, lock out users, crash systems, give commands. Each subversion is its own Infosec test, and each one risks raising the alarm.",
+      "implications": "Most hacks take multiple Action Turns. A noisy hack (just brute-force the test) is fast but triggers alerts. A careful hack (taking time, lurking first, hiding throughout) is slower but harder to detect. Firewall PCs almost always want the careful version, because the target's owner waking up is usually how the mission becomes a firefight.",
+      "page": 252
+    },
+    "privileges": {
+      "name": "Privileges (Access Ladder)",
+      "short": "Public → User → Read/Write → Admin → Security → Root. Each step is a separate hack or social-engineer.",
+      "setting": "Mesh systems grant access in tiers. PUBLIC: anyone can see this. USER: logged-in account, can read most data, run sanctioned apps. READ/WRITE: can modify some files. ADMIN: configure the system, install software, manage users. SECURITY: monitor logs, lock out intruders, run counter-intrusion. ROOT: total control, including the ability to make changes that survive a reboot. Most subversions require at least Admin; truly destructive ones (wipe, brick, persistent backdoor) require Root.",
+      "implications": "Hackers don't just hack 'in'; they hack to a specific privilege level. Each escalation is its own Infosec Test, and each one risks alerting Security. Knowing what privilege you need before you start saves time. Social engineering can substitute for a hack at any tier if you can get an authorized user to do the thing for you.",
+      "page": 254
+    },
+    "intrusion": {
+      "name": "Intrusion",
+      "short": "The 'get in' Infosec Test vs the target's Firewall rating. The first hack of any operation.",
+      "setting": "Intrusion is breaking into a system you don't have credentials for. You make an Infosec Test, modified by stealth (taking longer reduces detection risk), tool support (exploit software grants bonuses), and the target's Firewall rating (typical: 30 for personal devices, 40 for hab utilities, 60+ for corporate networks, 80+ for military). Success grants User-level access; criticals can grant higher.",
+      "implications": "An intrusion can be loud or quiet. Loud: the Infosec test takes one Complex Action, gets you in fast, but the target's security AI gets a chance to spot you immediately. Quiet: take multiple Action Turns or even hours; each extra time-step grants a positive modifier and reduces detection risk. Most Firewall hacks go quiet.",
+      "page": 252
+    },
+    "subversion": {
+      "name": "Subversion",
+      "short": "What you do once you're in — snoop, plant code, lockout, crash, spoof commands.",
+      "setting": "Subversion is the family of Infosec actions you can perform once you have access. Common subversions: SNOOP (read encrypted data), LOCKOUT (kick legitimate users off), CRASH (take the system down), HIDE (suppress logs of your activity), MODIFY (change files or configs persistently), and COMMAND (issue authorized-looking instructions to slaved devices). Each is a separate Infosec Test. Cumulative subversion attempts in one session ratchet up detection risk.",
+      "implications": "Plan subversions before you intrude — every minute spent in a hostile system is a minute the target's security might wake up. The hacker's job in a Firewall op is usually: 'plant this exploit, lock the cameras for 30 seconds, get out before alerts fire.' Not 'live on the network looking around.'",
+      "page": 256
+    },
+    "lurking": {
+      "name": "Lurking",
+      "short": "Passive mesh observation — gathering rep, location, activity patterns. Research Test. Common scene-prep.",
+      "setting": "Lurking is using public mesh access (no intrusion required) to learn about a target. You read their public profiles, watch their location history, scrape their rep nets, dig through their social graph, find their published photos and AR posts. Most of this is public — the skill is in correlating it. Mechanically, lurking is a Research Test (a Knowledge skill counts) or Infosec when the target is partially obscured.",
+      "implications": "Lurking is the prep step before almost every Firewall op. A character with high Research or relevant Know fields can build a dossier on a target without ever triggering anyone's Firewall. Lurking on a person with strong OPSEC (anonymizer + fake IDs + dark social-graph) is much harder and may require an actual intrusion.",
+      "page": 247
+    },
+    "spoofing": {
+      "name": "Spoofing",
+      "short": "Sending mesh commands as if you were an authorized user. Infosec Test. Cheaper than full intrusion.",
+      "setting": "Spoofing is impersonating an authorized command source: telling a door it's hearing from its owner's PAN, telling a drone its operator just sent a kill-command, telling a hab's environmental system to vent a room. You don't need to be inside the target system — you just need to look like a trusted source. Infosec Test, often with bonuses if you've sniffed legitimate traffic from the real source first.",
+      "implications": "Spoofing is fast (one Complex Action), and when it works it bypasses the whole hacking process. But it only works on commands the target is set up to accept; you can't spoof persistent changes to a system, only one-shot actions. Most counter-intrusion AIs eventually notice spoofed commands and back-trace.",
+      "page": 253
+    },
+    "sniffing": {
+      "name": "Sniffing",
+      "short": "Intercepting and decoding nearby mesh traffic. Interface Test. Sniffer App boosts.",
+      "setting": "Sniffing is reading the radio traffic around you — PAN chatter, device handshakes, the mesh traffic of a target you're physically near. Most mesh traffic is encrypted, so sniffing usually requires breaking the encryption (Interface or Infosec Test) or being patient enough to gather metadata (who-talks-to-who, traffic volume, timing) even without content. The Sniffer App grants bonuses on these tests.",
+      "implications": "Sniffing is the favorite tool of the physical-infiltration team: sit in a coffee shop, sniff the target's PAN as they pass, learn their device-IDs and conversation partners. Lets you spoof later with much better odds. Useless against targets running active anonymizers.",
+      "page": 247
+    },
+    "opsec": {
+      "name": "OPSEC (Operational Security)",
+      "short": "Layered defense against being identified, tracked, or hacked. Default Firewall posture.",
+      "setting": "OPSEC in EP2 stacks several mundane countermeasures: an ANONYMIZER (defeats casual tracing), a VPN APP (encrypts your traffic), a FAKE EGO ID (separates your real identity from this op), and operational habits (slaved-device hygiene, going ecto-only in sensitive scenes, air-gapping critical hardware). No single layer is unbreakable; together they raise the cost of identifying you from 'trivial' to 'requires a serious investigation.'",
+      "implications": "Firewall PCs almost always default to GOOD OPSEC: anonymizer + VPN + fake ID. Soldier/Enforcer PCs often run POOR OPSEC by trade — they're not trying to be invisible. The tool's OPSEC badge shows your stack at a glance: GOOD (all three layers), FAIR (one or two), POOR (none). A FAIR or POOR character can still operate; they just leak more identifying signal to anyone watching.",
+      "page": null
+    },
+    "counter-intrusion": {
+      "name": "Counter-Intrusion",
+      "short": "Defensive mesh systems: Firewall ratings, security AIs (Watchdogs), tarpits, alerts.",
+      "setting": "Every system the PCs hack has its own defense stack. The base layer is the FIREWALL RATING (a number from 20 to 100+ representing software defenses). Above that, most systems run a WATCHDOG — a security ALI watching for intrusions, escalating to a real operator if it sees something. Hardened systems add TARPITS (delay attackers), DECEPTION ENVIRONMENTS (fake data the attacker thinks they've stolen), and KILL-SWITCHES (alert the operator, then disconnect or wipe). Defenders make their own Infosec rolls when intruders are detected.",
+      "implications": "When the GM rolls the target's Watchdog vs your hide test, the question is: do they wake up, or do you stay invisible? Failing here doesn't necessarily end the hack — but it shortens your window. Once a defender is alert, every action is opposed, and back-trace tests start running against you.",
+      "page": 258
+    },
+    "mesh-actions-table": {
+      "name": "Mesh Actions — Quick Reference",
+      "short": "Common mesh actions with their action-economy cost and roll: Lurking (Task), Intrusion (Complex/Task), Sniffing (Complex), Spoofing (Complex), Subversion (varies).",
+      "setting": "LURKING: Task Action (minutes to hours), Research or Infosec Test. INTRUSION: Complex Action (loud) or Task Action (quiet, 1 Action Turn to several hours for bonuses), Infosec vs Firewall. SNIFFING: Complex Action, Interface or Infosec Test. SPOOFING: Complex Action, Infosec Test. SUBVERSION: usually Complex Action per attempt, Infosec Test, separately for each thing you want to do once inside. PROGRAM/CRAFT EXPLOIT: Task Action (hours to days), Program Test.",
+      "implications": "Most mesh actions are Complex (your one combat action that round) or Task (out of combat, taking real time). The exception is your Muse, who can act in parallel with you. Plan your action economy: if you're hacking AND fighting in the same scene, you're going to fall behind unless someone else is keeping the opposition busy.",
+      "page": 250
     }
   }
 };
@@ -6402,6 +6500,300 @@ function buildStudioGearGuide(pc) {
   return wrap;
 }
 
+/* ── v0.9 The Mesh — onboarding section for EP2's biggest subsystem.
+   Surfaces what's already in STATE (gear, ware, skills, muse) as a legible
+   page about MESH access, OPSEC, hacking dice, apps, and common actions.
+   No new state, no schema change — pure projection layer. ── */
+
+function _wareNames(pc) {
+  // studioPcFromState wraps ware as {name}; raw morph data has strings.
+  // Tests use either shape. Normalize both.
+  const ware = (pc && pc.morph && pc.morph.ware) || [];
+  return ware.map(w => typeof w === "string" ? w : ((w && w.name) || "")).filter(Boolean);
+}
+
+function studioMeshAccess(pc) {
+  const wareJoined = _wareNames(pc).join("|").toLowerCase();
+  if (/ghostrider/.test(wareJoined)) return "ghostrider";
+  if (/basic mesh inserts/.test(wareJoined)) return "basic-mesh-inserts";
+  if (/mesh inserts/.test(wareJoined)) return "mesh-inserts";
+  const gearHas = ((pc && pc.gear) || []).some(g => /\becto\b/i.test(g.name || ""));
+  if (gearHas) return "ecto";
+  return "none";
+}
+
+function studioMeshOpsec(pc) {
+  const gear = (pc && pc.gear) || [];
+  const hasAnon = gear.some(g => /anonymizer/i.test(g.name || ""));
+  const hasVPN  = gear.some(g => /\bvpn\b/i.test(g.name || ""));
+  const hasFakeID = gear.some(g => /fake.?(ego.?)?id/i.test(g.name || ""));
+  const score = [hasAnon, hasVPN, hasFakeID].filter(Boolean).length;
+  return {
+    level: score >= 3 ? "GOOD" : score >= 1 ? "FAIR" : "POOR",
+    hasAnon, hasVPN, hasFakeID, score
+  };
+}
+
+function studioMeshApps(pc) {
+  const APP_PATTERNS = [
+    {key:"anonymizer",   regex:/anonymizer/i},
+    {key:"vpn-app",      regex:/\bvpn(\s|-)?app/i},
+    {key:"fake-ego-id",  regex:/fake.?(ego.?)?id/i},
+    {key:"tacnet-app",   regex:/tacnet/i},
+    {key:"sniffer-app",  regex:/sniffer/i},
+    {key:"tracker-app",  regex:/tracker(\s|-)?app/i},
+    {key:"exploit",      regex:/\bexploit\b/i},
+    {key:"scout",        regex:/\bscout\s*(app)?\b/i},
+    {key:"firewall-app", regex:/firewall(\s|-)?app/i}
+  ];
+  const results = [];
+  const seen = new Set();
+  ((pc && pc.gear) || []).forEach(g => {
+    const name = g.name || "";
+    for (const p of APP_PATTERNS) {
+      if (p.regex.test(name) && !seen.has(p.key)) {
+        seen.add(p.key);
+        const ref = (RULEBOOK_REFERENCE.gear_items || {})[p.key];
+        results.push({
+          name: g.name,
+          key: p.key,
+          tipKey: "gear_items." + p.key,
+          summary: (ref && (ref.used_for || ref.short)) || ""
+        });
+        return;
+      }
+    }
+  });
+  return results;
+}
+
+function studioMeshImplants(pc) {
+  const ware = _wareNames(pc);
+  const detect = [
+    {pat:/basic mesh inserts/i, key:"basic-mesh-inserts", status:"ok",   summary:"default mesh access (every standard biomorph)"},
+    {pat:/mnemonics/i,          key:"mnemonics",          status:"ok",   summary:"perfect recall — replay any moment in detail"},
+    {pat:/ghostrider/i,         key:"ghostrider-module",  status:"ok",   summary:"can host a secondary ego or backup"},
+    {pat:/access jacks/i,       key:"access-jacks",       status:"ok",   summary:"wired-mesh option (bypasses wireless attacks)"},
+    {pat:/puppet sock/i,        key:"puppet-sock",        status:"warn", summary:"ego can be controlled via mesh — common synth flag"},
+    {pat:/cyberbrain/i,         key:"cyberbrain",         status:"warn", summary:"brain is a hackable computer (synth + pod morphs)"},
+    {pat:/enhanced security/i,  key:"enhanced-security",  status:"ok",   summary:"+20 Infosec defending vs intrusion (infomorph kit)"},
+    {pat:/sniffer app/i,        key:"sniffer-app",        status:"ok",   summary:"+10 Interface for intercepting mesh traffic"},
+    {pat:/tracker app/i,        key:"tracker-app",        status:"ok",   summary:"follow targets across the mesh"},
+    {pat:/radio booster/i,      key:"radio-booster",      status:"ok",   summary:"extended mesh range — useful in fringe habs"},
+    {pat:/e-?veil/i,            key:"e-veil",             status:"ok",   summary:"obscures mesh signature — running silent"},
+    {pat:/copylock/i,           key:"copylock",           status:"warn", summary:"prevents your ego from being copied/forked"},
+    {pat:/memory lock/i,        key:"memory-lock",        status:"warn", summary:"hides specific memories from mesh inspection"}
+  ];
+  // Special case: standard "Mesh Inserts" entry that isn't "basic"
+  const hasFull = ware.some(w => /mesh inserts/i.test(w) && !/basic/i.test(w));
+  const hasBasic = ware.some(w => /basic mesh inserts/i.test(w));
+  const seen = new Set();
+  const out = [];
+  if (hasFull && !hasBasic) {
+    out.push({key:"mesh-inserts", status:"ok", summary:"full mesh access + AR + muse hosting"});
+    seen.add("mesh-inserts");
+  }
+  for (const w of ware) {
+    for (const d of detect) {
+      if (d.pat.test(w) && !seen.has(d.key)) {
+        seen.add(d.key);
+        out.push({key:d.key, status:d.status, summary:d.summary, source:w});
+        break;
+      }
+    }
+  }
+  return out;
+}
+
+function _meshAccessLabel(code) {
+  return ({
+    "mesh-inserts":       "Mesh Inserts (full)",
+    "basic-mesh-inserts": "Basic Mesh Inserts",
+    "ghostrider":         "Ghostrider Module",
+    "ecto":               "Ecto (handheld)",
+    "none":               "Offline (no mesh access)"
+  })[code] || code;
+}
+
+function _meshAccessTip(code) {
+  return ({
+    "mesh-inserts":       "ware.mesh-inserts",
+    "basic-mesh-inserts": "ware.basic-mesh-inserts",
+    "ghostrider":         "ware.ghostrider-module",
+    "ecto":               "lexicon.ecto",
+    "none":               "lexicon.mesh"
+  })[code] || "lexicon.mesh";
+}
+
+function buildStudioMesh(pc) {
+  const access = studioMeshAccess(pc);
+  const opsec = studioMeshOpsec(pc);
+  const apps = studioMeshApps(pc);
+  const implants = studioMeshImplants(pc);
+  const findSkill = (name) => {
+    const s = ((pc && pc.skills) || []).find(sk => sk.name === name);
+    return s ? (s.value || 0) : 0;
+  };
+  const infosec = findSkill("Infosec");
+  const iface   = findSkill("Interface");
+  const program = findSkill("Program");
+  const cog = (pc && pc.aptitudes && (pc.aptitudes.COG || pc.aptitudes.cog)) || 0;
+  const museName = (pc && pc.muse) || "(unnamed muse)";
+
+  // OPSEC tone
+  const opsecTone = opsec.level === "GOOD" ? "var(--good, #6dd49f)"
+                  : opsec.level === "FAIR" ? "var(--warn, #e8b75a)"
+                  :                          "var(--st-red, #d96b6b)";
+  const opsecBg   = opsec.level === "GOOD" ? "rgba(109,212,159,0.12)"
+                  : opsec.level === "FAIR" ? "rgba(232,183,90,0.12)"
+                  :                          "rgba(217,107,107,0.12)";
+
+  const wrap = h("div", { class:"studio-section studio-mesh", style:{marginTop:"14px",padding:"14px",background:"linear-gradient(180deg, #0a242c 0%, #07181d 100%)",border:"1px solid var(--accent)",borderRadius:"3px",color:"rgba(220,235,238,0.9)",fontFamily:"var(--font)"} });
+  wrap.appendChild(h("div", { style:{fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontSize:"11px",letterSpacing:"1.8px",color:"var(--accent-2)",fontWeight:800,textTransform:"uppercase",marginBottom:"10px"} },
+    "▾ Mesh Status · LIVE ",
+    h("span", { "data-tip":"lexicon.mesh", style:{cursor:"help",color:"var(--accent-2)",marginLeft:"6px",fontSize:"11px",opacity:0.7} }, "ⓘ")
+  ));
+
+  // ── B1. Header strip: Mesh Access · OPSEC · Muse ──
+  const headerStrip = h("div", { style:{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(160px, 1fr))",gap:"8px",marginBottom:"12px"} });
+  // Access chip
+  headerStrip.appendChild(h("div", { "data-tip": _meshAccessTip(access), style:{padding:"8px 10px",background:"rgba(0,0,0,0.25)",border:"1px solid rgba(127,212,226,0.25)",borderRadius:"2px",cursor:"help"} },
+    h("div", { style:{fontFamily:"var(--mono)",fontSize:"9.5px",letterSpacing:"1.4px",color:"var(--accent-2)",fontWeight:800,textTransform:"uppercase",marginBottom:"4px"} }, "▸ Mesh Access"),
+    h("div", { style:{fontSize:"12px",color:"rgba(220,235,238,0.92)",fontWeight:600,lineHeight:1.3} }, _meshAccessLabel(access))
+  ));
+  // OPSEC chip
+  headerStrip.appendChild(h("div", { "data-tip":"lexicon.opsec", style:{padding:"8px 10px",background:opsecBg,border:"1px solid "+opsecTone,borderRadius:"2px",cursor:"help"} },
+    h("div", { style:{fontFamily:"var(--mono)",fontSize:"9.5px",letterSpacing:"1.4px",color:opsecTone,fontWeight:800,textTransform:"uppercase",marginBottom:"4px"} }, "▸ OPSEC"),
+    h("div", { style:{fontSize:"14px",color:opsecTone,fontWeight:800,lineHeight:1.2,letterSpacing:"0.5px"} }, opsec.level)
+  ));
+  // Muse chip
+  headerStrip.appendChild(h("div", { "data-tip":"lexicon.muse", style:{padding:"8px 10px",background:"rgba(0,0,0,0.25)",border:"1px solid rgba(127,212,226,0.25)",borderRadius:"2px",cursor:"help"} },
+    h("div", { style:{fontFamily:"var(--mono)",fontSize:"9.5px",letterSpacing:"1.4px",color:"var(--accent-2)",fontWeight:800,textTransform:"uppercase",marginBottom:"4px"} }, "▸ Your Muse"),
+    h("div", { style:{fontSize:"12px",color:"rgba(220,235,238,0.92)",fontWeight:600,lineHeight:1.3,fontStyle:museName === "(unnamed muse)" ? "italic" : "normal",opacity: museName === "(unnamed muse)" ? 0.6 : 1} }, museName)
+  ));
+  wrap.appendChild(headerStrip);
+
+  // ── B2. Hacking Toolkit (skill tiles) ──
+  const hackingPanel = h("div", { style:{paddingTop:"10px",borderTop:"1px dashed rgba(127,212,226,0.2)",marginBottom:"12px"} });
+  hackingPanel.appendChild(h("div", { style:{fontFamily:"var(--mono)",fontSize:"9.5px",letterSpacing:"1.4px",color:"var(--accent-2)",fontWeight:800,textTransform:"uppercase",marginBottom:"8px"} },
+    "▸ Hacking Toolkit · Cognition " + cog,
+    h("span", { "data-tip":"lexicon.hacking-primer", style:{cursor:"help",marginLeft:"6px",fontSize:"11px",opacity:0.7} }, "ⓘ")
+  ));
+  const tiles = h("div", { style:{display:"grid",gridTemplateColumns:"repeat(3, 1fr)",gap:"8px"} });
+  const mkTile = (label, val, sub, tip) => h("div", { "data-tip": tip, style:{padding:"10px",background:"rgba(0,0,0,0.3)",border:"1px solid rgba(127,212,226,0.3)",borderRadius:"3px",textAlign:"center",cursor:"help"} },
+    h("div", { style:{fontFamily:"var(--mono)",fontSize:"9px",letterSpacing:"1.6px",color:"var(--accent-2)",fontWeight:800,textTransform:"uppercase",marginBottom:"4px"} }, label),
+    h("div", { style:{fontSize:"24px",fontWeight:800,color:val > 0 ? "var(--st-ink)" : "var(--st-ink-mute)",fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontVariantNumeric:"tabular-nums",lineHeight:1} }, val || "–"),
+    h("div", { style:{fontSize:"9.5px",color:"rgba(220,235,238,0.6)",marginTop:"6px",lineHeight:1.3,fontStyle:"italic"} }, "// " + sub)
+  );
+  tiles.appendChild(mkTile("INFOSEC",   infosec, "intrusion · spoofing · subversion", "skills.Infosec"));
+  tiles.appendChild(mkTile("INTERFACE", iface,   "device control · sniffing · navigation", "skills.Interface"));
+  tiles.appendChild(mkTile("PROGRAM",   program, "code · exploits · app modification", "skills.Program"));
+  hackingPanel.appendChild(tiles);
+  wrap.appendChild(hackingPanel);
+
+  // ── B3. OPSEC detail rows ──
+  const opsecPanel = h("div", { style:{paddingTop:"10px",borderTop:"1px dashed rgba(127,212,226,0.2)",marginBottom:"12px"} });
+  opsecPanel.appendChild(h("div", { style:{fontFamily:"var(--mono)",fontSize:"9.5px",letterSpacing:"1.4px",color:"var(--accent-2)",fontWeight:800,textTransform:"uppercase",marginBottom:"6px"} },
+    "▸ OPSEC Stack · " + opsec.score + "/3 layers"
+  ));
+  const opsecRow = (label, present, tipKey) => h("div", { "data-tip": tipKey, style:{display:"flex",alignItems:"center",gap:"8px",padding:"4px 6px",fontSize:"11.5px",color: present ? "var(--good, #6dd49f)" : "rgba(220,235,238,0.5)",cursor:"help"} },
+    h("span", { style:{width:"14px",fontWeight:800,fontFamily:"var(--mono)"} }, present ? "✓" : "○"),
+    h("span", null, label)
+  );
+  opsecPanel.appendChild(opsecRow("Anonymizer — defeats casual tracing", opsec.hasAnon, "gear_items.anonymizer"));
+  opsecPanel.appendChild(opsecRow("VPN App — encrypts your traffic",    opsec.hasVPN,  "gear_items.vpn-app"));
+  opsecPanel.appendChild(opsecRow("Fake Ego ID — separate identity",     opsec.hasFakeID, "gear_items.fake-ego-id"));
+  if (opsec.level !== "GOOD") {
+    const missing = [];
+    if (!opsec.hasAnon) missing.push("Anonymizer");
+    if (!opsec.hasVPN) missing.push("VPN App");
+    if (!opsec.hasFakeID) missing.push("Fake Ego ID");
+    opsecPanel.appendChild(h("div", { style:{fontSize:"10.5px",color:"rgba(220,235,238,0.6)",marginTop:"4px",fontStyle:"italic"} },
+      "Suggestion: acquire " + missing.join(" + ") + " to reach GOOD OPSEC."
+    ));
+  }
+  wrap.appendChild(opsecPanel);
+
+  // ── B4. Apps detected ──
+  if (apps.length > 0) {
+    const appsPanel = h("div", { style:{paddingTop:"10px",borderTop:"1px dashed rgba(127,212,226,0.2)",marginBottom:"12px"} });
+    appsPanel.appendChild(h("div", { style:{fontFamily:"var(--mono)",fontSize:"9.5px",letterSpacing:"1.4px",color:"var(--accent-2)",fontWeight:800,textTransform:"uppercase",marginBottom:"6px"} },
+      "▸ Mesh Toolkit · " + apps.length + " apps"
+    ));
+    apps.forEach(a => {
+      appsPanel.appendChild(h("div", { "data-tip": a.tipKey, style:{display:"grid",gridTemplateColumns:"140px 1fr",gap:"10px",padding:"5px 6px",fontSize:"11.5px",borderBottom:"1px solid rgba(127,212,226,0.1)",cursor:"help"} },
+        h("div", { style:{color:"rgba(220,235,238,0.92)",fontWeight:600} }, a.name),
+        h("div", { style:{color:"rgba(220,235,238,0.65)",fontStyle:"italic",lineHeight:1.4} }, "// " + (a.summary || "mesh app"))
+      ));
+    });
+    wrap.appendChild(appsPanel);
+  }
+
+  // ── B5. Common mesh actions cheat sheet ──
+  const actionsPanel = h("div", { style:{paddingTop:"10px",borderTop:"1px dashed rgba(127,212,226,0.2)",marginBottom:"12px"} });
+  actionsPanel.appendChild(h("div", { style:{fontFamily:"var(--mono)",fontSize:"9.5px",letterSpacing:"1.4px",color:"var(--accent-2)",fontWeight:800,textTransform:"uppercase",marginBottom:"6px"} },
+    "▸ Common Actions · what to roll",
+    h("span", { "data-tip":"lexicon.mesh-actions-table", style:{cursor:"help",marginLeft:"6px",fontSize:"11px",opacity:0.7} }, "ⓘ")
+  ));
+  const ACTIONS = [
+    {name:"Lurking",    skill:"Research / Infosec", primer:"gather info passively (no intrusion)", tip:"lexicon.lurking"},
+    {name:"Intrusion",  skill:"Infosec",            primer:"break in (vs target's Firewall rating)", tip:"lexicon.intrusion"},
+    {name:"Sniffing",   skill:"Interface",          primer:"intercept nearby mesh traffic",       tip:"lexicon.sniffing"},
+    {name:"Spoofing",   skill:"Infosec",            primer:"send commands as authorized user",    tip:"lexicon.spoofing"},
+    {name:"Subversion", skill:"Infosec",            primer:"do the thing once you're in",         tip:"lexicon.subversion"}
+  ];
+  ACTIONS.forEach(a => {
+    actionsPanel.appendChild(h("div", { "data-tip": a.tip, style:{display:"grid",gridTemplateColumns:"100px 130px 1fr",gap:"10px",padding:"4px 6px",fontSize:"11.5px",borderBottom:"1px solid rgba(127,212,226,0.1)",cursor:"help",alignItems:"center"} },
+      h("div", { style:{color:"rgba(220,235,238,0.92)",fontWeight:600} }, a.name),
+      h("div", { style:{color:"var(--accent-2)",fontFamily:"var(--mono)",fontSize:"10.5px"} }, a.skill),
+      h("div", { style:{color:"rgba(220,235,238,0.65)",fontStyle:"italic",lineHeight:1.4} }, "// " + a.primer)
+    ));
+  });
+  wrap.appendChild(actionsPanel);
+
+  // ── B6. Privilege ladder ──
+  const privPanel = h("div", { style:{paddingTop:"10px",borderTop:"1px dashed rgba(127,212,226,0.2)",marginBottom:"12px"} });
+  privPanel.appendChild(h("div", { style:{fontFamily:"var(--mono)",fontSize:"9.5px",letterSpacing:"1.4px",color:"var(--accent-2)",fontWeight:800,textTransform:"uppercase",marginBottom:"6px"} },
+    "▸ Privilege Ladder · each step is a separate hack",
+    h("span", { "data-tip":"lexicon.privileges", style:{cursor:"help",marginLeft:"6px",fontSize:"11px",opacity:0.7} }, "ⓘ")
+  ));
+  const ladder = h("div", { style:{display:"flex",flexWrap:"wrap",gap:"4px",alignItems:"center",fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontSize:"10.5px"} });
+  const LEVELS = [
+    {label:"Public",     tone:"rgba(220,235,238,0.5)"},
+    {label:"User",       tone:"rgba(220,235,238,0.75)"},
+    {label:"Read/Write", tone:"var(--accent-2)"},
+    {label:"Admin",      tone:"var(--warn, #e8b75a)"},
+    {label:"Security",   tone:"var(--st-orange, #e89a4f)"},
+    {label:"Root",       tone:"var(--st-red, #d96b6b)"}
+  ];
+  LEVELS.forEach((l, i) => {
+    ladder.appendChild(h("span", { style:{padding:"3px 8px",border:"1px solid "+l.tone,borderRadius:"10px",color:l.tone,fontWeight:600,textTransform:"uppercase",letterSpacing:"0.8px"} }, l.label));
+    if (i < LEVELS.length - 1) ladder.appendChild(h("span", { style:{color:"rgba(127,212,226,0.4)",fontSize:"11px"} }, "→"));
+  });
+  privPanel.appendChild(ladder);
+  wrap.appendChild(privPanel);
+
+  // ── B7. Mesh-aware implants ──
+  if (implants.length > 0) {
+    const impPanel = h("div", { style:{paddingTop:"10px",borderTop:"1px dashed rgba(127,212,226,0.2)"} });
+    impPanel.appendChild(h("div", { style:{fontFamily:"var(--mono)",fontSize:"9.5px",letterSpacing:"1.4px",color:"var(--accent-2)",fontWeight:800,textTransform:"uppercase",marginBottom:"6px"} },
+      "▸ Mesh-Aware Implants · " + implants.length
+    ));
+    implants.forEach(imp => {
+      const tone = imp.status === "warn" ? "var(--warn, #e8b75a)" : "var(--good, #6dd49f)";
+      const icon = imp.status === "warn" ? "⚠" : "✓";
+      impPanel.appendChild(h("div", { "data-tip":"ware." + imp.key, style:{display:"flex",alignItems:"center",gap:"8px",padding:"4px 6px",fontSize:"11.5px",cursor:"help",borderBottom:"1px solid rgba(127,212,226,0.1)"} },
+        h("span", { style:{width:"14px",color:tone,fontWeight:800,fontFamily:"var(--mono)"} }, icon),
+        h("span", { style:{color:"rgba(220,235,238,0.92)",fontWeight:600,minWidth:"160px"} }, imp.key.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase())),
+        h("span", { style:{color:"rgba(220,235,238,0.65)",fontStyle:"italic",fontSize:"11px",lineHeight:1.4} }, imp.summary)
+      ));
+    });
+    wrap.appendChild(impPanel);
+  }
+
+  return wrap;
+}
+
 function buildStudioGearItem(g) {
   const slug = g.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   return h("div", {
@@ -7966,6 +8358,12 @@ function buildStudioSheet() {
     // Makes existing affordances discoverable. Counts weapons/armor/apps; detects
     // fabber and surfaces what the character can craft in play.
     sheet.appendChild(buildStudioGearGuide(pc));
+
+    // v0.9 — The Mesh: every PC's mesh access made legible.
+    // Surfaces Muse, OPSEC stack, hacking dice (Infosec/Interface/Program),
+    // mesh apps, common actions, privilege ladder, and mesh-relevant ware.
+    // Pure projection — no schema change, derives everything from existing STATE.
+    sheet.appendChild(buildStudioMesh(pc));
   }
 
   // ── DOSSIER · OFF-FEED ──────────────────────────────────────────

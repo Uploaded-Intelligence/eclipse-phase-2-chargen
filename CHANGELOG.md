@@ -2,6 +2,36 @@
 
 All notable changes to this project. Format follows the spirit of [Keep a Changelog](https://keepachangelog.com/), versioned by milestone.
 
+## [0.9] — 2026-05-16 — "The Mesh"
+
+EP2's biggest subsystem made legible. Every PC interacts with the mesh constantly — hacker or not — but most of that surface was buried in gear lists, skill rows, and corebook references. v0.9 surfaces it as a single legible page: Muse, OPSEC posture, hacking dice, your mesh apps with what they do at the table, common actions cheat-sheet, privilege ladder, and a mesh-implant audit on the morph. **Pure projection layer — no schema change.**
+
+### Added
+- **The Mesh section** (`buildStudioMesh(pc)`) — new collapsible Studio panel between Gear Guide and the Dossier. Seven subsections:
+  - **Header strip**: Mesh Access (Basic Mesh Inserts / Mesh Inserts / Ghostrider / Ecto / Offline — detected from morph ware) · OPSEC badge (GOOD/FAIR/POOR) · Muse name (data-tip on each).
+  - **Hacking Toolkit**: three large stat tiles for Infosec / Interface / Program with the linked Cognition aptitude, plus per-skill "what this rolls for" subtitle. Tap → existing skill tooltip.
+  - **OPSEC Stack**: auto-computed score (0-3) with row-by-row ✓/○ status for Anonymizer, VPN App, Fake Ego ID. POOR/FAIR cards include a "Suggestion: acquire X + Y" line.
+  - **Mesh Toolkit**: detects mesh apps in gear (Anonymizer, VPN App, Fake Ego ID, TacNet App, Sniffer App, Tracker App, Exploit, Scout, Firewall App) with a one-line "// what it does at the table" summary per app.
+  - **Common Mesh Actions**: 5-row cheat sheet (Lurking, Intrusion, Sniffing, Spoofing, Subversion) with skill name + one-line primer + tooltip per action.
+  - **Privilege Ladder**: visual `Public → User → Read/Write → Admin → Security → Root` pill row with the privileges Lexicon entry tooltip.
+  - **Mesh-Aware Implants**: detects mesh-relevant ware on the morph (Basic Mesh Inserts, Mnemonics, Ghostrider Module, Access Jacks, Puppet Sock, Cyberbrain, Enhanced Security, Sniffer App, Tracker App, Radio Booster, E-Veil, Copylock, Memory Lock) — `✓` green or `⚠` amber based on whether the implant is empowering or a risk-surface.
+- **14 new Lexicon entries** in `RULEBOOK_REFERENCE.lexicon` — `muse`, `mesh-id`, `pan`, `ecto`, `hacking-primer`, `privileges`, `intrusion`, `subversion`, `lurking`, `spoofing`, `sniffing`, `opsec`, `counter-intrusion`, `mesh-actions-table`. Each with `setting` (corebook prose) + `implications` (what it means at the table) + page refs to EP2 corebook §240-260. New GMs can hover any term in the Mesh section and read the rule in context.
+
+### Engine
+- `studioMeshAccess(pc)` — detects Mesh Inserts / Basic Mesh Inserts / Ghostrider Module from morph ware, falls back to Ecto detection in gear, then "none".
+- `studioMeshOpsec(pc)` — returns `{level, hasAnon, hasVPN, hasFakeID, score}`. Loose regex detection (e.g. `/anonymizer/i`) so variants (Anonymizer Pro, etc.) still count.
+- `studioMeshApps(pc)` — pattern-matches 9 known mesh-app categories against gear names, returns `{name, key, tipKey, summary}` per detection, dedupes by category.
+- `studioMeshImplants(pc)` — walks morph ware, flags 13 mesh-relevant implants as `ok` (empowering) or `warn` (hackable surface like Cyberbrain / Puppet Sock).
+- `_wareNames(pc)` — normalizes ware shape between studioPcFromState (objects with `.name`) and raw test fixtures (strings).
+
+### Tests
+- **506 total assertions** (was 461 — +45 covering OPSEC tri-state, mesh access detection across biomorph/synthmorph/ecto/none, mesh-app detection on Firewall PC, mesh-implant detection on synthmorph vs biomorph, all 14 new Lexicon keys present + content sanity checks, end-to-end derivation from a real STATE via studioPcFromState).
+
+### Cross-cutting principle
+**Make the implicit explicit.** The PC's mesh posture was already in STATE (gear, ware, skills, muse). v0.9 doesn't add mechanics — it just stops hiding what's there. The OPSEC badge is the most-condensed example: three boolean checks become a single GOOD/FAIR/POOR judgment that a new GM can read at a glance. Same pattern as v0.8's GP/Complexity guide and Fabrication detection: derive from existing state, teach in context.
+
+---
+
 ## [0.8] — 2026-05-17 — "Combat ALI"
 
 Three systemic bugs identified, three root causes fixed, plus a new Gear Guide section. The character creator becomes a session co-pilot that doesn't ghost on you.

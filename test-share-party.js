@@ -6,7 +6,7 @@ const vm = require("vm");
 const html = fs.readFileSync(__dirname + "/index.html", "utf8");
 let js = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 js = js.replace(/^boot\(\);$/m, "// boot suppressed");
-js += "\nthis.__exports = Object.defineProperties({}, {STATE:{get:()=>STATE,enumerable:true},RULEBOOK_DATA:{value:RULEBOOK_DATA,enumerable:true},RULEBOOK_REFERENCE:{value:RULEBOOK_REFERENCE,enumerable:true},derived:{value:derived,enumerable:true},newState:{value:newState,enumerable:true},encodeShareUrl:{value:encodeShareUrl,enumerable:true},decodeShareUrl:{value:decodeShareUrl,enumerable:true},stripPortrait:{value:stripPortrait,enumerable:true},importShareSnapshot:{value:importShareSnapshot,enumerable:true},makeCharacterId:{value:makeCharacterId,enumerable:true},migrateV6ToV7:{value:migrateV6ToV7,enumerable:true},migrateToCurrent:{value:migrateToCurrent,enumerable:true},SCHEMA_VERSION:{value:SCHEMA_VERSION,enumerable:true},LZString:{value:LZString,enumerable:true},studioPcFromState:{value:studioPcFromState,enumerable:true},studioHealDamage:{value:studioHealDamage,enumerable:true},studioHealWound:{value:studioHealWound,enumerable:true},studioHealStress:{value:studioHealStress,enumerable:true},studioHealTrauma:{value:studioHealTrauma,enumerable:true},characterHasFabber:{value:characterHasFabber,enumerable:true},_setState:{value:(v)=>{STATE=v;},enumerable:true}});\n";
+js += "\nthis.__exports = Object.defineProperties({}, {STATE:{get:()=>STATE,enumerable:true},RULEBOOK_DATA:{value:RULEBOOK_DATA,enumerable:true},RULEBOOK_REFERENCE:{value:RULEBOOK_REFERENCE,enumerable:true},derived:{value:derived,enumerable:true},newState:{value:newState,enumerable:true},encodeShareUrl:{value:encodeShareUrl,enumerable:true},decodeShareUrl:{value:decodeShareUrl,enumerable:true},stripPortrait:{value:stripPortrait,enumerable:true},importShareSnapshot:{value:importShareSnapshot,enumerable:true},makeCharacterId:{value:makeCharacterId,enumerable:true},migrateV6ToV7:{value:migrateV6ToV7,enumerable:true},migrateToCurrent:{value:migrateToCurrent,enumerable:true},SCHEMA_VERSION:{value:SCHEMA_VERSION,enumerable:true},LZString:{value:LZString,enumerable:true},studioPcFromState:{value:studioPcFromState,enumerable:true},studioHealDamage:{value:studioHealDamage,enumerable:true},studioHealWound:{value:studioHealWound,enumerable:true},studioHealStress:{value:studioHealStress,enumerable:true},studioHealTrauma:{value:studioHealTrauma,enumerable:true},characterHasFabber:{value:characterHasFabber,enumerable:true},studioMeshAccess:{value:studioMeshAccess,enumerable:true},studioMeshOpsec:{value:studioMeshOpsec,enumerable:true},studioMeshApps:{value:studioMeshApps,enumerable:true},studioMeshImplants:{value:studioMeshImplants,enumerable:true},_setState:{value:(v)=>{STATE=v;},enumerable:true}});\n";
 
 const sandbox = {
   console,
@@ -255,6 +255,70 @@ assert("combat.healing references stress recovery + Moxie", !!(heal && heal.used
 console.log("\n=== v0.8 — ALI Lexicon entry exists ===");
 assert("Lexicon entry 'ali' exists", !!exp.RULEBOOK_REFERENCE.lexicon.ali);
 assert("ALI entry mentions Combat ALI", !!(exp.RULEBOOK_REFERENCE.lexicon.ali.short && /Combat ALI/i.test(exp.RULEBOOK_REFERENCE.lexicon.ali.short)));
+
+console.log("\n=== v0.9 — Mesh Lexicon entries ===");
+const meshKeys = ["muse","mesh-id","pan","ecto","hacking-primer","privileges","intrusion","subversion","lurking","spoofing","sniffing","opsec","counter-intrusion","mesh-actions-table"];
+const lex = exp.RULEBOOK_REFERENCE.lexicon;
+meshKeys.forEach(k => assert("Lexicon entry '" + k + "' exists", !!lex[k]));
+assert("muse entry mentions ALI", !!(lex.muse && /ALI/.test(lex.muse.setting || lex.muse.short)));
+assert("hacking-primer enumerates 4 steps", !!(lex["hacking-primer"] && /probe.*infiltrate.*hide.*subvert/i.test(lex["hacking-primer"].setting || "")));
+assert("privileges entry has the ladder", !!(lex.privileges && /public.*user.*admin.*root/i.test(lex.privileges.setting || "")));
+assert("opsec entry mentions all three layers", !!(lex.opsec && /anonymizer/i.test(lex.opsec.setting) && /vpn/i.test(lex.opsec.setting) && /fake.*id/i.test(lex.opsec.setting)));
+
+console.log("\n=== v0.9 — studioMeshOpsec tri-state ===");
+const opsecGood = exp.studioMeshOpsec({ gear:[{name:"Anonymizer"},{name:"VPN App"},{name:"Fake Ego ID"}] });
+assert("3 layers → GOOD",  opsecGood.level === "GOOD", "got " + opsecGood.level);
+assert("GOOD score === 3", opsecGood.score === 3);
+const opsecFair = exp.studioMeshOpsec({ gear:[{name:"Anonymizer"},{name:"Medium Pistol"}] });
+assert("1 layer → FAIR",  opsecFair.level === "FAIR", "got " + opsecFair.level);
+const opsecFair2 = exp.studioMeshOpsec({ gear:[{name:"VPN App"},{name:"Fake Ego ID"}] });
+assert("2 layers → FAIR",  opsecFair2.level === "FAIR");
+const opsecPoor = exp.studioMeshOpsec({ gear:[{name:"Medium Pistol"},{name:"Armor Vest Light"}] });
+assert("0 layers → POOR", opsecPoor.level === "POOR");
+assert("POOR.hasAnon === false", opsecPoor.hasAnon === false);
+
+console.log("\n=== v0.9 — studioMeshAccess detection ===");
+const accBasic = exp.studioMeshAccess({ morph:{ware:["Basic Mesh Inserts","Biomods"]} });
+assert("Basic Mesh Inserts → basic-mesh-inserts", accBasic === "basic-mesh-inserts");
+const accFull = exp.studioMeshAccess({ morph:{ware:["Mesh Inserts","Cortical Stack","Cyberbrain"]} });
+assert("Mesh Inserts (non-basic) → mesh-inserts", accFull === "mesh-inserts");
+const accGhost = exp.studioMeshAccess({ morph:{ware:["Cortical Stack","Ghostrider Module","Cyberbrain"]} });
+assert("Ghostrider Module → ghostrider", accGhost === "ghostrider");
+const accEcto = exp.studioMeshAccess({ morph:{ware:[]}, gear:[{name:"Ecto"}] });
+assert("no ware + ecto → ecto", accEcto === "ecto");
+const accNone = exp.studioMeshAccess({ morph:{ware:[]}, gear:[] });
+assert("no ware + no ecto → none", accNone === "none");
+
+console.log("\n=== v0.9 — studioMeshApps detection ===");
+const appsFW = exp.studioMeshApps({ gear:[{name:"Anonymizer"},{name:"VPN App"},{name:"Fake Ego ID"},{name:"TacNet App"},{name:"Medium Pistol"}] });
+assert("Firewall PC apps: detects 4", appsFW.length === 4, "got " + appsFW.length);
+assert("apps include anonymizer", appsFW.some(a => a.key === "anonymizer"));
+assert("apps include vpn-app",    appsFW.some(a => a.key === "vpn-app"));
+assert("apps include fake-ego-id",appsFW.some(a => a.key === "fake-ego-id"));
+assert("apps include tacnet-app", appsFW.some(a => a.key === "tacnet-app"));
+assert("Medium Pistol NOT classified as app", !appsFW.some(a => /pistol/i.test(a.name)));
+const appsEmpty = exp.studioMeshApps({ gear:[{name:"Medium Pistol"}] });
+assert("no mesh apps when none in gear", appsEmpty.length === 0);
+
+console.log("\n=== v0.9 — studioMeshImplants detection ===");
+const impSynth = exp.studioMeshImplants({ morph:{ware:["Cortical Stack","Cyberbrain","Mesh Inserts","Puppet Sock"]} });
+assert("synthmorph: detects cyberbrain (warn)", impSynth.some(i => i.key === "cyberbrain" && i.status === "warn"));
+assert("synthmorph: detects puppet-sock (warn)", impSynth.some(i => i.key === "puppet-sock" && i.status === "warn"));
+assert("synthmorph: detects mesh-inserts (ok)",  impSynth.some(i => i.key === "mesh-inserts" && i.status === "ok"));
+const impBio = exp.studioMeshImplants({ morph:{ware:["Basic Mesh Inserts","Biomods","Cortical Stack","Mnemonics"]} });
+assert("biomorph: detects basic-mesh-inserts",   impBio.some(i => i.key === "basic-mesh-inserts" && i.status === "ok"));
+assert("biomorph: detects mnemonics (ok)",       impBio.some(i => i.key === "mnemonics" && i.status === "ok"));
+assert("biomorph: does NOT flag cyberbrain",    !impBio.some(i => i.key === "cyberbrain"));
+
+console.log("\n=== v0.9 — End-to-end mesh derivation from a real STATE ===");
+exp._setState(exp.newState());
+exp.STATE.ego.career = "hacker";
+exp.STATE.morph.chosen = "exalt";
+const pcMesh = exp.studioPcFromState();
+const liveAccess = exp.studioMeshAccess(pcMesh);
+assert("hacker+exalt PC has mesh access (not 'none')", liveAccess !== "none", "got " + liveAccess);
+const liveOpsec = exp.studioMeshOpsec(pcMesh);
+assert("studioMeshOpsec returns a level on real PC", ["GOOD","FAIR","POOR"].includes(liveOpsec.level), "got " + liveOpsec.level);
 
 console.log("\n=========================================");
 console.log("FINAL: " + pass + " pass, " + fail + " fail");
