@@ -2,6 +2,39 @@
 
 All notable changes to this project. Format follows the spirit of [Keep a Changelog](https://keepachangelog.com/), versioned by milestone.
 
+## [0.10.10] — 2026-05-17 — "EGO · MORPH headers, in EP2 vocabulary"
+
+**Two corrections to v0.10.9 in one wave.** The user looked at the new HP↔STRESS divider and said: *"dont like this 'divider' design. It's too 'small' and just looks so out of place. Also theres no 'Morph' 'header' to complement the 'Ego' 'header' (not mind)."*
+
+Two distinct things in that:
+1. The v0.10.9 FeedBreak was sized for a quiet "channel switch" marker (its original use was the dossier off-feed). Too small for what's actually a *major* Eclipse Phase system boundary.
+2. The label should be **EGO** (not MIND), and it needs a complementary **MORPH** header above the damage bar. EP2's two-substrate model: the **ego** is the persistent mind/self that gets re-sleeved across **morphs** (the physical or synthetic forms). Calling it "MIND" is a Westernised default; "EGO" is the EP2-canonical term and teaches the rule.
+
+### Changed
+- **Vital Signs panel now has two parallel sub-section headers**: `MORPH` (green, `#3a9c64`, kicker "body · form · durability") above the damage bar, and `EGO` (blue, `#6b9eff`, kicker "self · mind · lucidity") above the stress bar. Each is an 18px bold uppercase label in the section's accent colour, with an italic kicker and an accent-tinted underline. Sized for a system boundary, not a channel switch.
+- **Section banner kicker** updated from `body · mind · pools · recharge · healing` to `morph · ego · pools · recharge · healing` — consistent EP2 vocabulary throughout.
+- **Healing sub-section label** updated from `▾ HEALING · BODY · MIND` to `▾ HEALING · MORPH · EGO` — same reason.
+
+### Added
+- **`buildStudioVbarSectionHead({ label, kicker, accent })`** — new helper near `buildStudioDamageBar` (line ~7057). Generic enough for any major sub-section under Vital Signs; currently used twice (MORPH + EGO). The previous helper, `buildStudioFeedBreak`, stays for its original use (the dossier off-feed marker) but is no longer used inside Vital Signs.
+
+### Why "EGO" not "MIND"
+Saved this preference to memory for future sessions. In Eclipse Phase 2:
+- **EGO** = the persistent self / consciousness / psyche — what survives morph transfers, what tracks stress and traumas.
+- **MORPH** = the current physical/synthetic body — what takes damage and ticks wounds.
+
+The "newbie GM teaching" thread continues: the UI teaches the EP2 vocabulary by *using* it. If the player learns "stress hits the ego, damage hits the morph" from the section labels, they internalise the rule's substrate split.
+
+### Tests
+- v0.10.9's FeedBreak-for-MIND assertions replaced with VbarSectionHead-for-MORPH+EGO assertions (≥16px font; accent underline via `borderBottom`; both labels present; correct accents; no MIND vocabulary).
+
+### What did NOT change
+- The damage and mind bars themselves — same internal structure.
+- `buildStudioFeedBreak` — still in the codebase, still used for the dossier off-feed divider where it fits.
+- v0.10.9's other wins (cross-card alignment via warning placeholder, rich coverage sliders) — unchanged.
+
+---
+
 ## [0.10.9] — 2026-05-17 — "Aligned · Coverage Sliders · BODY/MIND Divider"
 
 **Three pointed observations from a single team-page screenshot, all addressed in one wave.** The user pointed at three cards (SMOKED · UNNA · PUFT) and said: *"look at how uneven this is. Think well how to best organise and auto-align all the sections."* Plus: *"zone coverage should be sliders with red/yellow/green colourings + number (and consider emphasized design if they have high stats for a zone)."* Plus: *"i want a proper intuitive line/divider separation or some way to easily tell apart HP from STRESS."*
