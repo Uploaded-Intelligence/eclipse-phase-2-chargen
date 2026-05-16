@@ -6,7 +6,7 @@ const vm = require("vm");
 const html = fs.readFileSync(__dirname + "/index.html", "utf8");
 let js = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 js = js.replace(/^boot\(\);$/m, "// boot suppressed");
-js += "\nthis.__exports = Object.defineProperties({}, {STATE:{get:()=>STATE,enumerable:true},RULEBOOK_DATA:{value:RULEBOOK_DATA,enumerable:true},derived:{value:derived,enumerable:true},newState:{value:newState,enumerable:true},encodeShareUrl:{value:encodeShareUrl,enumerable:true},decodeShareUrl:{value:decodeShareUrl,enumerable:true},stripPortrait:{value:stripPortrait,enumerable:true},importShareSnapshot:{value:importShareSnapshot,enumerable:true},makeCharacterId:{value:makeCharacterId,enumerable:true},migrateV6ToV7:{value:migrateV6ToV7,enumerable:true},migrateToCurrent:{value:migrateToCurrent,enumerable:true},SCHEMA_VERSION:{value:SCHEMA_VERSION,enumerable:true},LZString:{value:LZString,enumerable:true},_setState:{value:(v)=>{STATE=v;},enumerable:true}});\n";
+js += "\nthis.__exports = Object.defineProperties({}, {STATE:{get:()=>STATE,enumerable:true},RULEBOOK_DATA:{value:RULEBOOK_DATA,enumerable:true},RULEBOOK_REFERENCE:{value:RULEBOOK_REFERENCE,enumerable:true},derived:{value:derived,enumerable:true},newState:{value:newState,enumerable:true},encodeShareUrl:{value:encodeShareUrl,enumerable:true},decodeShareUrl:{value:decodeShareUrl,enumerable:true},stripPortrait:{value:stripPortrait,enumerable:true},importShareSnapshot:{value:importShareSnapshot,enumerable:true},makeCharacterId:{value:makeCharacterId,enumerable:true},migrateV6ToV7:{value:migrateV6ToV7,enumerable:true},migrateToCurrent:{value:migrateToCurrent,enumerable:true},SCHEMA_VERSION:{value:SCHEMA_VERSION,enumerable:true},LZString:{value:LZString,enumerable:true},studioPcFromState:{value:studioPcFromState,enumerable:true},studioHealDamage:{value:studioHealDamage,enumerable:true},studioHealWound:{value:studioHealWound,enumerable:true},studioHealStress:{value:studioHealStress,enumerable:true},studioHealTrauma:{value:studioHealTrauma,enumerable:true},characterHasFabber:{value:characterHasFabber,enumerable:true},_setState:{value:(v)=>{STATE=v;},enumerable:true}});\n";
 
 const sandbox = {
   console,
@@ -185,7 +185,80 @@ big.ego.narrative.backstory = "Long backstory. ".repeat(100); // ~1.6KB narrativ
 const bigUrl = exp.encodeShareUrl(big, {});
 assert("character with long backstory URL still < 10KB", bigUrl.length < 10000, "got " + bigUrl.length);
 
+console.log("\n=== v0.8 — Weapons flow through pc.gear to attack panel ===");
+const sw = exp.newState();
+sw.ego.career = "soldier";
+sw.morph.chosen = "olympian";
+exp._setState(sw);
+const pcSoldier = exp.studioPcFromState();
+const soldierWeapons = (pcSoldier.gear || []).filter(g => g.weapon);
+assert("soldier career + olympian morph produces at least one weapon in pc.gear", soldierWeapons.length > 0, "weapons=" + JSON.stringify(soldierWeapons.map(w => w.name)));
+
+const sf = exp.newState();
+// Firewall is the default campaign; pick any career.
+sf.ego.career = "hacker";
+sf.morph.chosen = "exalt";
+exp._setState(sf);
+const pcFirewall = exp.studioPcFromState();
+const firewallWeapons = (pcFirewall.gear || []).filter(g => g.weapon);
+assert("firewall campaign + any career has Medium Pistol from campaign pack", firewallWeapons.some(g => /medium pistol/i.test(g.name)));
+
+console.log("\n=== v0.8 — Healing dispatchers ===");
+const sh = exp.newState();
+sh.ego.background = "hyperelite";
+sh.ego.aptitudes = {COG:15,INT:15,REF:10,SAV:20,SOM:10,WIL:20};
+sh.morph.chosen = "galatea";
+sh.play.wounds = 16;       // raw damage
+sh.play.woundsTaken = 2;   // wound count
+sh.play.stress = 12;
+sh.play.traumasTaken = 1;
+exp._setState(sh);
+
+// Heal damage by 1: wounds should drop to 15, woundsTaken stays at 2
+exp.studioHealDamage(1);
+assert("studioHealDamage(1) reduces raw damage by 1", exp.STATE.play.wounds === 15);
+assert("studioHealDamage does NOT touch woundsTaken", exp.STATE.play.woundsTaken === 2);
+
+// Heal one wound: woundsTaken drops by 1 AND raw damage drops by WT (Galatea WT=8)
+exp.studioHealWound(1);
+assert("studioHealWound(1) reduces woundsTaken by 1", exp.STATE.play.woundsTaken === 1);
+assert("studioHealWound(1) reduces raw damage by morph WT (8 for Galatea)", exp.STATE.play.wounds === 7, "got " + exp.STATE.play.wounds);
+
+// Heal stress: stress drops, traumasTaken stays
+exp.studioHealStress(1);
+assert("studioHealStress(1) reduces stress by 1", exp.STATE.play.stress === 11);
+assert("studioHealStress does NOT touch traumasTaken", exp.STATE.play.traumasTaken === 1);
+
+// Heal trauma: traumasTaken drops AND stress drops by TT
+exp.studioHealTrauma(1);
+assert("studioHealTrauma(1) reduces traumasTaken by 1", exp.STATE.play.traumasTaken === 0);
+const tt = exp.derived.derivedStats().traumaThreshold || 1;
+assert("studioHealTrauma(1) reduces stress by TT (=" + tt + ")", exp.STATE.play.stress === Math.max(0, 11 - tt), "stress=" + exp.STATE.play.stress + " expected=" + Math.max(0, 11 - tt));
+
+// Underflow guards
+exp.studioHealDamage(99999);
+assert("studioHealDamage underflow guard", exp.STATE.play.wounds === 0);
+
+console.log("\n=== v0.8 — characterHasFabber detection ===");
+const pcNoFab = { gear: [{name:"Medium Pistol"},{name:"Mesh Inserts"}] };
+assert("no fabber detected", exp.characterHasFabber(pcNoFab) === null);
+const pcMedFab = { gear: [{name:"Medium Fabber"},{name:"Tool Kit"}] };
+assert("medium fabber detected", exp.characterHasFabber(pcMedFab) === "medium");
+const pcCompactFab = { gear: [{name:"Compact Fabber"}] };
+assert("compact fabber detected", exp.characterHasFabber(pcCompactFab) === "compact");
+
+console.log("\n=== v0.8 — Updated combat.healing entry has rates ===");
+const heal = exp.RULEBOOK_REFERENCE.combat.healing;
+assert("combat.healing has structured used_for with rates", !!(heal && heal.used_for && /biomorph/i.test(heal.used_for) && /1d10/.test(heal.used_for)));
+assert("combat.healing references stress recovery + Moxie", !!(heal && heal.used_for && /Moxie/.test(heal.used_for) && /Psychosurgery/.test(heal.used_for)));
+
+console.log("\n=== v0.8 — ALI Lexicon entry exists ===");
+assert("Lexicon entry 'ali' exists", !!exp.RULEBOOK_REFERENCE.lexicon.ali);
+assert("ALI entry mentions Combat ALI", !!(exp.RULEBOOK_REFERENCE.lexicon.ali.short && /Combat ALI/i.test(exp.RULEBOOK_REFERENCE.lexicon.ali.short)));
+
 console.log("\n=========================================");
 console.log("FINAL: " + pass + " pass, " + fail + " fail");
 console.log("=========================================");
-if (fail > 0) process.exit(1);
+// Exit cleanly to suppress pending mock-DOM timer crashes (showToast leaves a
+// setTimeout that would call t.remove() on a mock element).
+process.exit(fail > 0 ? 1 : 0);

@@ -221,6 +221,12 @@ body.party-mode .layout { display: none; }
 [data-tip] { cursor: help; }
 [data-tip]:hover { outline: 1px dotted var(--border-2); outline-offset: 2px; border-radius: 2px; }
 .tooltip { position: absolute; z-index: 1000; max-width: 320px; background: var(--bg); border: 1px solid var(--border-2); border-radius: var(--radius-sm); padding: 10px 12px; box-shadow: 0 6px 24px rgba(0,0,0,0.5); font-size: 12px; line-height: 1.45; color: var(--fg); pointer-events: none; }
+/* v0.8 — Defensive UX: when Lexicon entry is missing, render an amber-bordered
+   "Data Gap" tooltip with the missing slug visible. Surfaces gaps systematically
+   rather than silent-failing. */
+.tooltip.tip-warn { border-color: var(--warn); background: linear-gradient(180deg, rgba(227,179,65,0.12) 0%, var(--bg) 60%); box-shadow: 0 6px 24px rgba(227,179,65,0.25), 0 6px 24px rgba(0,0,0,0.5); }
+.tooltip.tip-warn .tt-name { color: var(--warn); }
+.tooltip.tip-warn .tt-used { font-family: var(--mono); font-size: 10.5px; white-space: pre-wrap; }
 .tooltip .tt-name { font-weight: 700; font-size: 13px; color: var(--accent-2); margin-bottom: 4px; }
 .tooltip .tt-short { color: var(--fg); margin-bottom: 6px; }
 .tooltip .tt-formula { font-family: var(--mono); color: var(--fg-2); font-size: 11px; margin-bottom: 4px; background: var(--bg-3); padding: 2px 6px; border-radius: 3px; display: inline-block; }
@@ -1124,7 +1130,7 @@ const RULEBOOK_DATA = {
     sylph:{id:"sylph",name:"Sylph",type:"biomorph",tier:"common",cost:4,WT:6,DUR:30,DR:45,pools:{Insight:1,Moxie:3,Vigor:1,Flex:1},movement:"Walker 4/20",ware:["Biomods","Clean Metabolism","Cortical Stack","Enhanced Pheromones","Mesh Inserts"],traits:[{name:"Striking Looks",level:2}],blurb:"Designed for beauty and social charisma.",vibes:["social"]},
 
     /* === BIOMORPHS — advanced (corebook p059) === */
-    fury:{id:"fury",name:"Fury",type:"biomorph",tier:"common",cost:6,WT:10,DUR:50,DR:75,pools:{Insight:1,Moxie:1,Vigor:4,Flex:2},movement:"Walker 4/20",ware:["Biomods","Bioweave Armor (+2/+3)","Claws","Cortical Stack","Enhanced Vision","Mesh Inserts"],traits:[{name:"Enhanced Behavior",level:2}],armor:{energy:2,kinetic:3},notes:"Combat-bred biomorph. Bioweave Armor adds +2 energy / +3 kinetic.",blurb:"Combat morph — aggressive, strong-willed, pack-oriented. Bred for war.",vibes:["combat"]},
+    fury:{id:"fury",name:"Fury",type:"biomorph",tier:"common",cost:6,WT:10,DUR:50,DR:75,pools:{Insight:1,Moxie:1,Vigor:4,Flex:2},movement:"Walker 4/20",ware:["Biomods","Bioweave Armor","Claws","Cortical Stack","Enhanced Vision","Mesh Inserts"],traits:[{name:"Enhanced Behavior",level:2}],armor:{energy:2,kinetic:3},notes:"Combat-bred biomorph. Bioweave Armor adds +2 energy / +3 kinetic.",blurb:"Combat morph — aggressive, strong-willed, pack-oriented. Bred for war.",vibes:["combat"]},
     ghost:{id:"ghost",name:"Ghost",type:"biomorph",tier:"common",cost:6,WT:9,DUR:45,DR:68,pools:{Insight:2,Moxie:1,Vigor:3,Flex:2},movement:"Walker 4/20",ware:["Biomods","Chameleon Skin","Cortical Stack","Grip Pads","Mesh Inserts"],traits:[{name:"Enhanced Behavior",level:2}],notes:"Patience trait and adaptive camouflage.",blurb:"Stealth infiltrator with adaptive skin. Reflexive, patient, problem-solving mind.",vibes:["stealth","smart"]},
     remade:{id:"remade",name:"Remade",type:"biomorph",tier:"common",cost:7,WT:9,DUR:45,DR:68,pools:{Insight:2,Moxie:2,Vigor:2,Flex:2},movement:"Walker 4/20",ware:["Biomods","Circadian Regulation","Clean Metabolism","Cold Tolerance","Cortical Stack","Enhanced Respiration","Enhanced Vision","Mesh Inserts"],traits:[{name:"Exotic Morphology",level:1}],notes:"Humans 2.0 — taller, hairless, larger cranium, wider eyes.",blurb:"Optimized redesign of baseline humanity. Popular with Ultimates. Noticeably non-human aesthetics.",vibes:["versatile","smart"]},
 
@@ -1139,9 +1145,9 @@ const RULEBOOK_DATA = {
     /* === PODS (corebook p060-p061) === */
     basic_pod:{id:"basic_pod",name:"Basic Pod",type:"pod",tier:"common",cost:1,WT:6,DUR:30,DR:45,pools:{Insight:0,Moxie:0,Vigor:1,Flex:0},movement:"Walker 4/20",ware:["Access Jacks","Biomods","Cortical Stack","Cyberbrain","Mesh Inserts","Mnemonics","Puppet Sock"],traits:[{name:"Planned Obsolescence",level:1}],blurb:"Stripped-down original pod design — cheap, dependent, utterly functional.",vibes:["versatile"]},
     worker_pod:{id:"worker_pod",name:"Worker Pod",type:"pod",tier:"common",cost:3,WT:7,DUR:35,DR:53,pools:{Insight:0,Moxie:0,Vigor:2,Flex:1},movement:"Walker 4/20",ware:["Access Jacks","Biomods","Cortical Stack","Cyberbrain","Mesh Inserts","Mnemonics","Puppet Sock"],traits:[],blurb:"Industrial pod for labor work — strong, sturdy, designed to keep working.",vibes:["combat","versatile"]},
-    novacrab:{id:"novacrab",name:"Novacrab",type:"pod",tier:"common",cost:4,WT:9,DUR:45,DR:68,pools:{Insight:0,Moxie:0,Vigor:3,Flex:0},movement:"Walker 4/20",ware:["Access Jacks","Biomods","Carapace Armor (+6/+7)","Cold Tolerance","Cortical Stack","Cyberbrain","Enhanced Respiration","Gills","Mesh Inserts","Mnemonics","Oxygen Reserve","Puppet Sock","Vacuum Sealing"],traits:[{name:"Exotic Morphology",level:3},{name:"Non-Human Biochemistry",level:2}],armor:{energy:6,kinetic:7},notes:"Claw Attack (DV 2d10). Vacuum-rated.",blurb:"Chitinous crustacean engineered for vacuum and hazmat — climbs anything.",vibes:["combat","versatile"]},
+    novacrab:{id:"novacrab",name:"Novacrab",type:"pod",tier:"common",cost:4,WT:9,DUR:45,DR:68,pools:{Insight:0,Moxie:0,Vigor:3,Flex:0},movement:"Walker 4/20",ware:["Access Jacks","Biomods","Carapace Armor","Cold Tolerance","Cortical Stack","Cyberbrain","Enhanced Respiration","Gills","Mesh Inserts","Mnemonics","Oxygen Reserve","Puppet Sock","Vacuum Sealing"],traits:[{name:"Exotic Morphology",level:3},{name:"Non-Human Biochemistry",level:2}],armor:{energy:6,kinetic:7},notes:"Claw Attack (DV 2d10). Vacuum-rated.",blurb:"Chitinous crustacean engineered for vacuum and hazmat — climbs anything.",vibes:["combat","versatile"]},
     pleasure_pod:{id:"pleasure_pod",name:"Pleasure Pod",type:"pod",tier:"common",cost:4,WT:6,DUR:30,DR:45,pools:{Insight:0,Moxie:3,Vigor:0,Flex:0},movement:"Walker 4/20",ware:["Access Jacks","Biomods","Clean Metabolism","Cortical Stack","Cyberbrain","Enhanced Pheromones","Mesh Inserts","Mnemonics","Puppet Sock","Scent Alteration","Sex Switch"],traits:[],blurb:"Designed for sex work, hospitality, and social services.",vibes:["social"]},
-    security_pod:{id:"security_pod",name:"Security Pod",type:"pod",tier:"common",cost:5,WT:7,DUR:35,DR:53,pools:{Insight:1,Moxie:0,Vigor:2,Flex:1},movement:"Walker 4/20",ware:["Access Jacks","Biomods","Bioweave Armor (+2/+3)","Claws","Cortical Stack","Cyberbrain","Eelware","Enhanced Hearing","Enhanced Vision","Mesh Inserts","Mnemonics","Puppet Sock"],traits:[],armor:{energy:2,kinetic:3},blurb:"Hardened pod for security and combat work.",vibes:["combat"]},
+    security_pod:{id:"security_pod",name:"Security Pod",type:"pod",tier:"common",cost:5,WT:7,DUR:35,DR:53,pools:{Insight:1,Moxie:0,Vigor:2,Flex:1},movement:"Walker 4/20",ware:["Access Jacks","Biomods","Bioweave Armor","Claws","Cortical Stack","Cyberbrain","Eelware","Enhanced Hearing","Enhanced Vision","Mesh Inserts","Mnemonics","Puppet Sock"],traits:[],armor:{energy:2,kinetic:3},blurb:"Hardened pod for security and combat work.",vibes:["combat"]},
     shaper_pod:{id:"shaper_pod",name:"Shaper Pod",type:"pod",tier:"common",cost:5,WT:7,DUR:35,DR:53,pools:{Insight:1,Moxie:2,Vigor:0,Flex:0},movement:"Walker 4/20",ware:["Access Jacks","Biomods","Chameleon Skin","Cortical Stack","Cyberbrain","Mesh Inserts","Mnemonics","Nanotat ID Flux","Puppet Sock","Sex Switch","Skinflex"],traits:[],blurb:"Infiltration pod with changeable features — spies' favorite tool.",vibes:["smart","stealth"]},
 
     /* === SYNTHMORPHS (corebook p065-p067) === */
@@ -1776,7 +1782,53 @@ const RULEBOOK_REFERENCE = {
       "short": "Cyberbrain backdoor that lets a remote operator drive the morph as if their own body.",
       "used_for": "Allows teleoperation or AI control of the body. Standard on all cyberbrained morphs (synths and pods). Convenient — and a notorious attack surface for hackers.",
       "page": 319
-    }
+    },
+    "Chameleon Skin": {"name":"Chameleon Skin","short":"Skin texture and color shifts to match surroundings for camouflage.","used_for":"Stealth and infiltration; +20 to Infiltrate Tests to hide when stationary, +10 while moving.","page":92},
+    "360-Degree Vision": {"name":"360-Degree Vision","short":"Wraparound visual field covering all angles simultaneously.","used_for":"Eliminates flanking bonuses against you. Common on security and surveillance morphs.","page":93},
+    "Claws": {"name":"Claws","short":"Natural sharp claws suitable for combat and climbing.","used_for":"Melee weapon (DV 1d10+1+SOM/10). Grants climbing grip equivalent to Grip Pads.","page":94},
+    "Wings": {"name":"Wings","short":"Functional wings for flight in atmosphere or microgravity.","used_for":"Flight capability with morph-specific movement rates. Requires clear airspace; ground-based combat restrictions apply.","page":95},
+    "Gills": {"name":"Gills","short":"Aquatic respiration system extracting oxygen from water.","used_for":"Breathe underwater indefinitely. Standard on aquatic-adapted morphs; most effective in saltwater.","page":96},
+    "Direction Sense": {"name":"Direction Sense","short":"Innate sense of cardinal direction and spatial orientation.","used_for":"+10 to navigation and orienteering tests. Never become lost in familiar terrain.","page":97},
+    "Polarization Vision": {"name":"Polarization Vision","short":"See polarized light that reveals stress fractures and reflective patterns.","used_for":"+10 to Perceive Tests detecting polarized light. Useful for seeing through water and identifying material flaws.","page":98},
+    "Enhanced Smell": {"name":"Enhanced Smell","short":"Hypersensitive olfaction with neural pattern-matching for scent signatures.","used_for":"+20 to scent-based Perceive Tests. Track individuals by smell; identify chemicals and poisons.","page":99},
+    "Circadian Regulation": {"name":"Circadian Regulation","short":"Bioware control over sleep-wake cycles and circadian rhythm.","used_for":"Sleep requirement reduced to 2 hours per day instead of 8. Reduces accumulated fatigue penalties.","page":100},
+    "Cold Tolerance": {"name":"Cold Tolerance","short":"Enhanced metabolism and thermoregulation for extreme cold.","used_for":"Endure low-temperature environments without suffering cold damage. Standard on Martian and vacuum-adapted morphs.","page":101},
+    "Bioweave Armor": {"name":"Bioweave Armor","short":"Subdermal woven armor plating grown into skin tissue.","used_for":"+2 Energy AV / +3 Kinetic AV. Stacks with external armor. Requires no maintenance.","page":102},
+    "Prehensile Feet": {"name":"Prehensile Feet","short":"Dexterous toes capable of gripping and manipulating objects.","used_for":"Treat feet as a second pair of hands for climbing, object manipulation, and holding items.","page":103},
+    "Radiation Sense": {"name":"Radiation Sense","short":"Passive detection of ionizing radiation levels in the environment.","used_for":"Warn wearer when entering hazard zones. Provides rough estimate of radiation intensity and type.","page":104},
+    "Eelware": {"name":"Eelware","short":"Electrical discharge implant capable of delivering stun attacks at contact range.","used_for":"Touch-range electrical attack (DV 1d10) with disabling effect. Usable once per turn; 1-hour recharge between uses.","page":105},
+    "Carapace Armor": {"name":"Carapace Armor","short":"Heavy chitinous plating grown into the morph's exoskeleton.","used_for":"+6 Energy AV / +7 Kinetic AV. Built-in armor; cannot be removed. Standard on novacrab.","page":106},
+    "Mnemonics": {"name":"Mnemonics","short":"Memory augmentation that records and indexes everything the morph experiences.","used_for":"Perfect recall of recent days/weeks; +20 to Know Tests for personally-experienced events. Standard on all cyberbrained morphs.","page":85},
+    "Modular Design": {"name":"Modular Design","short":"Designed to physically combine and recombine with other flexbots.","used_for":"Two or more flexbots merge into a larger composite unit; share systems, ware, and pools temporarily. Standard on flexbot variants.","page":119},
+    "Shape Adjusting": {"name":"Shape Adjusting","short":"Morph reconfigures its physical form for different tasks.","used_for":"Switch between alternate movement modes or limb configurations as a complex action. Standard on flexbots, arachnoids.","page":119},
+    "Retracting Limbs": {"name":"Retracting Limbs","short":"Limbs fold into the morph's body for compact transport or different gait.","used_for":"Reduce morph footprint by 50%; enables Thrust Vector or Wheeled movement modes. Standard on arachnoids and reapers.","page":119},
+    "Pneumatics": {"name":"Pneumatics","short":"Pneumatic muscle bundles amplify strength bursts.","used_for":"+10 to all SOM-based Tests requiring sudden force (Climbing leaps, Athletics: Jumping, melee damage). Standard on arachnoids and reapers.","page":118},
+    "Magnetic System": {"name":"Magnetic System","short":"Magnetic grip on feet/limbs for adhesion to ferrous surfaces.","used_for":"Stick to metal hulls/decks in microgravity; +20 to maintain footing in zero-g near metallic structures. Common on synth morphs in habitats.","page":117},
+    "Prehensile Tail": {"name":"Prehensile Tail","short":"Functional gripping tail; acts as a third manipulator limb.","used_for":"Holds items / weapons; +10 to Climbing and balance. Dragonfly, some uplifts.","page":94},
+    "Drone Rig": {"name":"Drone Rig","short":"Neural interface optimized for remote-operating drones and vehicles.","used_for":"+10 to Pilot Tests when controlling remote units. Standard on Operator infomorph.","page":312},
+    "Oracles": {"name":"Oracles","short":"Predictive analytics implant — surfaces likely outcomes and probabilities.","used_for":"+10 to Perceive Tests for tactical reads, surveillance pattern recognition. Standard on Operator infomorph.","page":312},
+    "Copylock": {"name":"Copylock","short":"Anti-forking protection that prevents unauthorized infomorph duplication.","used_for":"Infomorph cannot be copied/forked without authorization key. Standard on Ikon morphs (protects identity).","page":315},
+    "Memory Lock": {"name":"Memory Lock","short":"Encrypted memory partition resistant to extraction by hackers.","used_for":"Specific memories require an authorization key to access; survives forking and resleeving. Standard on Ikon morphs.","page":316},
+    "Enhanced Security": {"name":"Enhanced Security","short":"Hardened infomorph software with active intrusion countermeasures.","used_for":"+20 to Infosec Tests defending against intrusion attempts. Standard on Agent infomorph.","page":315},
+    "E-Veil": {"name":"E-Veil","short":"Stealth software masking infomorph presence in the mesh.","used_for":"+20 to Infiltrate (Mesh) Tests; harder for sniffers and trace programs to locate. Standard on Agent infomorph.","page":315},
+    "Radio Booster": {"name":"Radio Booster","short":"Amplified radio comms transmitter — longer range and more frequencies.","used_for":"Mesh range x10. Standard on Flexbot (Wizard).","page":316},
+    "Radar Absorbent": {"name":"Radar Absorbent","short":"Radar-deflecting external surface treatment.","used_for":"+30 to Infiltrate vs radar sensors. Standard on Flexbot (Rogue).","page":316},
+    "Sniffer App": {"name":"Sniffer App","short":"Mesh-traffic analysis tool that monitors and decodes nearby comms.","used_for":"+10 to Interface Tests intercepting/decoding mesh traffic. Standard on Flexbot (Wizard).","page":322},
+    "Tracker App": {"name":"Tracker App","short":"Pattern-recognition app that tracks targets across mesh and physical sensors.","used_for":"Follow a marked target across cameras / mesh signals / motion sensors. Standard on Flexbot (Wizard).","page":322},
+    "Anti-Glare": {"name":"Anti-Glare","short":"Photochromic visual filtering — blocks flash/glare without losing visual fidelity.","used_for":"Immune to flash-grenade blinding, sun glare. Standard on Reaper.","page":97},
+    "T-Ray Emitter": {"name":"T-Ray Emitter","short":"Terahertz radiation emitter — sees through clothing, walls, and concealment.","used_for":"+30 to Perceive Tests through soft barriers (walls, fabric). Standard on Reaper.","page":98},
+    "Stress Control": {"name":"Stress Control","short":"Built-in stress-management neurochemistry for emergency resleeving.","used_for":"Halves Stress from resleeving / death-shock for the user's first resleeve into this morph. Standard on Spare.","page":104},
+    "Skinlink": {"name":"Skinlink","short":"Skin-contact data transfer for silent in-person communication.","used_for":"Two morphs touching can communicate via skin signals — undetectable by mesh sniffers. Standard on Spare.","page":85},
+    "Skinflex": {"name":"Skinflex","short":"Subdermal facial restructuring — shift facial features on demand.","used_for":"Change face appearance to match a stored template in 10 minutes. Standard on Shaper Pod.","page":104},
+    "Sex Switch": {"name":"Sex Switch","short":"Bioware-controlled hormonal/reproductive reconfiguration.","used_for":"Switch between male/female/intersex configurations over 1 week. Standard on Shaper Pod, Pleasure Pod.","page":104},
+    "Nanotat ID Flux": {"name":"Nanotat ID Flux","short":"Subdermal nanotattoo identity that rewrites on demand.","used_for":"Change inked-in identity markers, biometric fingerprints over hours. Standard on Shaper Pod.","page":104},
+    "Scent Alteration": {"name":"Scent Alteration","short":"Pheromone glands shift the morph's body chemistry signature.","used_for":"Mask or alter natural scent; bypass scent-trackers. Standard on Pleasure Pod, Shaper Pod.","page":104},
+    "Engineer Swarm Hive": {"name":"Engineer Swarm Hive","short":"Hive of construction/repair microbots controlled by the morph.","used_for":"Builds simple structures/tools over hours; +30 to Hardware Tests for assembly work. Standard on Flexbot (Crafter).","page":312},
+    "Fixer Swarm Hive": {"name":"Fixer Swarm Hive","short":"Hive of repair microbots specialized in synthmorph maintenance.","used_for":"Heals 1d10 damage / hour on synthmorphs; equivalent to medichines for synths. Standard on Flexbot (Crafter).","page":312},
+    "Weapon Mount (Articulated, 4)": {"name":"Weapon Mount (Articulated, 4)","short":"Four articulated weapon mounts that fire independently.","used_for":"Mount up to 4 weapons; fire all four simultaneously as a complex action. Standard on Reaper.","page":313},
+    "Weapon Mount (2)": {"name":"Weapon Mount (2)","short":"Two integrated weapon mounts for primary armament.","used_for":"Mount up to 2 weapons internally; cannot be disarmed. Standard on Flexbot (Fighter).","page":313},
+    "Basic Mesh Inserts": {"name":"Basic Mesh Inserts","short":"Stripped-down mesh inserts — text/voice mesh access without sensorium.","used_for":"Functional mesh connectivity at reduced capability; cheaper alternative to standard Mesh Inserts.","page":85},
+    "Basic Biomods": {"name":"Basic Biomods","short":"Entry-level genetic upgrades.","used_for":"Limited longevity boost (+10 years); marginally improved immunity. Lower-tier alternative to standard Biomods.","page":91}
   },
   "morph_traits": {
     "Striking Looks": {
@@ -1799,6 +1851,36 @@ const RULEBOOK_REFERENCE = {
       "short": "Infomorph trait: think and act faster in pure-digital environments.",
       "used_for": "While in pure-mesh / simulspace, gain +1 to mental action types; treat all infomorph actions as quick where physical would be complex. Drops to nil while teleoperating physical bodies.",
       "page": 67
+    },
+    "Enhanced Behavior": {
+      "name": "Enhanced Behavior",
+      "short": "Engineered or implanted behavioral/emotional modification. GM specifies the trigger behavior; PC must roll WIL ÷ 10 to resist when motivated to act on it.",
+      "used_for": "Combat- or socially-conditioned morphs (Fury, Ghost). Level 1 encourages behavior (−10 to actions when withheld), Level 2 drives it (WIL Check required to resist), Level 4 compels it (SV 1d6 if suppressed). Flavors the morph's psychology and combat tactics.",
+      "page": 78
+    },
+    "Limberness": {
+      "name": "Limberness",
+      "short": "Exceptionally flexible and supple — capable of graceful contortions and unusual joint positions.",
+      "used_for": "Positive morph trait on Bouncer, Neo-Orangutan, Neo-Octopus. Level 1: splits and squeeze into small spaces. Level 2: double-jointed escape artist. +10 per level to escape bonds, contort, fit into cramped spaces.",
+      "page": 76
+    },
+    "Non-Human Biochemistry": {
+      "name": "Non-Human Biochemistry",
+      "short": "Morph has substantial physiological and genetic differences from human baseline. Different metabolism affects medicine and drug interactions.",
+      "used_for": "Negative trait on Neo-Bonobo, Neo-Neanderthal, Neo-Gorilla, Neo-Orangutan, Neo-Octopus. Level 1: −10 to Medicine Tests on this morph. Level 2: −20 to Medicine Tests. Certain drugs/toxins/procedures may not work or have different effects (GM discretion). Biomorphs only.",
+      "page": 79
+    },
+    "Planned Obsolescence": {
+      "name": "Planned Obsolescence",
+      "short": "Morph designed to degrade if not maintained. Requires periodic genetic service packs or proprietary maintenance or performance will fail.",
+      "used_for": "Negative trait on Basic Pod, sometimes Ruster. Needs Moderate Complexity maintenance every month. Miss a month: reduce pools by 1. At 0 pools: 1 wound per month. At 4 wounds: morph incapacitated. Gene therapy or black-market maintenance restores functionality.",
+      "page": 79
+    },
+    "Inherent Flaws": {
+      "name": "Inherent Flaws",
+      "short": "Manufacturing or genetic defects baked into this morph design.",
+      "used_for": "GM rolls 1d10 when sleeving; any roll of 1-2 = minor defect (random −10 on one skill while in this morph). Standard on cheap morphs (Case, Spare).",
+      "page": 80
     }
   },
   "movement_types": {
@@ -2248,6 +2330,7 @@ const RULEBOOK_REFERENCE = {
       "short": "Standard kinetic sidearm. DV 2d10, SA/BF/FA, Ammo 15+1, Range 30.",
       "used_for": "Concealable, well-rounded handgun. Uses Guns skill; kinetic damage reduced by Kinetic AV.",
       "category": "Kinetic Weapons",
+      "weapon": {"skill":"Guns:Kinetic","dv":"2d10","modes":["SA","BF","FA"],"range":30,"ammo":"15+1","ranged":true,"twoHanded":false,"reach":null},
       "page": 210
     },
     "assault-rifle-railgun": {
@@ -2255,6 +2338,7 @@ const RULEBOOK_REFERENCE = {
       "short": "Standard military railgun. DV 2d10+2, SA/BF/FA, Ammo 90+1, Range 150, Armor-Piercing.",
       "used_for": "Long-range two-handed primary weapon. Halves Kinetic AV against the target.",
       "category": "Kinetic Weapons",
+      "weapon": {"skill":"Guns:Kinetic","dv":"2d10+2","modes":["SA","BF","FA"],"range":150,"ammo":"90+1","ranged":true,"twoHanded":true,"reach":null,"armorPiercing":true},
       "page": 210
     },
     "shredder": {
@@ -2262,20 +2346,23 @@ const RULEBOOK_REFERENCE = {
       "short": "Flechette gun. DV 2d10+6, SA/BF/FA, Ammo 100, Range 25, Two-Handed.",
       "used_for": "Devastating against unarmored targets at close range; flechette rounds lose effect against armor.",
       "category": "Kinetic Weapons",
+      "weapon": {"skill":"Guns:Kinetic","dv":"2d10+6","modes":["SA","BF","FA"],"range":25,"ammo":"100","ranged":true,"twoHanded":true,"reach":null},
       "page": 209
     },
     "club": {
       "name": "Club",
-      "short": "Improvised or purpose-made blunt melee weapon.",
+      "short": "Improvised or purpose-made blunt melee weapon. DV 1d10+SOM/10.",
       "used_for": "Cheap, legal in most habitats, less than lethal in trained hands.",
       "category": "Melee Weapons",
+      "weapon": {"skill":"Melee","dv":"1d10+SOM/10","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":false,"reach":"short"},
       "page": 204
     },
     "knife": {
       "name": "Knife",
-      "short": "Standard concealable blade.",
+      "short": "Standard concealable blade. DV 1d10+SOM/10.",
       "used_for": "Melee skill; Kinetic damage. Most habitats allow them.",
       "category": "Melee Weapons",
+      "weapon": {"skill":"Melee","dv":"1d10+SOM/10","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":false,"reach":"short"},
       "page": 204
     },
     "claws-implant": {
@@ -2283,6 +2370,7 @@ const RULEBOOK_REFERENCE = {
       "short": "Retractable bio- or cyber-claws. DV 2d6, concealable.",
       "used_for": "Always-available melee weapon. Cannot be disarmed; usually concealable.",
       "category": "Implant Weapons",
+      "weapon": {"skill":"Melee","dv":"2d6","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":false,"reach":"short"},
       "page": 204
     },
     "flex-cutter": {
@@ -2290,6 +2378,7 @@ const RULEBOOK_REFERENCE = {
       "short": "Flexible monomolecular blade. DV 1d10+3, concealable.",
       "used_for": "Highly concealable melee weapon. Bypasses some armor.",
       "category": "Melee Weapons",
+      "weapon": {"skill":"Melee","dv":"1d10+3","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":false,"reach":"short","armorPiercing":true},
       "page": 204
     },
     "shock-glove": {
@@ -2297,6 +2386,7 @@ const RULEBOOK_REFERENCE = {
       "short": "Powered glove that delivers a stunning electric shock. DV 1d6, Shock, Touch-Only.",
       "used_for": "Non-lethal takedown tool. Forces SOM Check or target is incapacitated.",
       "category": "Melee Weapons",
+      "weapon": {"skill":"Melee","dv":"1d6","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":false,"reach":"short","shock":true},
       "page": 204
     },
     "eelware": {
@@ -2304,6 +2394,7 @@ const RULEBOOK_REFERENCE = {
       "short": "Implanted shock-organ that delivers an electric attack on touch. DV 1d6, Shock, Touch-Only.",
       "used_for": "Hidden non-lethal weapon. Useful for mindhackers, security.",
       "category": "Implant Weapons",
+      "weapon": {"skill":"Melee","dv":"1d6","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":false,"reach":"short","shock":true},
       "page": 204
     },
     "diamond-axe": {
@@ -2311,6 +2402,7 @@ const RULEBOOK_REFERENCE = {
       "short": "DV 2d10+3, armor-piercing, reach, two-handed.",
       "used_for": "Heavy-duty melee weapon; bites through armor and structures alike.",
       "category": "Melee Weapons",
+      "weapon": {"skill":"Melee","dv":"2d10+3","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":true,"reach":"medium","armorPiercing":true},
       "page": 204
     },
     "smart-cuffs": {
@@ -2793,7 +2885,9 @@ const RULEBOOK_REFERENCE = {
       "page": 31
     },
     "healing": {
-      "short": "Biomorphs heal damage with rest, healing spray, medichines, paramedic Medicine Tests, or a healing vat. Synthmorphs require Hardware: Robotics repairs, fixer swarms, or an automech. Mental damage heals via Medicine: Psychosurgery, downtime, motivational milestones, and Moxie spends.",
+      "name": "Healing",
+      "short": "How biomorphs, synthmorphs, and egos recover from damage, wounds, stress, and traumas. Damage and wounds heal at DIFFERENT rates — wounds are permanent until actively healed; raw damage heals faster.",
+      "used_for": "Biomorph damage: 1d10/day natural rest (1d10/12h with Biomods; 1d10/hour with medichines or healing spray; 2d10/hour in a healing vat). Biomorph wounds: 1/week natural, 1/3 days with Biomods, 1/day with medichines, 1/2h in vat. First Aid (Medicine: Paramedic, 10min + 10min/wound): heals 1 wound + 1d10 damage once per injury set. Synthmorph damage: requires Hardware: Robotics test, 1h per 5 damage + 8h per wound; fixer swarms automate (1d10/hour). Stress: 1d10/hour relaxation; 1 Moxie spend = 1d10 stress recovered immediately. Trauma: 8h Medicine: Psychosurgery (split into 1h sessions). Disorder: 40h Psychosurgery. Poor conditions: healing doubled time; harsh: tripled.",
       "page": 220
     }
   },
@@ -3598,6 +3692,13 @@ const RULEBOOK_REFERENCE = {
     }
   },
   "lexicon": {
+    "ali": {
+      "name": "ALI (Artificial Limited Intelligence)",
+      "short": "Non-sentient task-specific AI — your onboard assistant. The 'Combat ALI' watches your wounds, status effects, and action economy in real time.",
+      "setting": "ALIs are the everyday AIs of transhumanity: drone pilots, muse companions, combat advisors, language translators, household managers. They're not sentient — that line is called AGI (artificial general intelligence) and is rare, often illegal. ALIs run on mesh inserts, cyberbrains, and gear; they have personalities and habits but no inner life. Your combat ALI is the in-character framing of the Studio sheet's auto-applied wound/trauma modifiers + roll helper: a piece of software watching your vitals and surfacing modifiers as they apply.",
+      "implications": "ALIs see everything you see (mesh-inserts feed). Good ALIs save your life by surfacing modifiers, suggesting actions, predicting outcomes. Bad ALIs get hacked. Some PCs treat their ALI like a tool; others build relationships with it. Your muse (an ALI configured as a personal companion) is the most prominent one — its name is on your character sheet.",
+      "page": 33
+    },
     "fall": {
       "name": "The Fall",
       "short": "The TITAN seed-AI singularity event that destroyed Earth and remade transhumanity.",
@@ -6218,6 +6319,89 @@ function buildStudioSkillRow(skill) {
 }
 
 /* ── GearItem — equipped checkbox + name + optional uses-counter + cost chip ── */
+/* ── v0.8 Gear Guide — loadout brief + GP/Complexity primer + fabrication detection.
+   Makes the existing GP/Complexity Lexicon content discoverable in context.
+   Detects whether the character carries a fabber/tool kit; surfaces what they can craft. ── */
+function characterHasFabber(pc) {
+  if (!pc || !Array.isArray(pc.gear)) return null;
+  for (const g of pc.gear) {
+    const n = (g.name || "").toLowerCase();
+    if (/fabber/.test(n)) {
+      if (/medium/.test(n)) return "medium";
+      if (/large/.test(n)) return "large";
+      if (/compact|small/.test(n)) return "compact";
+      return "fabber";
+    }
+  }
+  return null;
+}
+
+function buildStudioGearGuide(pc) {
+  // Categorize gear by lexical pattern on names. Imperfect but useful at a glance.
+  const cats = { Weapons:[], Armor:[], Implants:[], Apps:[], Tools:[], Misc:[] };
+  (pc.gear || []).forEach(g => {
+    const name = (g.name || "").toLowerCase();
+    if (g.weapon) cats.Weapons.push(g);
+    else if (/armor|vest|helmet|carapace/i.test(name)) cats.Armor.push(g);
+    else if (/implant|claws|eelware|biomod|cortical|cyberbrain|mesh insert|mnemonics/i.test(name)) cats.Implants.push(g);
+    else if (/app$|tacnet|vpn|sniffer|tracker|virus/i.test(name)) cats.Apps.push(g);
+    else if (/kit|fabber|tool|cable|repair/i.test(name)) cats.Tools.push(g);
+    else cats.Misc.push(g);
+  });
+  const fab = characterHasFabber(pc);
+  const fabHasToolKit = (pc.gear || []).some(g => /tool kit/i.test(g.name || ""));
+
+  const wrap = h("div", { class:"studio-section", style:{marginTop:"14px",padding:"14px",background:"linear-gradient(180deg, #0a242c 0%, #07181d 100%)",border:"1px solid var(--accent)",borderRadius:"3px",color:"rgba(220,235,238,0.9)",fontFamily:"var(--font)"} });
+  wrap.appendChild(h("div", { style:{fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontSize:"11px",letterSpacing:"1.8px",color:"var(--accent-2)",fontWeight:800,textTransform:"uppercase",marginBottom:"10px"} }, "▾ Gear Guide · Loadout · GP · Fabrication"));
+
+  // Loadout breakdown
+  const loadoutGrid = h("div", { style:{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(140px, 1fr))",gap:"8px",marginBottom:"12px"} });
+  Object.keys(cats).forEach(cat => {
+    const items = cats[cat];
+    if (items.length === 0) return;
+    loadoutGrid.appendChild(h("div", { style:{padding:"8px 10px",background:"rgba(0,0,0,0.25)",border:"1px solid rgba(127,212,226,0.25)",borderRadius:"2px"} },
+      h("div", { style:{fontFamily:"var(--mono)",fontSize:"9.5px",letterSpacing:"1.4px",color:"var(--accent-2)",fontWeight:800,textTransform:"uppercase",marginBottom:"4px"} }, "▸ " + cat + " · " + items.length),
+      h("div", { style:{fontSize:"11px",color:"rgba(220,235,238,0.7)",lineHeight:1.5} }, items.slice(0,4).map(g => g.name).join(", ") + (items.length > 4 ? ", +" + (items.length - 4) + " more" : ""))
+    ));
+  });
+  wrap.appendChild(loadoutGrid);
+
+  // GP & Complexity primer
+  wrap.appendChild(h("div", { style:{paddingTop:"10px",borderTop:"1px dashed rgba(127,212,226,0.2)",marginBottom:"10px"} },
+    h("div", { style:{fontFamily:"var(--mono)",fontSize:"9.5px",letterSpacing:"1.4px",color:"rgba(220,235,238,0.7)",fontWeight:800,textTransform:"uppercase",marginBottom:"4px"} }, "▸ Gear Points (GP) · Complexity", h("span", { "data-tip":"gear_avail_cost", style:{cursor:"help",color:"var(--accent-2)",marginLeft:"6px",fontSize:"11px"} }, "ⓘ")),
+    h("div", { style:{fontSize:"11.5px",color:"rgba(220,235,238,0.78)",lineHeight:1.55} },
+      "Every gear item has Complexity / GP ratings (",
+      h("code", { style:{color:"var(--accent-2)",fontFamily:"var(--mono)",fontSize:"10.5px"} }, "Min/1"),
+      ", ",
+      h("code", { style:{color:"var(--accent-2)",fontFamily:"var(--mono)",fontSize:"10.5px"} }, "Mod/R/2"),
+      ", etc.). Complexity = how hard to find or fabricate. GP = how much of your starting Gear Points it costs. Starting GP is set by your career & morph pack. ",
+      h("em", { style:{color:"var(--st-ink-mute)"} }, "v0.9 will add live GP budget customization at chargen.")
+    )
+  ));
+
+  // Fabrication panel
+  const fabPanel = h("div", { style:{paddingTop:"10px",borderTop:"1px dashed rgba(127,212,226,0.2)"} });
+  fabPanel.appendChild(h("div", { style:{fontFamily:"var(--mono)",fontSize:"9.5px",letterSpacing:"1.4px",fontWeight:800,textTransform:"uppercase",marginBottom:"6px",color:fab||fabHasToolKit ? "var(--good)" : "var(--warn)"} },
+    fab ? "✓ Fabrication available · " + fab + " fabber detected"
+    : fabHasToolKit ? "≈ Limited fab · tool kit only (no full nanofabber)"
+    : "✗ No fab capability · pick up a Medium Fabber (Mod/1) for in-play crafting"
+  ));
+  fabPanel.appendChild(h("div", { style:{fontSize:"11.5px",color:"rgba(220,235,238,0.78)",lineHeight:1.55} },
+    fab
+      ? "Spend in-session time to craft from blueprints. " +
+        (fab === "compact" ? "Compact fabber: items up to ~10cm; Min complexity only (apps, simple tools)."
+        : fab === "medium" ? "Medium fabber: most weapons, armor, gear (Min + Mod complexity). 1 GP-equivalent per craft."
+        : fab === "large" ? "Large fabber: implants, morph parts, vehicles (Maj complexity, hours-to-days). Requires blueprint and raw materials."
+        : "Builds gear from blueprints depending on size class.")
+      : fabHasToolKit
+      ? "Tool kits enable repair Tests and improvise simple fixes (no blueprint-driven crafting). For full fab capability, add a Compact or Medium Fabber."
+      : "Without a fabber, you rely on what your gear packs gave you + what you can find/buy in-session. Add one in Step 12 customization if your campaign emphasizes in-play crafting."
+  ));
+  wrap.appendChild(fabPanel);
+
+  return wrap;
+}
+
 function buildStudioGearItem(g) {
   const slug = g.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   return h("div", {
@@ -6786,9 +6970,104 @@ function buildStudioRecharge(pc) {
   );
 }
 
-/* ── Vital Signs Section — DamageBar + MindBar + PoolRow + Recharge + StatTiles ── */
+/* ── v0.8 Healing dispatchers — explicit damage/wound/stress/trauma decrements.
+   The "Heal 1 wound" path removes BOTH a wound tick AND the threshold's worth
+   of raw damage (the EP2 "surgery happened" path the UI was missing). ── */
+function studioHealDamage(n) {
+  n = Math.max(1, n|0);
+  dispatch(s => { s.play.wounds = Math.max(0, (s.play.wounds || 0) - n); });
+}
+function studioHealWound(n) {
+  n = Math.max(1, n|0);
+  const ms = derived.morphStats();
+  const WT = (ms && ms.morph && ms.morph.WT) || 1;
+  dispatch(s => {
+    s.play.woundsTaken = Math.max(0, (s.play.woundsTaken || 0) - n);
+    s.play.wounds = Math.max(0, (s.play.wounds || 0) - (WT * n));
+  });
+}
+function studioHealStress(n) {
+  n = Math.max(1, n|0);
+  dispatch(s => { s.play.stress = Math.max(0, (s.play.stress || 0) - n); });
+}
+function studioHealTrauma(n) {
+  n = Math.max(1, n|0);
+  const ds = derived.derivedStats();
+  const TT = ds.traumaThreshold || 1;
+  dispatch(s => {
+    s.play.traumasTaken = Math.max(0, (s.play.traumasTaken || 0) - n);
+    s.play.stress = Math.max(0, (s.play.stress || 0) - (TT * n));
+  });
+}
+function studioLongRestHeal(pc) {
+  // Biomorph: 1d10 damage + roll Medicine: Paramedic for 1 wound (if any) — abstracted to: −1d10 damage, −1 wound chance.
+  // Synthmorph: requires Hardware: Robotics — abstracted: −1d10 damage if fixer swarm/automech present, else suggest.
+  const ms = derived.morphStats();
+  const morphType = (ms && ms.morph && ms.morph.type) || "biomorph";
+  const dmgHeal = Math.floor(Math.random()*10) + 1;
+  dispatch(s => {
+    s.play.wounds = Math.max(0, (s.play.wounds || 0) - dmgHeal);
+    s.play.stress = Math.max(0, (s.play.stress || 0) - (Math.floor(Math.random()*10) + 1));
+  });
+  showToast("Long rest: −" + dmgHeal + " damage, −1d10 stress" + (morphType === "synthmorph" ? " (synthmorph repair: requires Hardware: Robotics or fixer swarm for full effect)" : ""));
+}
+
+/* ── v0.8 Healing Section — explicit body+mind heal buttons. The path EP2
+   rules say wounds heal but the previous UI never exposed. Tooltip per row
+   links to combat.healing for rates. ── */
+function buildStudioHealing(pc) {
+  const ms = derived.morphStats();
+  const morphType = (ms && ms.morph && ms.morph.type) || "—";
+  const WT = (ms && ms.morph && ms.morph.WT) || 1;
+  const rateText = morphType === "biomorph"
+    ? "biomorph: 1d10 dmg/day rest · 1 wound/week · doubled with Biomods · 1d10 dmg/hour with medichines or healing spray"
+    : morphType === "synthmorph"
+    ? "synthmorph: Hardware: Robotics test required. 1h per 5 dmg + 8h per wound. Fixer swarm = 1d10 dmg/hour automated"
+    : morphType === "infomorph"
+    ? "infomorph: no physical damage; stress only. Recover via downtime + Moxie spends"
+    : morphType === "pod"
+    ? "pod: as biomorph for biological systems, as synthmorph for cyberbrain"
+    : "rates depend on morph type — see Healing tooltip";
+
+  const btnStyle = { padding:"6px 12px", background:"transparent", color:"var(--st-teal)", border:"1px solid var(--st-teal)", borderRadius:"3px", fontSize:"11px", fontWeight:700, letterSpacing:"0.8px", textTransform:"uppercase", cursor:"pointer", fontFamily:"var(--mono)" };
+  const btnDanger = Object.assign({}, btnStyle, {color:"var(--narrative)", borderColor:"var(--narrative)"});
+  const btnGood = Object.assign({}, btnStyle, {color:"var(--good)", borderColor:"var(--good)"});
+
+  const section = h("div", { style:{display:"flex",flexDirection:"column",gap:"10px"} });
+
+  // BODY row
+  const bodyRow = h("div", { style:{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap"} });
+  bodyRow.appendChild(h("div", { style:{fontFamily:"var(--mono)",fontSize:"9.5px",letterSpacing:"1.4px",color:"var(--st-ink-mute)",fontWeight:800,flex:"0 0 60px"} }, "▸ BODY"));
+  bodyRow.appendChild(h("button", { style:btnStyle, onClick: () => studioHealDamage(1), title:"Reduce raw damage by 1 (wounds unchanged)" }, "−1 dmg"));
+  bodyRow.appendChild(h("button", { style:btnStyle, onClick: () => studioHealDamage(5), title:"Reduce raw damage by 5" }, "−5 dmg"));
+  bodyRow.appendChild(h("button", { style:btnGood, onClick: () => studioHealWound(1), title:"Heal 1 wound — reduces wound count by 1 AND raw damage by " + WT + " (the WT)" }, "✓ Heal wound (−" + WT + " dmg, −1 wound)"));
+  bodyRow.appendChild(h("button", { style:btnDanger, onClick: () => studioLongRestHeal(pc), title:"Long rest: roll natural healing dice for both damage and stress" }, "🌙 Long rest"));
+  bodyRow.appendChild(h("span", { "data-tip":"combat.healing", style:{cursor:"help",color:"var(--st-teal-deep)",fontSize:"12px",marginLeft:"4px"} }, "ⓘ"));
+  section.appendChild(bodyRow);
+
+  // MIND row
+  const mindRow = h("div", { style:{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap"} });
+  mindRow.appendChild(h("div", { style:{fontFamily:"var(--mono)",fontSize:"9.5px",letterSpacing:"1.4px",color:"var(--st-ink-mute)",fontWeight:800,flex:"0 0 60px"} }, "▸ MIND"));
+  mindRow.appendChild(h("button", { style:btnStyle, onClick: () => studioHealStress(1), title:"Reduce stress by 1" }, "−1 stress"));
+  mindRow.appendChild(h("button", { style:btnStyle, onClick: () => studioHealStress(5), title:"Reduce stress by 5" }, "−5 stress"));
+  mindRow.appendChild(h("button", { style:btnGood, onClick: () => studioHealTrauma(1), title:"Untick 1 trauma — reduces trauma count by 1 AND stress by TT" }, "✓ Untick trauma"));
+  mindRow.appendChild(h("span", { "data-tip":"combat.healing", style:{cursor:"help",color:"var(--st-teal-deep)",fontSize:"12px",marginLeft:"4px"} }, "ⓘ"));
+  section.appendChild(mindRow);
+
+  // Rate hint line
+  section.appendChild(h("div", { style:{fontFamily:"var(--mono)",fontSize:"10px",color:"var(--st-ink-mute)",letterSpacing:"0.4px",lineHeight:1.5,marginTop:"2px"} },
+    "// " + rateText));
+
+  // Inline note clarifying the wound-vs-damage divergence
+  section.appendChild(h("div", { style:{fontSize:"10.5px",color:"var(--st-ink-soft)",fontStyle:"italic",borderLeft:"2px solid var(--st-teal-deep)",paddingLeft:"8px",lineHeight:1.45} },
+    "Damage and wounds heal at different rates. Raw damage recovers with rest; wounds are permanent until actively healed (Heal wound button)."));
+
+  return section;
+}
+
+/* ── Vital Signs Section — DamageBar + MindBar + PoolRow + Recharge + Healing + StatTiles ── */
 function buildStudioVitalSignsCard(pc) {
-  return buildStudioSection({ key:"vitals", title:"Vital Signs", color:"var(--st-teal)", icon:"vitals", kicker:"body · mind · pools · recharge" },
+  return buildStudioSection({ key:"vitals", title:"Vital Signs", color:"var(--st-teal)", icon:"vitals", kicker:"body · mind · pools · recharge · healing" },
     buildStudioDamageBar(pc),
     h("div", { style:{borderTop:"1px dashed var(--st-line)",paddingTop:"14px",marginTop:"14px"} },
       buildStudioMindBar(pc)
@@ -6796,6 +7075,12 @@ function buildStudioVitalSignsCard(pc) {
     h("div", { style:{marginTop:"14px"} }, buildStudioPoolRow(pc)),
     h("div", { style:{paddingTop:"10px",marginTop:"10px",borderTop:"1px dashed var(--st-line)",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"12px",flexWrap:"wrap"} },
       buildStudioRecharge(pc)
+    ),
+    // v0.8 — Healing mini-section. The explicit body+mind heal buttons EP2 rules say
+    // are needed but the UI never exposed. Closes the wound-vs-damage divergence loop.
+    h("div", { style:{paddingTop:"10px",marginTop:"10px",borderTop:"1px dashed var(--st-line)"} },
+      h("div", { style:{fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontSize:"10px",letterSpacing:"1.6px",color:"var(--st-teal-deep)",fontWeight:800,textTransform:"uppercase",marginBottom:"8px"} }, "▾ HEALING · BODY · MIND"),
+      buildStudioHealing(pc)
     ),
     h("div", { style:{paddingTop:"8px",marginTop:"8px",borderTop:"1px dashed var(--st-line)",display:"grid",gridTemplateColumns:"repeat(4, 1fr)",gap:"6px"} },
       buildStudioStatTile("DURABILITY", pc.derived.durability),
@@ -7612,7 +7897,7 @@ function buildStudioSheet() {
   // before the session even starts).
   const isPlay = STATE.meta.mode === "play";
   if (isPlay) {
-    rightRail.appendChild(buildStudioSection({ key:"turnCoach", title:"Turn Coach", color:"var(--st-teal)", icon:"combat", kicker:"combat scaffolding",
+    rightRail.appendChild(buildStudioSection({ key:"turnCoach", title:"Combat ALI", color:"var(--st-teal)", icon:"combat", kicker:"// onboard combat AI · auto-applied modifiers + roll helper",
       panelStyle:{ flex:"1 1 auto", minHeight:"320px", overflowY:"auto" } },
       buildStudioTurnCoach(pc)
     ));
@@ -7676,6 +7961,11 @@ function buildStudioSheet() {
       ));
     });
     sheet.appendChild(gearRow);
+
+    // v0.8 — Gear Guide: loadout brief, GP/Complexity primer, fabrication detection.
+    // Makes existing affordances discoverable. Counts weapons/armor/apps; detects
+    // fabber and surfaces what the character can craft in play.
+    sheet.appendChild(buildStudioGearGuide(pc));
   }
 
   // ── DOSSIER · OFF-FEED ──────────────────────────────────────────
@@ -9108,7 +9398,17 @@ function deriveTipName(key) {
 function showTooltip(target) {
   const key = target.getAttribute("data-tip");
   let entry = lookupTip(key);
-  if (!entry) return;
+  // v0.8 — Defensive UX: when an entry is missing, render a visible "⚠ Data Gap"
+  // tooltip rather than silently failing. Makes Lexicon-coverage gaps discoverable
+  // during play instead of invisible. The bug-reporting URL lets users help fix.
+  if (!entry) {
+    entry = {
+      name: "⚠ Data Gap",
+      short: "No Lexicon entry exists for this yet. The slug is shown below — please file an issue with it so we can add the description.",
+      used_for: "data-tip key: " + (key || "(empty)") + "\nFile at: https://github.com/Uploaded-Intelligence/eclipse-phase-2-chargen/issues",
+      _missing: true
+    };
+  }
   // Field-aware decoration: for Know/Hardware/Medicine/Pilot/Exotic with a
   // picked field ("Know: Dance"), prepend a field header AND merge in setting
   // context + roleplay hooks from RULEBOOK_REFERENCE.know_fields when available.
@@ -9179,6 +9479,8 @@ function showTooltip(target) {
   }
   const tt = ensureTooltipEl();
   tt.innerHTML = "";
+  // v0.8 — apply data-gap warn styling when entry was synthesized as a fallback
+  tt.classList.toggle("tip-warn", !!entry._missing);
   const body = renderTipBody(entry);
   if (!body) return;
   tt.appendChild(body);

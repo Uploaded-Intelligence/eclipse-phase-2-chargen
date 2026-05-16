@@ -13,7 +13,7 @@
 // share-links and other anonymous-share TTRPG tools). Documented to users:
 // "treat live links like session passwords".
 
-import { kv } from "@vercel/kv";
+const { kv } = require("@vercel/kv");
 
 const ID_PATTERN = /^[a-zA-Z0-9_-]{8,64}$/;
 const MAX_PAYLOAD_BYTES = 200 * 1024;        // 200KB hard ceiling (typical char ~50KB)
@@ -34,7 +34,7 @@ function setCors(res) {
   for (const k of Object.keys(h)) res.setHeader(k, h[k]);
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   setCors(res);
   if (req.method === "OPTIONS") {
     return res.status(204).end();

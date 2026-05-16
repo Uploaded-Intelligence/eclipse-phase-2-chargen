@@ -153,6 +153,60 @@ assert("kebab-case uplift IDs (neo-*)", morphs["neo-avian"] && morphs["neo-octop
 assert("snake_case multi-word IDs (worker_pod, steel_morph, flexbot_*)",
   morphs.worker_pod && morphs.steel_morph && morphs.flexbot_crafter && morphs.flexbot_fighter);
 
+console.log("\n=== v0.8 Coverage — every ware/trait referenced by morphs has a Lexicon entry ===");
+const ware = exp.RULEBOOK_REFERENCE.ware || {};
+const traits = exp.RULEBOOK_REFERENCE.morph_traits || {};
+const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+const wareKeysAsSlugs = new Set(Object.keys(ware).map(slug));
+const traitKeysAsSlugs = new Set(Object.keys(traits).map(slug));
+
+const wareRefsByMorph = new Map();
+const traitRefsByMorph = new Map();
+morphArr.forEach(m => {
+  (m.ware || []).forEach(w => {
+    const s = slug(w);
+    if (!wareRefsByMorph.has(s)) wareRefsByMorph.set(s, []);
+    wareRefsByMorph.get(s).push(m.name + " (" + w + ")");
+  });
+  (m.traits || []).forEach(t => {
+    const tn = typeof t === "string" ? t : t.name;
+    const s = slug(tn);
+    if (!traitRefsByMorph.has(s)) traitRefsByMorph.set(s, []);
+    traitRefsByMorph.get(s).push(m.name + " (" + tn + ")");
+  });
+});
+
+const missingWare = [...wareRefsByMorph.keys()].filter(s => !ware[s] && !wareKeysAsSlugs.has(s));
+const missingTraits = [...traitRefsByMorph.keys()].filter(s => !traits[s] && !traitKeysAsSlugs.has(s));
+
+assert("every ware string referenced by morphs has a Lexicon entry",
+  missingWare.length === 0,
+  missingWare.length > 0 ? "missing: " + missingWare.map(s => s + " [" + wareRefsByMorph.get(s).join(", ") + "]").join(" · ") : "");
+
+assert("every morph_trait referenced by morphs has a Lexicon entry",
+  missingTraits.length === 0,
+  missingTraits.length > 0 ? "missing: " + missingTraits.map(s => s + " [" + traitRefsByMorph.get(s).join(", ") + "]").join(" · ") : "");
+
+// Specific high-priority ware items the user explicitly flagged
+const requiredWare = ["Chameleon Skin","Wings","Gills","Claws","360-Degree Vision","Direction Sense","Polarization Vision","Enhanced Smell","Circadian Regulation","Cold Tolerance","Bioweave Armor","Prehensile Feet","Radiation Sense","Carapace Armor","Eelware"];
+requiredWare.forEach(w => assert("Lexicon has " + w, !!ware[w], "missing"));
+
+// Specific morph_traits
+const requiredTraits = ["Enhanced Behavior","Limberness","Non-Human Biochemistry","Planned Obsolescence"];
+requiredTraits.forEach(t => assert("Lexicon has trait " + t, !!traits[t], "missing"));
+
+console.log("\n=== v0.8 Wave 3 — Weapon metadata in gear_items ===");
+const gi = exp.RULEBOOK_REFERENCE.gear_items || {};
+const weaponIds = ["medium-pistol","assault-rifle-railgun","shredder","club","knife","claws-implant","flex-cutter","shock-glove","eelware","diamond-axe"];
+weaponIds.forEach(id => {
+  assert(id + " has structured weapon metadata", !!(gi[id] && gi[id].weapon), gi[id] ? "weapon=" + JSON.stringify(gi[id].weapon) : "no gear entry");
+});
+// Verify specific weapon shapes
+assert("medium-pistol has dv 2d10 + range 30 + ranged true", gi["medium-pistol"] && gi["medium-pistol"].weapon.dv === "2d10" && gi["medium-pistol"].weapon.range === 30 && gi["medium-pistol"].weapon.ranged === true);
+assert("assault-rifle-railgun is two-handed with range 150", gi["assault-rifle-railgun"] && gi["assault-rifle-railgun"].weapon.twoHanded === true && gi["assault-rifle-railgun"].weapon.range === 150);
+assert("club is melee, range 0, no modes, reach short", gi.club && gi.club.weapon.ranged === false && gi.club.weapon.range === 0 && gi.club.weapon.reach === "short");
+assert("claws-implant uses Melee skill", gi["claws-implant"] && gi["claws-implant"].weapon.skill === "Melee");
+
 console.log("\n=========================================");
 console.log("FINAL: " + pass + " pass, " + fail + " fail");
 console.log("=========================================");

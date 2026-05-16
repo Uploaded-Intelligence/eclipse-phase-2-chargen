@@ -2,6 +2,42 @@
 
 All notable changes to this project. Format follows the spirit of [Keep a Changelog](https://keepachangelog.com/), versioned by milestone.
 
+## [0.8] — 2026-05-17 — "Combat ALI"
+
+Three systemic bugs identified, three root causes fixed, plus a new Gear Guide section. The character creator becomes a session co-pilot that doesn't ghost on you.
+
+### Fixed (systemic — not just patches)
+- **Tooltip silent-fail eliminated.** `RULEBOOK_REFERENCE.ware` was missing 44 entries (incl. Chameleon Skin — the user-reported failure). Added them all + 5 new `morph_traits` entries (Enhanced Behavior, Limberness, Non-Human Biochemistry, Planned Obsolescence, Inherent Flaws). `RULEBOOK_REFERENCE.ware` grew from 30 → 74 entries. **Plus**: `showTooltip` now renders an amber "⚠ Data Gap" tooltip when an entry is missing — surfaces future gaps visibly instead of silently failing. **Plus**: new coverage assertion in `test-morph-catalog.js` — "every ware/trait referenced by a morph must have a Lexicon entry" — would have caught the chameleon-skin bug on day one of v0.6.
+- **Attack panel weapons fixed at the data layer.** `RULEBOOK_REFERENCE.gear_items` weapon entries had `short` text with "DV 2d10, SA/BF/FA, Range 30" but no structured `weapon: {dv, modes, range, ammo, skill, ranged, twoHanded, reach}` object. `studioPcFromState` reads `ref.weapon || null` → always null → attack panel saw nothing. Added structured metadata to all 10 weapons in the catalog (medium-pistol, assault-rifle-railgun, shredder, club, knife, claws-implant, flex-cutter, shock-glove, eelware, diamond-axe). **Firewall PCs now see their Medium Pistol; soldiers see their Assault Rifle Railgun.** No code changes needed downstream — the data was the bug.
+- **Wound/damage divergence clarified + healable.** The `Math.max(current, auto)` ratchet was actually EP2-correct (wounds are permanent until healed). What was missing: a healing UI. Added new **Healing mini-section** in Vital Signs with explicit `−1 dmg / −5 dmg / Heal wound (−WT dmg, −1 wound) / Long rest / −1 stress / Untick trauma` buttons. Each comes with a `ⓘ` tooltip linking to `combat.healing`. Plus: inline note "Damage and wounds heal at different rates — raw damage recovers with rest; wounds require active healing." **The user's confusion ("wounds not following damage") was a UI gap, now closed.**
+- **Bioweave/Carapace Armor data normalization.** Morph data had `"Bioweave Armor (+2/+3)"` and `"Carapace Armor (+6/+7)"` strings with armor values embedded in the name. Armor values are already captured in `morph.armor: {energy, kinetic}`. Stripped the redundant paren suffix from morph ware lists; Lexicon now resolves cleanly.
+
+### Added
+- **Combat ALI rename.** "Turn Coach" → **"Combat ALI"** (Artificial Limited Intelligence). Subtitle "combat scaffolding" → "// onboard combat AI · auto-applied modifiers + roll helper". Plus: new Lexicon entry for `ali` explaining the in-character framing — your combat ALI is the software watching your wounds, your status effects, your action economy — and adjusting your rolls in real time. The character creator's combat helper now has its proper EP2 vocabulary.
+- **Updated `combat.healing` Lexicon entry.** Replaced bare prose with structured rates: biomorph damage (1d10/day rest, 1d10/12h with Biomods, 1d10/hour with medichines, 2d10/hour in healing vat); biomorph wounds (1/week natural, 1/3 days with Biomods, 1/day with medichines, 1/2h vat); first aid (Medicine: Paramedic 10min + 10min/wound = 1 wound + 1d10 damage); synthmorph (Hardware: Robotics test, 1h per 5 dmg + 8h per wound, fixer swarms automate); stress (1d10/hour relaxation, 1 Moxie = 1d10 immediate); trauma (8h Psychosurgery). Players now know HOW LONG things take.
+- **Gear Guide section (Track E).** New panel after the Gear row that:
+  - Categorizes loadout (Weapons / Armor / Implants / Apps / Tools / Misc) with item counts
+  - Explains Gear Points (GP) and Complexity ratings (Min/Mod/Maj) inline with a `ⓘ` link to `gear_avail_cost`
+  - Detects fab capability — `characterHasFabber(pc)` checks for Compact / Medium / Large fabbers
+  - Surfaces fab guidance: ✓ green "Fabrication available — Medium fabber detected" with item-class breakdown / ✗ amber "Pick up a Medium Fabber (Mod/1) for in-play crafting"
+  - Notes "v0.9 will add live GP budget customization at chargen"
+- **44 ware Lexicon entries + 5 morph_trait entries** with corebook-derived `short` + `used_for` + `page` content.
+- **Defensive tooltip pattern** (`tip-warn` CSS class). Amber-bordered tooltips when an entry is missing, showing the slug + a GitHub issue link so users can help fix.
+
+### Changed (engine)
+- `studioHealDamage(n)`, `studioHealWound(n)`, `studioHealStress(n)`, `studioHealTrauma(n)` — explicit healing dispatchers. `studioHealWound` decrements BOTH `woundsTaken` AND raw damage by `WT * n` (the "surgery happened" path EP2 rules describe but the UI never exposed). `studioHealTrauma` mirrors for mental side.
+- `studioLongRestHeal(pc)` — rolls 1d10 damage + 1d10 stress recovery; surfaces morph-type hint (synthmorph needs Hardware: Robotics for full effect).
+- `characterHasFabber(pc)` — gear-string heuristic detecting Compact / Medium / Large fabbers for the Gear Guide.
+
+### Total counts
+- **74 ware Lexicon entries** (was 30 — +44)
+- **9 morph_trait Lexicon entries** (was 4 — +5)
+- **10 weapons with structured metadata** (was 0)
+- **461 test assertions** (was 406 — +55 covering ware coverage, weapon flow-through, healing dispatchers, Combat ALI lexicon, fabber detection)
+
+### Cross-cutting principle
+The three systemic bugs shared one root: **silent failure when data should be there**. The defensive tooltip + the coverage assertion turn that into an audit-able invariant going forward. No more "feature looks fine but the data layer is empty".
+
 ## [0.7] — 2026-05-16 — "Constellation"
 
 The party becomes visible. Sharing becomes one click. The GM gets a Command Centre.
