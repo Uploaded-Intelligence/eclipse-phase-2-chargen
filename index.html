@@ -820,6 +820,71 @@ body.play-mode .preview-mech { background: transparent; padding: 0; border: none
 .party-card .studio-sheet .studio-section { margin-bottom: 0; }
 .party-card .studio-sheet .studio-section-panel { padding: 10px; }
 
+/* v0.11 — Nanofab · Armaments Codex
+   CSS-driven filter behavior on the panel root: attribute-based hiding for
+   class/lethal/owned/fab states. No JS re-render on filter clicks. */
+.armaments-panel { font-family: var(--font); }
+.armaments-tab { transition: background 0.15s, color 0.15s; }
+.armaments-tab--active { background: rgba(79,212,224,0.18) !important; color: var(--st-teal) !important; }
+.armaments-filter-chip { transition: background 0.12s, color 0.12s, border-color 0.12s; }
+.armaments-filter-chip:hover { background: rgba(79,212,224,0.10); color: var(--st-ink); }
+
+.armaments-codex-body[data-armaments-view="codex"],
+.armaments-loadout-body[data-armaments-view="loadout"] { padding-right: 2px; }
+
+.armament-card { position: relative; transition: opacity 0.15s; }
+.armament-card:hover { background: linear-gradient(180deg, rgba(7,24,29,0.65), rgba(7,24,29,0.45)) !important; }
+.armament-card[data-owned="true"] { box-shadow: 0 0 0 1px rgba(76,175,80,0.20) inset; }
+
+.armament-card .armament-stat-chip + .armament-stat-chip { /* spacing handled inline */ }
+
+/* Filter rules: hide cards that don't match active filters. Multiple attributes
+   compose AND-wise. Group headers also hide when their class is filtered out. */
+.armaments-panel[data-filter-class="firearm"]   .armament-card:not([data-class="firearm"])   { display: none; }
+.armaments-panel[data-filter-class="beam"]      .armament-card:not([data-class="beam"])      { display: none; }
+.armaments-panel[data-filter-class="spray"]     .armament-card:not([data-class="spray"])     { display: none; }
+.armaments-panel[data-filter-class="seeker"]    .armament-card:not([data-class="seeker"])    { display: none; }
+.armaments-panel[data-filter-class="melee"]     .armament-card:not([data-class="melee"])     { display: none; }
+.armaments-panel[data-filter-class="implant"]   .armament-card:not([data-class="implant"])   { display: none; }
+.armaments-panel[data-filter-class="grenade"]   .armament-card:not([data-class="grenade"])   { display: none; }
+.armaments-panel[data-filter-class="missile"]   .armament-card:not([data-class="missile"])   { display: none; }
+.armaments-panel[data-filter-class="explosive"] .armament-card:not([data-class="explosive"]) { display: none; }
+.armaments-panel[data-filter-class="ammo"]      .armament-card:not([data-class="ammo"])      { display: none; }
+.armaments-panel[data-filter-class="mod"]       .armament-card:not([data-class="mod"])       { display: none; }
+.armaments-panel[data-filter-lethal="lethal"]     .armament-card[data-lethal="non-lethal"] { display: none; }
+.armaments-panel[data-filter-lethal="non-lethal"] .armament-card[data-lethal="lethal"]     { display: none; }
+.armaments-panel[data-filter-owned="true"]        .armament-card[data-owned="false"]       { display: none; }
+.armaments-panel[data-filter-fab="true"]          .armament-card[data-fab-ready="false"]   { display: none; }
+
+/* Group headers: hide when their class is filtered out.
+   The header sits sibling to its cards; we use :has() where available, else
+   they remain visible (mostly cosmetic). */
+.armaments-panel[data-filter-class="firearm"]   .armaments-group-header:not([data-class="firearm"]),
+.armaments-panel[data-filter-class="beam"]      .armaments-group-header:not([data-class="beam"]),
+.armaments-panel[data-filter-class="spray"]     .armaments-group-header:not([data-class="spray"]),
+.armaments-panel[data-filter-class="seeker"]    .armaments-group-header:not([data-class="seeker"]),
+.armaments-panel[data-filter-class="melee"]     .armaments-group-header:not([data-class="melee"]),
+.armaments-panel[data-filter-class="implant"]   .armaments-group-header:not([data-class="implant"]),
+.armaments-panel[data-filter-class="grenade"]   .armaments-group-header:not([data-class="grenade"]),
+.armaments-panel[data-filter-class="missile"]   .armaments-group-header:not([data-class="missile"]),
+.armaments-panel[data-filter-class="explosive"] .armaments-group-header:not([data-class="explosive"]),
+.armaments-panel[data-filter-class="ammo"]      .armaments-group-header:not([data-class="ammo"]),
+.armaments-panel[data-filter-class="mod"]       .armaments-group-header:not([data-class="mod"]) { display: none; }
+
+/* Trait pill hover */
+.armament-trait-pill:hover { background: rgba(127,212,226,0.20) !important; color: var(--st-ink) !important; }
+
+/* Mobile reflow */
+@media (max-width: 520px) {
+  .armaments-tabs { flex-direction: column; }
+  .armaments-tabs .armaments-tab { width: 100%; }
+  .armaments-filters { gap: 3px; padding: 4px; }
+  .armaments-filter-chip { font-size: 9px; padding: 2px 6px; }
+  .armament-card { padding: 8px 10px; }
+  .armament-card-header { flex-direction: column; align-items: flex-start; }
+  .armament-stat-chip { font-size: 10px; padding: 2px 6px; }
+}
+
 /* Vitality bar — two-zone (operational | dying) accumulator with markers. */
 .studio-sheet .studio-vbar { display: flex; flex-direction: column; }
 .studio-sheet .studio-vbar-head {
@@ -2426,7 +2491,8 @@ const RULEBOOK_REFERENCE = {
       "short": "Standard kinetic sidearm. DV 2d10, SA/BF/FA, Ammo 15+1, Range 30.",
       "used_for": "Concealable, well-rounded handgun. Uses Guns skill; kinetic damage reduced by Kinetic AV.",
       "category": "Kinetic Weapons",
-      "weapon": {"skill":"Guns:Kinetic","dv":"2d10","modes":["SA","BF","FA"],"range":30,"ammo":"15+1","ranged":true,"twoHanded":false,"reach":null},
+      "weapon": {"type":"firearm","skill":"Guns:Kinetic","dv":"2d10","modes":["SA","BF","FA"],"range":30,"ammo":"15+1","ranged":true,"twoHanded":false,"reach":null,"traits":["concealable"]},
+      "cost": "Min/R/1",
       "page": 210
     },
     "assault-rifle-railgun": {
@@ -2434,7 +2500,8 @@ const RULEBOOK_REFERENCE = {
       "short": "Standard military railgun. DV 2d10+2, SA/BF/FA, Ammo 90+1, Range 150, Armor-Piercing.",
       "used_for": "Long-range two-handed primary weapon. Halves Kinetic AV against the target.",
       "category": "Kinetic Weapons",
-      "weapon": {"skill":"Guns:Kinetic","dv":"2d10+2","modes":["SA","BF","FA"],"range":150,"ammo":"90+1","ranged":true,"twoHanded":true,"reach":null,"armorPiercing":true},
+      "weapon": {"type":"firearm","skill":"Guns:Kinetic","dv":"2d10+2","modes":["SA","BF","FA"],"range":150,"ammo":"90+1","ranged":true,"twoHanded":true,"reach":null,"armorPiercing":true,"traits":["ap","burst-capable","full-auto"]},
+      "cost": "Maj/R/3",
       "page": 210
     },
     "shredder": {
@@ -2442,7 +2509,8 @@ const RULEBOOK_REFERENCE = {
       "short": "Flechette gun. DV 2d10+6, SA/BF/FA, Ammo 100, Range 25, Two-Handed.",
       "used_for": "Devastating against unarmored targets at close range; flechette rounds lose effect against armor.",
       "category": "Kinetic Weapons",
-      "weapon": {"skill":"Guns:Kinetic","dv":"2d10+6","modes":["SA","BF","FA"],"range":25,"ammo":"100","ranged":true,"twoHanded":true,"reach":null},
+      "weapon": {"type":"firearm","skill":"Guns:Kinetic","dv":"2d10+6","modes":["SA","BF","FA"],"range":25,"ammo":"100","ranged":true,"twoHanded":true,"reach":null,"traits":["burst-capable","full-auto","flechette"]},
+      "cost": "Mod/R/2",
       "page": 209
     },
     "club": {
@@ -2450,7 +2518,8 @@ const RULEBOOK_REFERENCE = {
       "short": "Improvised or purpose-made blunt melee weapon. DV 1d10+SOM/10.",
       "used_for": "Cheap, legal in most habitats, less than lethal in trained hands.",
       "category": "Melee Weapons",
-      "weapon": {"skill":"Melee","dv":"1d10+SOM/10","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":false,"reach":"short"},
+      "weapon": {"type":"melee","skill":"Melee","dv":"1d10+SOM/10","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":false,"reach":"short","traits":["concealable"]},
+      "cost": "Min/1",
       "page": 204
     },
     "knife": {
@@ -2458,7 +2527,8 @@ const RULEBOOK_REFERENCE = {
       "short": "Standard concealable blade. DV 1d10+SOM/10.",
       "used_for": "Melee skill; Kinetic damage. Most habitats allow them.",
       "category": "Melee Weapons",
-      "weapon": {"skill":"Melee","dv":"1d10+SOM/10","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":false,"reach":"short"},
+      "weapon": {"type":"melee","skill":"Melee","dv":"1d10+SOM/10","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":false,"reach":"short","traits":["concealable"]},
+      "cost": "Min/1",
       "page": 204
     },
     "claws-implant": {
@@ -2466,7 +2536,8 @@ const RULEBOOK_REFERENCE = {
       "short": "Retractable bio- or cyber-claws. DV 2d6, concealable.",
       "used_for": "Always-available melee weapon. Cannot be disarmed; usually concealable.",
       "category": "Implant Weapons",
-      "weapon": {"skill":"Melee","dv":"2d6","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":false,"reach":"short"},
+      "weapon": {"type":"implant","skill":"Melee","dv":"2d6","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":false,"reach":"short","traits":["concealable","implant"]},
+      "cost": "Min/R/1",
       "page": 204
     },
     "flex-cutter": {
@@ -2474,23 +2545,26 @@ const RULEBOOK_REFERENCE = {
       "short": "Flexible monomolecular blade. DV 1d10+3, concealable.",
       "used_for": "Highly concealable melee weapon. Bypasses some armor.",
       "category": "Melee Weapons",
-      "weapon": {"skill":"Melee","dv":"1d10+3","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":false,"reach":"short","armorPiercing":true},
+      "weapon": {"type":"melee","skill":"Melee","dv":"1d10+3","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":false,"reach":"short","armorPiercing":true,"traits":["ap","concealable","monomolecular"]},
+      "cost": "Mod/R/2",
       "page": 204
     },
     "shock-glove": {
       "name": "Shock Glove",
       "short": "Powered glove that delivers a stunning electric shock. DV 1d6, Shock, Touch-Only.",
-      "used_for": "Non-lethal takedown tool. Forces SOM Check or target is incapacitated.",
+      "used_for": "Non-lethal takedown tool. On hit, target makes a SOM Check or is incapacitated (Stunned) for 1 Action Turn. Lethal damage capped (1d6); the real effect is the shock state.",
       "category": "Melee Weapons",
-      "weapon": {"skill":"Melee","dv":"1d6","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":false,"reach":"short","shock":true},
+      "weapon": {"type":"melee","skill":"Melee","dv":"1d6","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":false,"reach":"short","shock":true,"nonLethal":true,"status":{"kind":"stunned","save":"SOM Check","escape":"Stunned ends end of next Action Turn","notes":"On failed SOM Check, target is Stunned (cannot act for 1 Action Turn)."},"traits":["non-lethal","shock"]},
+      "cost": "Min/1",
       "page": 204
     },
     "eelware": {
       "name": "Eelware",
       "short": "Implanted shock-organ that delivers an electric attack on touch. DV 1d6, Shock, Touch-Only.",
-      "used_for": "Hidden non-lethal weapon. Useful for mindhackers, security.",
+      "used_for": "Hidden non-lethal weapon. On hit, target makes a SOM Check or is Stunned for 1 Action Turn. Useful for mindhackers and infiltrators — cannot be disarmed, registers as biology not weapon.",
       "category": "Implant Weapons",
-      "weapon": {"skill":"Melee","dv":"1d6","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":false,"reach":"short","shock":true},
+      "weapon": {"type":"implant","skill":"Melee","dv":"1d6","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":false,"reach":"short","shock":true,"nonLethal":true,"status":{"kind":"stunned","save":"SOM Check","escape":"Stunned ends end of next Action Turn","notes":"Concealed implant — passes weapon-scanners by default."},"traits":["non-lethal","shock","implant","concealable"]},
+      "cost": "Min/R/1",
       "page": 204
     },
     "diamond-axe": {
@@ -2498,9 +2572,580 @@ const RULEBOOK_REFERENCE = {
       "short": "DV 2d10+3, armor-piercing, reach, two-handed.",
       "used_for": "Heavy-duty melee weapon; bites through armor and structures alike.",
       "category": "Melee Weapons",
-      "weapon": {"skill":"Melee","dv":"2d10+3","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":true,"reach":"medium","armorPiercing":true},
+      "weapon": {"type":"melee","skill":"Melee","dv":"2d10+3","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":true,"reach":"medium","armorPiercing":true,"traits":["ap","two-handed","reach"]},
+      "cost": "Mod/2",
       "page": 204
     },
+
+    "light-pistol": {
+      "name": "Light Pistol (Firearm)",
+      "short": "Compact kinetic sidearm. DV 2d6+2, SA/BF, Ammo 18+1, Range 20.",
+      "used_for": "Easily concealed handgun. Lower DV than a Medium Pistol, but holds more rounds and hides better. Standard for civilians who want a pistol without registering an obvious one.",
+      "category": "Kinetic Weapons",
+      "weapon": {"type":"firearm","skill":"Guns:Kinetic","dv":"2d6+2","modes":["SA","BF"],"range":20,"ammo":"18+1","ranged":true,"twoHanded":false,"reach":null,"traits":["concealable"]},
+      "cost": "Min/R/1",
+      "page": null
+    },
+    "heavy-pistol": {
+      "name": "Heavy Pistol (Firearm)",
+      "short": "Powerful kinetic sidearm. DV 2d10+2, SA/BF/FA, Ammo 12+1, Range 50.",
+      "used_for": "Heavier round, longer range, fewer in the mag. Sees use with security, mercs, and gatecrashers who want serious one-hand stopping power.",
+      "category": "Kinetic Weapons",
+      "weapon": {"type":"firearm","skill":"Guns:Kinetic","dv":"2d10+2","modes":["SA","BF","FA"],"range":50,"ammo":"12+1","ranged":true,"twoHanded":false,"reach":null,"traits":["burst-capable","full-auto"]},
+      "cost": "Mod/R/2",
+      "page": null
+    },
+    "submachine-gun": {
+      "name": "Submachine Gun (Firearm)",
+      "short": "Compact rapid-fire kinetic. DV 2d10, SA/BF/FA, Ammo 40+1, Range 50.",
+      "used_for": "Two-hand-friendly close-quarters weapon with high ammo capacity. Common with security, criminals, and Firewall sentinels going loud in tight corridors.",
+      "category": "Kinetic Weapons",
+      "weapon": {"type":"firearm","skill":"Guns:Kinetic","dv":"2d10","modes":["SA","BF","FA"],"range":50,"ammo":"40+1","ranged":true,"twoHanded":false,"reach":null,"traits":["burst-capable","full-auto"]},
+      "cost": "Mod/R/2",
+      "page": null
+    },
+    "sport-rifle": {
+      "name": "Sport Rifle (Railgun)",
+      "short": "Civilian hunting railgun. DV 2d10+2, SA, Ammo 20+1, Range 200.",
+      "used_for": "Legal in most habitats as hunting/sport gear. Two-handed, accurate at distance, but no automatic fire. Often the first long-arm a player can legally carry around openly.",
+      "category": "Kinetic Weapons",
+      "weapon": {"type":"firearm","skill":"Guns:Kinetic","dv":"2d10+2","modes":["SA"],"range":200,"ammo":"20+1","ranged":true,"twoHanded":true,"reach":null,"traits":["long-range"]},
+      "cost": "Min/1",
+      "page": null
+    },
+    "battle-rifle": {
+      "name": "Battle Rifle (Railgun)",
+      "short": "Heavy combat railgun. DV 2d10+4, SA/BF/FA, Ammo 30+1, Range 250, Armor-Piercing.",
+      "used_for": "Step up from an Assault Rifle — harder hit, longer reach, halves Kinetic AV. Two-handed military mainline; restricted in civilian habs.",
+      "category": "Kinetic Weapons",
+      "weapon": {"type":"firearm","skill":"Guns:Kinetic","dv":"2d10+4","modes":["SA","BF","FA"],"range":250,"ammo":"30+1","ranged":true,"twoHanded":true,"reach":null,"armorPiercing":true,"traits":["ap","burst-capable","full-auto","long-range"]},
+      "cost": "Maj/R/3",
+      "page": null
+    },
+    "sniper-rifle": {
+      "name": "Sniper Rifle (Railgun)",
+      "short": "Long-range precision railgun. DV 2d10+6, SA, Ammo 10+1, Range 500, Armor-Piercing.",
+      "used_for": "Aimed Action benefits especially well (+30 with full aim). For overwatch, anti-materiel, hard-target removal. Halves Kinetic AV. Almost always smart-linked.",
+      "category": "Kinetic Weapons",
+      "weapon": {"type":"firearm","skill":"Guns:Kinetic","dv":"2d10+6","modes":["SA"],"range":500,"ammo":"10+1","ranged":true,"twoHanded":true,"reach":null,"armorPiercing":true,"traits":["ap","long-range","precision"]},
+      "cost": "Maj/R/3",
+      "page": null
+    },
+    "shotgun": {
+      "name": "Shotgun (Firearm)",
+      "short": "Spread-pattern kinetic. DV 2d10+5, SA/BF, Ammo 6+1, Range 15.",
+      "used_for": "Devastating close range, useless at distance. Can fire flechette, shot, slug, or specialty ammo. Common with boarding crews and habitat security.",
+      "category": "Kinetic Weapons",
+      "weapon": {"type":"firearm","skill":"Guns:Kinetic","dv":"2d10+5","modes":["SA","BF"],"range":15,"ammo":"6+1","ranged":true,"twoHanded":true,"reach":null,"traits":["burst-capable","spread"]},
+      "cost": "Mod/R/2",
+      "page": null
+    },
+    "machine-gun": {
+      "name": "Machine Gun (Railgun)",
+      "short": "Crew-served suppression railgun. DV 2d10+4, BF/FA, Ammo 200+1, Range 200.",
+      "used_for": "Full-auto-only beast for suppression and area denial. Two-handed, usually braced or mounted. Excels at laying down hate; poor for solo Aimed shots.",
+      "category": "Kinetic Weapons",
+      "weapon": {"type":"firearm","skill":"Guns:Kinetic","dv":"2d10+4","modes":["BF","FA"],"range":200,"ammo":"200+1","ranged":true,"twoHanded":true,"reach":null,"traits":["burst-capable","full-auto","long-range","suppression"]},
+      "cost": "Maj/R/3",
+      "page": null
+    },
+    "disposable-launcher": {
+      "name": "Disposable Rocket Launcher",
+      "short": "Single-use anti-armor rocket. DV 4d10+10, SS, Ammo 1, Range 250.",
+      "used_for": "Discard after firing. Carried for one critical shot — punching a vehicle, a hardened door, a heavy synthmorph. Counts as a Seeker for skill purposes.",
+      "category": "Kinetic Weapons",
+      "weapon": {"type":"firearm","skill":"Guns:Seeker","dv":"4d10+10","modes":["SS"],"range":250,"ammo":"1","ranged":true,"twoHanded":true,"reach":null,"armorPiercing":true,"traits":["ap","disposable","heavy"]},
+      "cost": "Maj/R/3",
+      "page": null
+    },
+
+    "laser-pulser": {
+      "name": "Laser Pulser (Beam)",
+      "short": "Coherent-light beam weapon. DV 2d10, SA/BF/FA, Ammo 100, Range 100.",
+      "used_for": "Mid-line beam weapon. Long ammo count (battery shots), silent, no muzzle flash. Reduced effect through fog/atmospherics. Energy damage type — Energy AV applies.",
+      "category": "Beam Weapons",
+      "weapon": {"type":"beam","skill":"Guns:Beam","dv":"2d10","modes":["SA","BF","FA"],"range":100,"ammo":"100","ranged":true,"twoHanded":false,"reach":null,"traits":["burst-capable","silent","energy"]},
+      "cost": "Mod/R/2",
+      "page": null
+    },
+    "plasma-rifle": {
+      "name": "Plasma Rifle (Beam)",
+      "short": "Superheated plasma launcher. DV 2d10+8, SA/BF, Ammo 30, Range 80, Fire.",
+      "used_for": "Devastating, ignites targets (Fire status). Two-handed. Damage is energy; targets exposed to plasma can suffer secondary burning damage 1d6/turn until extinguished.",
+      "category": "Beam Weapons",
+      "weapon": {"type":"beam","skill":"Guns:Beam","dv":"2d10+8","modes":["SA","BF"],"range":80,"ammo":"30","ranged":true,"twoHanded":true,"reach":null,"traits":["fire","energy","heavy"]},
+      "cost": "Maj/R/3",
+      "page": null
+    },
+    "microwave-agonizer": {
+      "name": "Microwave Agonizer (Beam)",
+      "short": "Pain-compliance beam. DV 1d6, SA, Ammo 50, Range 30. Non-lethal.",
+      "used_for": "Stimulates nerves in the target's skin to cause agonizing pain. On hit, target makes WIL Check or is incapacitated by pain (cannot act, –30 to all actions) until the beam stops. Used by riot police and security.",
+      "category": "Beam Weapons",
+      "weapon": {"type":"beam","skill":"Guns:Beam","dv":"1d6","modes":["SA"],"range":30,"ammo":"50","ranged":true,"twoHanded":false,"reach":null,"nonLethal":true,"status":{"kind":"dazed","save":"WIL Check","escape":"Beam ends or target leaves cone — pain stops immediately","notes":"Pure pain — no actual damage to the morph past 1d6. Useless against synthmorphs without pain modeling."},"traits":["non-lethal","energy","area-control"]},
+      "cost": "Mod/R/2",
+      "page": null
+    },
+    "particle-beam-bolter": {
+      "name": "Particle Beam Bolter",
+      "short": "Anti-armor beam weapon. DV 2d10+4, SA/BF, Ammo 50, Range 100, Armor-Piercing.",
+      "used_for": "Halves Energy AV. Heavy military beam weapon; recoils visibly even with bracing. Excellent against armored synthmorphs and bots.",
+      "category": "Beam Weapons",
+      "weapon": {"type":"beam","skill":"Guns:Beam","dv":"2d10+4","modes":["SA","BF"],"range":100,"ammo":"50","ranged":true,"twoHanded":true,"reach":null,"armorPiercing":true,"traits":["ap","energy","heavy"]},
+      "cost": "Maj/R/3",
+      "page": null
+    },
+    "stunner-beam": {
+      "name": "Stunner (Beam)",
+      "short": "Non-lethal nerve-disruption beam. DV 1d6, SA, Ammo 50, Range 25. Non-lethal.",
+      "used_for": "On hit, target makes SOM Check or is Stunned for 1 Action Turn (cannot act). On a MoF ≥ 30, Stunned for 2 Action Turns. Common with security and law enforcement.",
+      "category": "Beam Weapons",
+      "weapon": {"type":"beam","skill":"Guns:Beam","dv":"1d6","modes":["SA"],"range":25,"ammo":"50","ranged":true,"twoHanded":false,"reach":null,"nonLethal":true,"status":{"kind":"stunned","save":"SOM Check","escape":"Stunned ends end of next Action Turn (or 2 turns on MoF ≥ 30)","notes":"Useless against synthmorphs."},"traits":["non-lethal","energy"]},
+      "cost": "Min/R/1",
+      "page": null
+    },
+
+    "freezer-spray": {
+      "name": "Freezer (Spray)",
+      "short": "Non-lethal foam sprayer. DV —, SS, Ammo 30, Range 10. Grapples target.",
+      "used_for": "Fires fast-hardening foam that immobilizes targets. On hit, target makes a REF Check or becomes Grappled (Complex Action and SOM Check −30 to escape; an outside helper can also free them). Foam allows breathing but impedes vision; encased target has AV 5/10 and Durability 20 and degrades over ~12 hours. Can lay down a one-person foam barricade. Reservoirs can be spiked with contact toxins or drugs.",
+      "category": "Spray Weapons",
+      "weapon": {"type":"spray","skill":"Guns:Spray","dv":"—","modes":["SS"],"range":10,"ammo":"30","ranged":true,"twoHanded":false,"reach":null,"nonLethal":true,"status":{"kind":"grappled","save":"REF Check","escape":"SOM Check (−30) by target or helper","notes":"Foam: AV 5/10, Durability 20, decays ~12h. Can be spiked with toxins/drugs."},"traits":["non-lethal","area-control"]},
+      "cost": "Mod/R/2",
+      "page": null
+    },
+    "vortex-ring-gun": {
+      "name": "Vortex Ring Gun (Spray)",
+      "short": "Non-lethal concussive blast. DV —, SS, Ammo 20, Range 15. Knockdown + −10 penalty.",
+      "used_for": "Detonates a blank charge to launch a high-speed donut-shaped pressure vortex. Struck target suffers −10 to all actions for the rest of the Action Turn AND must pass a SOM × 2 Test or fall Prone. If the SOM Test's MoF ≥ 30, the target is also Stunned (cannot act until the end of their next Action Turn). The charge can be loaded with aerosolized drugs or chemicals.",
+      "category": "Spray Weapons",
+      "weapon": {"type":"spray","skill":"Guns:Spray","dv":"—","modes":["SS"],"range":15,"ammo":"20","ranged":true,"twoHanded":false,"reach":null,"nonLethal":true,"status":{"kind":"knockdown","save":"SOM × 2 Test (fall Prone on failure; +Stunned on MoF ≥ 30)","escape":"Stand up = Quick Action; Stunned ends end of next Action Turn","notes":"−10 action penalty on hit (rest of Action Turn). Charge can carry aerosolized agents."},"traits":["non-lethal","knockdown"]},
+      "cost": "Mod/R/2",
+      "page": null
+    },
+    "chemical-sprayer": {
+      "name": "Chemical Sprayer (Spray)",
+      "short": "Pressurized chemical delivery. DV 1d6, SS, Ammo 30, Range 10.",
+      "used_for": "Hose-like sprayer for delivering toxins, drugs, or agents. Damage is from the chemical, not the spray itself. Reservoir capacity varies by chemical viscosity.",
+      "category": "Spray Weapons",
+      "weapon": {"type":"spray","skill":"Guns:Spray","dv":"1d6","modes":["SS"],"range":10,"ammo":"30","ranged":true,"twoHanded":false,"reach":null,"traits":["area-control","chemical-carrier"]},
+      "cost": "Min/R/1",
+      "page": null
+    },
+    "flamer": {
+      "name": "Flamer (Spray)",
+      "short": "Pressurized flame projector. DV 2d10, SS/BF, Ammo 50, Range 15. Fire.",
+      "used_for": "Sprays burning fuel. On hit, target ignites and takes 1d6 fire damage per Action Turn until extinguished (full action). Useful for clearing infestations, infomorph-incinerated drones, and structure denial.",
+      "category": "Spray Weapons",
+      "weapon": {"type":"spray","skill":"Guns:Spray","dv":"2d10","modes":["SS","BF"],"range":15,"ammo":"50","ranged":true,"twoHanded":true,"reach":null,"traits":["fire","area-control"]},
+      "cost": "Mod/R/2",
+      "page": null
+    },
+    "torch-cutting": {
+      "name": "Cutting Torch (Spray)",
+      "short": "Industrial cutting beam. DV 2d10+5, SS, Ammo 25, Range 2. Armor-Piercing.",
+      "used_for": "Designed for cutting through hulls and bulkheads. As a weapon, requires touch-range, but halves Energy AV. Common in salvage, breaching, and improvised combat.",
+      "category": "Spray Weapons",
+      "weapon": {"type":"spray","skill":"Guns:Spray","dv":"2d10+5","modes":["SS"],"range":2,"ammo":"25","ranged":true,"twoHanded":false,"reach":null,"armorPiercing":true,"traits":["ap","fire","industrial"]},
+      "cost": "Min/1",
+      "page": null
+    },
+
+    "pistol-seeker": {
+      "name": "Pistol Seeker (Launcher)",
+      "short": "Sidearm micromissile launcher. DV per missile, SA, Ammo 6, Range 60.",
+      "used_for": "Sidearm-sized micromissile launcher. Single-handed; missiles smart-link by default. Load with any Missile or Seeker Payload entry. Restricted in most habitats.",
+      "category": "Seeker Launchers",
+      "weapon": {"type":"firearm","skill":"Guns:Seeker","dv":"per missile","modes":["SA"],"range":60,"ammo":"6","ranged":true,"twoHanded":false,"reach":null,"traits":["smart-linked","launcher"]},
+      "cost": "Mod/R/2",
+      "page": null
+    },
+    "rifle-seeker": {
+      "name": "Rifle Seeker (Launcher)",
+      "short": "Two-handed micromissile launcher. DV per missile, SA, Ammo 12, Range 200.",
+      "used_for": "Long-arm micromissile launcher. Smart-link by default. Holds 12 micromissiles; load with any Missile entry. Field-deployable squad weapon.",
+      "category": "Seeker Launchers",
+      "weapon": {"type":"firearm","skill":"Guns:Seeker","dv":"per missile","modes":["SA"],"range":200,"ammo":"12","ranged":true,"twoHanded":true,"reach":null,"traits":["smart-linked","launcher","long-range"]},
+      "cost": "Maj/R/3",
+      "page": null
+    },
+    "missile-launcher": {
+      "name": "Missile Launcher (Heavy)",
+      "short": "Rocket-grade launcher. DV per missile, SS, Ammo 4, Range 500.",
+      "used_for": "Crew-served heavy launcher firing full-sized missiles (not micros). Load with HE / HEAP / EMP / Plasma payloads. Anti-vehicle, anti-bunker, anti-large-synthmorph. Very restricted.",
+      "category": "Seeker Launchers",
+      "weapon": {"type":"firearm","skill":"Guns:Seeker","dv":"per missile","modes":["SS"],"range":500,"ammo":"4","ranged":true,"twoHanded":true,"reach":null,"traits":["smart-linked","launcher","heavy","long-range"]},
+      "cost": "Maj/R/3",
+      "page": null
+    },
+
+    "vibroblade": {
+      "name": "Vibroblade",
+      "short": "Powered ultrasonic blade. DV 2d10, Armor-Piercing, concealable.",
+      "used_for": "Hilt-powered ultrasonic blade vibrates the cutting edge to slice through armor. Halves Kinetic AV. Standard mercenary close-combat sidearm.",
+      "category": "Melee Weapons",
+      "weapon": {"type":"melee","skill":"Melee","dv":"2d10","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":false,"reach":"short","armorPiercing":true,"traits":["ap","concealable","powered"]},
+      "cost": "Min/R/1",
+      "page": null
+    },
+    "monomolecular-sword": {
+      "name": "Monomolecular Sword",
+      "short": "Single-atom-edged blade. DV 2d10+2, Armor-Piercing, reach.",
+      "used_for": "The edge is one molecule thick — cuts most matter trivially. Halves Kinetic AV. Two-handed or one-handed with SOM ≥ 15. Restricted as 'fundamentally lethal' in some habitats.",
+      "category": "Melee Weapons",
+      "weapon": {"type":"melee","skill":"Melee","dv":"2d10+2","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":false,"reach":"medium","armorPiercing":true,"traits":["ap","reach","monomolecular"]},
+      "cost": "Mod/R/2",
+      "page": null
+    },
+    "sword": {
+      "name": "Sword (Mundane)",
+      "short": "Conventional steel/composite blade. DV 2d10, reach medium.",
+      "used_for": "Old-style melee weapon. No armor-piercing, but cheap, legal almost everywhere, and intimidating. Common with traditionalists, ceremonial guards, and habitats with sword-fighting cultures.",
+      "category": "Melee Weapons",
+      "weapon": {"type":"melee","skill":"Melee","dv":"2d10","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":false,"reach":"medium","traits":["reach"]},
+      "cost": "Min/1",
+      "page": null
+    },
+
+    "shock-organ": {
+      "name": "Shock Organ (Implant)",
+      "short": "Bio-implanted shock attack. DV 1d6, Shock, Touch-Only. Non-lethal.",
+      "used_for": "On hit, target makes a SOM Check or is Stunned for 1 Action Turn. Concealed (registers as biology, not weapon). Useful for plurals, infiltrators, mindhackers.",
+      "category": "Implant Weapons",
+      "weapon": {"type":"implant","skill":"Melee","dv":"1d6","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":false,"reach":"short","shock":true,"nonLethal":true,"status":{"kind":"stunned","save":"SOM Check","escape":"Stunned ends end of next Action Turn","notes":"Implant — bypasses weapon scanners."},"traits":["non-lethal","shock","implant","concealable"]},
+      "cost": "Min/R/1",
+      "page": null
+    },
+    "drill-implant": {
+      "name": "Drill (Implant)",
+      "short": "Concealed pneumatic drill. DV 2d10, Armor-Piercing, Touch-Only.",
+      "used_for": "Industrial-grade drill mounted in forearm or palm. Halves Kinetic AV. Surprises armored targets at touch range. Concealed when retracted.",
+      "category": "Implant Weapons",
+      "weapon": {"type":"implant","skill":"Melee","dv":"2d10","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":false,"reach":"short","armorPiercing":true,"traits":["ap","implant","concealable","industrial"]},
+      "cost": "Mod/R/2",
+      "page": null
+    },
+    "spurs-implant": {
+      "name": "Spurs (Implant)",
+      "short": "Retractable heel/elbow blades. DV 1d10+SOM/10, concealable.",
+      "used_for": "Bio- or cyber-blade spurs extending from heel or elbow. Always-available kicking/elbowing weapon. Cannot be disarmed.",
+      "category": "Implant Weapons",
+      "weapon": {"type":"implant","skill":"Melee","dv":"1d10+SOM/10","modes":[],"range":0,"ammo":null,"ranged":false,"twoHanded":false,"reach":"short","traits":["implant","concealable"]},
+      "cost": "Min/R/1",
+      "page": null
+    },
+
+    "frag-grenade": {
+      "name": "Frag Grenade",
+      "short": "Fragmentation grenade. DV 2d10+5 · Radius 5m · Delay 1 turn.",
+      "used_for": "Throw or launch. On detonation, all targets within 5m radius take 2d10+5 kinetic damage; Fray ÷ 2 halves. Standard military fragmentation pattern.",
+      "category": "Grenades & Thrown",
+      "weapon": {"type":"grenade","skill":"Throw","dv":"2d10+5","radius":5,"delay":"1 turn","throwRange":30,"ranged":true,"twoHanded":false,"traits":["area-effect","consumable"]},
+      "cost": "Min/1",
+      "page": null
+    },
+    "plasma-grenade": {
+      "name": "Plasma Grenade",
+      "short": "Plasma-burst grenade. DV 3d10+10 · Radius 10m · Fire.",
+      "used_for": "Detonates in a 10m plasma fireball. Targets ignite (1d6 fire damage per turn until extinguished). Halves Energy AV via heat penetration.",
+      "category": "Grenades & Thrown",
+      "weapon": {"type":"grenade","skill":"Throw","dv":"3d10+10","radius":10,"delay":"1 turn","throwRange":30,"ranged":true,"twoHanded":false,"traits":["area-effect","consumable","fire"]},
+      "cost": "Mod/R/2",
+      "page": null
+    },
+    "emp-grenade": {
+      "name": "EMP Grenade",
+      "short": "Electromagnetic pulse. DV — · Radius 20m. Disables electronics.",
+      "used_for": "On detonation, all electronics within 20m make a SYS Check or are disabled for 1d10 minutes. Synthmorphs, mesh inserts, and bots are vulnerable; biomorphs without mesh inserts are unaffected.",
+      "category": "Grenades & Thrown",
+      "weapon": {"type":"grenade","skill":"Throw","dv":"—","radius":20,"delay":"instant","throwRange":30,"ranged":true,"twoHanded":false,"nonLethal":true,"status":{"kind":"emp","save":"SYS Check (electronics)","escape":"Reboot — 1d10 minutes","notes":"Affects synthmorphs, drones, mesh inserts. Doesn't affect biomorphs without electronics."},"traits":["area-effect","consumable","non-lethal","emp"]},
+      "cost": "Mod/R/2",
+      "page": null
+    },
+    "smoke-grenade": {
+      "name": "Smoke Grenade",
+      "short": "Vision-blocking smoke. DV — · Radius 5m · Lasts 5 turns.",
+      "used_for": "Creates a smoke cloud blocking line of sight (and most visual sensors). Targets within suffer −30 to ranged attacks and Perceive tests using vision.",
+      "category": "Grenades & Thrown",
+      "weapon": {"type":"grenade","skill":"Throw","dv":"—","radius":5,"delay":"instant","throwRange":30,"ranged":true,"twoHanded":false,"nonLethal":true,"status":{"kind":"smoke","save":"none — area effect","escape":"Move out of cloud or wait 5 turns","notes":"−30 to vision-based attacks/perceive within cloud. Lasts ~5 turns."},"traits":["area-effect","consumable","non-lethal","area-control"]},
+      "cost": "Min/1",
+      "page": null
+    },
+    "flashbang-grenade": {
+      "name": "Flash-Bang Grenade",
+      "short": "Sensory-overload grenade. DV — · Radius 5m. Stuns + dazzles.",
+      "used_for": "On detonation, targets within 5m make REF Check or are Stunned (1 Action Turn) and Dazzled (−30 to vision tests for 1 turn). Standard breach tool.",
+      "category": "Grenades & Thrown",
+      "weapon": {"type":"grenade","skill":"Throw","dv":"—","radius":5,"delay":"instant","throwRange":30,"ranged":true,"twoHanded":false,"nonLethal":true,"status":{"kind":"stunned","save":"REF Check","escape":"Stun ends end of next Action Turn; Dazzled wears off 1 turn after","notes":"Both effects apply on failure; only Dazzled on partial."},"traits":["area-effect","consumable","non-lethal","knockdown"]},
+      "cost": "Min/R/1",
+      "page": null
+    },
+    "splash-grenade": {
+      "name": "Splash Grenade",
+      "short": "Chemical-carrier grenade. DV 1d10 + chemical · Radius 4m.",
+      "used_for": "Disperses a liquid/aerosol payload (toxin, drug, neutralizer, healing spray, etc.). Base 1d10 splash damage from pressure; actual effect depends on chemical load.",
+      "category": "Grenades & Thrown",
+      "weapon": {"type":"grenade","skill":"Throw","dv":"1d10","radius":4,"delay":"instant","throwRange":30,"ranged":true,"twoHanded":false,"traits":["area-effect","consumable","chemical-carrier"]},
+      "cost": "Min/R/1",
+      "page": null
+    },
+    "shredder-grenade": {
+      "name": "Shredder Grenade",
+      "short": "Flechette grenade. DV 3d10 · Radius 8m.",
+      "used_for": "Sprays flechette fragments over 8m. Devastating against unarmored targets; loses effect against armor (Kinetic AV applies normally).",
+      "category": "Grenades & Thrown",
+      "weapon": {"type":"grenade","skill":"Throw","dv":"3d10","radius":8,"delay":"instant","throwRange":30,"ranged":true,"twoHanded":false,"traits":["area-effect","consumable","flechette"]},
+      "cost": "Mod/R/2",
+      "page": null
+    },
+    "smart-pinpoint-grenade": {
+      "name": "Smart-Pinpoint Grenade",
+      "short": "Homing micro-grenade. DV 2d10+5 · Radius 3m · Smart-guided.",
+      "used_for": "Tracks a designated target via smartlink and detonates within 3m of them. Bypasses Fray ÷ 2 (counts as smart). Ideal for surgical strikes in cluttered terrain.",
+      "category": "Grenades & Thrown",
+      "weapon": {"type":"grenade","skill":"Throw","dv":"2d10+5","radius":3,"delay":"instant","throwRange":30,"ranged":true,"twoHanded":false,"traits":["area-effect","consumable","homing","smart-linked"]},
+      "cost": "Mod/R/2",
+      "page": null
+    },
+
+    "frag-missile": {
+      "name": "Frag Missile",
+      "short": "Seeker payload. DV 2d10+10 · Radius 8m · Smart-guided.",
+      "used_for": "Loaded into Seeker launchers. On detonation, fragmentation pattern in 8m radius; Fray ÷ 2 halves. Targets in cover get the usual bonuses.",
+      "category": "Missiles & Seeker Payloads",
+      "weapon": {"type":"missile","skill":"Guns:Seeker","dv":"2d10+10","radius":8,"payload":"fragmentation","guidance":"smart-homing","launcherCompat":["pistol-seeker","rifle-seeker","missile-launcher"],"traits":["area-effect","consumable","smart-linked","homing"]},
+      "cost": "Mod/R/2",
+      "page": null
+    },
+    "plasma-missile": {
+      "name": "Plasma Missile",
+      "short": "Plasma seeker payload. DV 3d10+15 · Radius 12m · Fire.",
+      "used_for": "Plasma warhead. Devastating area effect; ignites targets (1d6/turn fire damage). For HEAVY launchers.",
+      "category": "Missiles & Seeker Payloads",
+      "weapon": {"type":"missile","skill":"Guns:Seeker","dv":"3d10+15","radius":12,"payload":"plasma","guidance":"smart-homing","launcherCompat":["rifle-seeker","missile-launcher"],"traits":["area-effect","consumable","smart-linked","homing","fire"]},
+      "cost": "Maj/X/4",
+      "page": null
+    },
+    "heap-missile": {
+      "name": "HEAP Missile",
+      "short": "High-Explosive Armor-Piercing. DV 3d10+10 · Radius 5m · AP.",
+      "used_for": "Anti-armor shaped charge. Smaller radius, but halves Kinetic AV. For piercing bunkers, heavy synthmorphs, vehicle hulls.",
+      "category": "Missiles & Seeker Payloads",
+      "weapon": {"type":"missile","skill":"Guns:Seeker","dv":"3d10+10","radius":5,"payload":"shaped-charge","guidance":"smart-homing","launcherCompat":["rifle-seeker","missile-launcher"],"armorPiercing":true,"traits":["area-effect","consumable","smart-linked","homing","ap"]},
+      "cost": "Maj/R/3",
+      "page": null
+    },
+    "he-missile": {
+      "name": "HE Missile",
+      "short": "High-Explosive. DV 4d10 · Radius 10m · Smart-guided.",
+      "used_for": "Plain explosive warhead. Larger radius than HEAP, less penetration. Anti-personnel area denial.",
+      "category": "Missiles & Seeker Payloads",
+      "weapon": {"type":"missile","skill":"Guns:Seeker","dv":"4d10","radius":10,"payload":"high-explosive","guidance":"smart-homing","launcherCompat":["rifle-seeker","missile-launcher"],"traits":["area-effect","consumable","smart-linked","homing"]},
+      "cost": "Maj/R/3",
+      "page": null
+    },
+    "emp-missile": {
+      "name": "EMP Missile",
+      "short": "Electromagnetic pulse seeker. DV — · Radius 25m.",
+      "used_for": "EMP burst in 25m. All electronics make SYS Check or are disabled for 1d10 minutes. Synthmorphs, drones, mesh inserts vulnerable. Doesn't damage biology.",
+      "category": "Missiles & Seeker Payloads",
+      "weapon": {"type":"missile","skill":"Guns:Seeker","dv":"—","radius":25,"payload":"emp","guidance":"smart-homing","launcherCompat":["rifle-seeker","missile-launcher"],"nonLethal":true,"status":{"kind":"emp","save":"SYS Check (electronics)","escape":"Reboot — 1d10 minutes","notes":"Affects synthmorphs, drones, mesh inserts."},"traits":["area-effect","consumable","smart-linked","homing","non-lethal","emp"]},
+      "cost": "Mod/R/2",
+      "page": null
+    },
+    "jammer-missile": {
+      "name": "Jammer Missile",
+      "short": "Comms-jamming seeker. DV — · Radius 20m. Disables wireless.",
+      "used_for": "Detonates as a persistent jammer (5 minutes). All wireless mesh inside 20m is blocked. Targets must rely on hardlines/visual/audio.",
+      "category": "Missiles & Seeker Payloads",
+      "weapon": {"type":"missile","skill":"Guns:Seeker","dv":"—","radius":20,"payload":"jammer","guidance":"smart-homing","launcherCompat":["rifle-seeker","missile-launcher"],"nonLethal":true,"status":{"kind":"jammed","save":"none — area effect","escape":"Move out of zone or wait 5 minutes","notes":"Wireless mesh, teleop, smartlink all disrupted within radius."},"traits":["area-effect","consumable","smart-linked","homing","non-lethal","emp"]},
+      "cost": "Mod/R/2",
+      "page": null
+    },
+    "smart-homing-missile": {
+      "name": "Smart Homing Missile",
+      "short": "Universal smart payload. DV 2d10+5 · Radius 5m.",
+      "used_for": "General-purpose tracking warhead. Locks via smartlink to designated target; ignores Fray ÷ 2 if smart-lock is achieved.",
+      "category": "Missiles & Seeker Payloads",
+      "weapon": {"type":"missile","skill":"Guns:Seeker","dv":"2d10+5","radius":5,"payload":"high-explosive","guidance":"smart-homing","launcherCompat":["pistol-seeker","rifle-seeker","missile-launcher"],"traits":["area-effect","consumable","smart-linked","homing"]},
+      "cost": "Mod/R/2",
+      "page": null
+    },
+
+    "plastic-explosive": {
+      "name": "Plastic Explosive",
+      "short": "Mouldable demo charge. DV 2d10+5 per kg · Radius 5m. Demolitions skill.",
+      "used_for": "Mouldable explosive packed against the target. Placement requires Demolitions skill test (failure = misfire or partial). DV scales linearly with mass. Common breach charge.",
+      "category": "Explosives & Mines",
+      "weapon": {"type":"explosive","skill":"Demolitions","dv":"2d10+5 (per kg)","radius":5,"placement":"1 minute / kg","trigger":"timer or remote","traits":["area-effect","consumable","demolitions"]},
+      "cost": "Mod/R/2",
+      "page": null
+    },
+    "thermite-charge": {
+      "name": "Thermite Charge",
+      "short": "Anti-armor incendiary. DV 4d10 · Radius 1m. Cuts armor.",
+      "used_for": "Burns through armor and bulkhead. Tiny radius, but bypasses Kinetic AV entirely. Placement requires Demolitions test. Used for breaching vaults, doors, vehicle hulls.",
+      "category": "Explosives & Mines",
+      "weapon": {"type":"explosive","skill":"Demolitions","dv":"4d10","radius":1,"placement":"30 seconds","trigger":"chemical fuse or remote","armorPiercing":true,"traits":["consumable","demolitions","ap","fire"]},
+      "cost": "Mod/R/2",
+      "page": null
+    },
+    "demolition-charge": {
+      "name": "Demolition Charge",
+      "short": "Heavy explosive. DV 5d10 · Radius 10m. Building demolition.",
+      "used_for": "Large pre-formed charge for structural demolition. Placement requires Demolitions test (often as a multi-test). For wrecking habitats, vehicles, bunkers.",
+      "category": "Explosives & Mines",
+      "weapon": {"type":"explosive","skill":"Demolitions","dv":"5d10","radius":10,"placement":"5 minutes","trigger":"timer or remote","traits":["area-effect","consumable","demolitions","heavy"]},
+      "cost": "Maj/R/3",
+      "page": null
+    },
+    "proximity-mine": {
+      "name": "Proximity Mine",
+      "short": "Motion-triggered mine. DV 3d10+5 · Radius 6m.",
+      "used_for": "Placed and armed; detonates when motion is detected within ~2m. Static area denial. Perceive test (−30 if hidden) to spot.",
+      "category": "Explosives & Mines",
+      "weapon": {"type":"mine","skill":"Demolitions","dv":"3d10+5","radius":6,"trigger":"motion (~2m)","detection":"Perceive (−30 if concealed)","traits":["area-effect","consumable","area-control"]},
+      "cost": "Mod/R/2",
+      "page": null
+    },
+    "smart-mine": {
+      "name": "Smart Mine",
+      "short": "IFF-discriminating mine. DV 2d10+10 · Radius 4m.",
+      "used_for": "Detonates only on non-friendly signatures (mesh ID, transponder, biometric profile). Allies pass safely. Higher-end area denial.",
+      "category": "Explosives & Mines",
+      "weapon": {"type":"mine","skill":"Demolitions","dv":"2d10+10","radius":4,"trigger":"IFF mismatch","detection":"Perceive (−30 if concealed)","traits":["area-effect","consumable","smart-linked","area-control"]},
+      "cost": "Mod/R/2",
+      "page": null
+    },
+    "claymore-mine": {
+      "name": "Claymore-Pattern Mine",
+      "short": "Directional flechette mine. DV 4d10 · Radius 10m cone · AP.",
+      "used_for": "Detonates a flechette cone in the direction it faces. Command-triggered (remote or tripwire). Halves Kinetic AV via velocity.",
+      "category": "Explosives & Mines",
+      "weapon": {"type":"mine","skill":"Demolitions","dv":"4d10","radius":10,"trigger":"command / tripwire","detection":"Perceive (−10, visible)","armorPiercing":true,"traits":["area-effect","consumable","directional","ap","flechette"]},
+      "cost": "Mod/R/2",
+      "page": null
+    },
+
+    "regular-ammo": {
+      "name": "Regular Ammo",
+      "short": "Standard kinetic rounds. Baseline.",
+      "used_for": "Default load for any Kinetic firearm. No modifier. Cheap, ubiquitous, legal where the gun itself is legal.",
+      "category": "Ammunition",
+      "weapon": {"type":"ammo","compatibility":["firearm"],"modifies":{"note":"baseline — no modifier"},"traits":[]},
+      "cost": "Min/1",
+      "page": null
+    },
+    "ap-ammo": {
+      "name": "Armor-Piercing Rounds",
+      "short": "Halves Kinetic AV. Loads into kinetic firearms.",
+      "used_for": "Replaces standard rounds. Halves the target's Kinetic AV. Cost is per magazine. Restricted in most civilian habitats.",
+      "category": "Ammunition",
+      "weapon": {"type":"ammo","compatibility":["firearm"],"modifies":{"armorPenetration":"halves Kinetic AV"},"traits":["ap"]},
+      "cost": "Min/R/1",
+      "page": null
+    },
+    "hollow-point-ammo": {
+      "name": "Hollow-Point Rounds",
+      "short": "+5 DV against unarmored / soft targets.",
+      "used_for": "Mushrooms on impact. +5 DV against unarmored targets; LOSES the bonus and 1d10 DV against any armor. Bad choice against synthmorphs.",
+      "category": "Ammunition",
+      "weapon": {"type":"ammo","compatibility":["firearm"],"modifies":{"dv":"+5 vs unarmored; −1d10 vs armored"},"traits":["hollow-point"]},
+      "cost": "Min/R/1",
+      "page": null
+    },
+    "accushot-ammo": {
+      "name": "Accushot (Smart) Rounds",
+      "short": "+10 to-hit. Requires smartlink.",
+      "used_for": "Smart rounds adjust mid-flight. +10 to-hit when fired through a smartlinked weapon. Useless without smartlink.",
+      "category": "Ammunition",
+      "weapon": {"type":"ammo","compatibility":["firearm"],"modifies":{"toHit":"+10 (requires smartlink)"},"traits":["smart-linked"]},
+      "cost": "Min/R/1",
+      "page": null
+    },
+    "electrocyte-ammo": {
+      "name": "Electrocyte Rounds",
+      "short": "Adds shock effect. Status: stunned.",
+      "used_for": "Discharge on impact. On hit, target also makes SOM Check or is Stunned for 1 Action Turn. DV reduced by 1d10 vs heavy armor. Non-lethal flavor.",
+      "category": "Ammunition",
+      "weapon": {"type":"ammo","compatibility":["firearm"],"modifies":{"status":"target makes SOM Check or Stunned 1 Action Turn"},"traits":["shock","non-lethal"]},
+      "cost": "Min/R/1",
+      "page": null
+    },
+    "capsule-ammo": {
+      "name": "Capsule Rounds",
+      "short": "Frangible toxin-carrier. DV 1d6 + toxin.",
+      "used_for": "Hollow capsule shatters on impact, delivering a chemical payload (toxin, drug, neutralizer, marker dye). Base damage is low; real effect is the payload.",
+      "category": "Ammunition",
+      "weapon": {"type":"ammo","compatibility":["firearm"],"modifies":{"dv":"reduced to 1d6","note":"delivers chemical payload"},"traits":["chemical-carrier"]},
+      "cost": "Min/R/1",
+      "page": null
+    },
+    "reactive-ammo": {
+      "name": "Reactive Anti-Armor Rounds",
+      "short": "Halves Kinetic AV; +1d10 DV vs synthmorphs.",
+      "used_for": "Small shaped-charge tip. Halves Kinetic AV; adds +1d10 DV against synthmorphs and heavy armor. Doesn't work in burst/full-auto modes (single shot only).",
+      "category": "Ammunition",
+      "weapon": {"type":"ammo","compatibility":["firearm"],"modifies":{"armorPenetration":"halves Kinetic AV","dv":"+1d10 vs synthmorphs","note":"single-shot only"},"traits":["ap","reactive"]},
+      "cost": "Mod/R/2",
+      "page": null
+    },
+
+    "smartlink-mod": {
+      "name": "Smartlink (Mod)",
+      "short": "+10 to-hit ranged. Requires mesh inserts.",
+      "used_for": "Attached to a Kinetic / Beam / Spray / Seeker weapon. Grants +10 to-hit on ranged attacks when the user has Basic Mesh Inserts or equivalent. Standard in Firewall-issued gear.",
+      "category": "Weapon Mods",
+      "weapon": {"type":"mod","compatibility":["firearm","beam","spray"],"modifies":{"toHit":"+10 ranged (requires mesh inserts)"},"traits":["smart-linked"]},
+      "cost": "Min/1",
+      "page": null
+    },
+    "extended-magazine-mod": {
+      "name": "Extended Magazine (Mod)",
+      "short": "1.5× ammo capacity.",
+      "used_for": "Increases the weapon's magazine capacity by 50% (round down). Bulkier silhouette. Compatible with any firearm using a removable magazine.",
+      "category": "Weapon Mods",
+      "weapon": {"type":"mod","compatibility":["firearm"],"modifies":{"ammoCapacity":"×1.5"},"traits":["extended-magazine"]},
+      "cost": "Min/1",
+      "page": null
+    },
+    "extended-barrel-mod": {
+      "name": "Extended Barrel (Mod)",
+      "short": "1.5× range.",
+      "used_for": "Longer barrel for extra range. Multiplies the weapon's Range rating by 1.5. Negates concealability — adds −10 to Frisk-resistance.",
+      "category": "Weapon Mods",
+      "weapon": {"type":"mod","compatibility":["firearm","beam"],"modifies":{"range":"×1.5","conceal":"−10"},"traits":["extended-barrel"]},
+      "cost": "Min/1",
+      "page": null
+    },
+    "suppressor-mod": {
+      "name": "Suppressor (Mod)",
+      "short": "−30 detection; −2 DV.",
+      "used_for": "Reduces muzzle flash and sound. −30 to others' Perceive tests to detect the shot. Costs −2 to weapon DV. Compatible with firearms only.",
+      "category": "Weapon Mods",
+      "weapon": {"type":"mod","compatibility":["firearm"],"modifies":{"detect":"−30 to detect shot","dv":"−2"},"traits":["suppressed"]},
+      "cost": "Min/R/1",
+      "page": null
+    },
+    "gyromount-mod": {
+      "name": "Gyromount (Mod)",
+      "short": "+20 to-hit when bracing.",
+      "used_for": "Gyroscopic stabilizer. +20 to-hit when the wielder takes a Quick Action to brace before firing. Bulky — counts as two-handed for any weapon while mounted.",
+      "category": "Weapon Mods",
+      "weapon": {"type":"mod","compatibility":["firearm","beam"],"modifies":{"toHit":"+20 when braced (Quick Action)","handedness":"forces two-handed"},"traits":["gyromounted"]},
+      "cost": "Mod/1",
+      "page": null
+    },
+    "concealed-holster-mod": {
+      "name": "Concealed Holster (Mod)",
+      "short": "+20 to conceal weapon.",
+      "used_for": "Specialized hidden holster. +20 to resist Frisk and concealment-detection tests. For pistol-class weapons only.",
+      "category": "Weapon Mods",
+      "weapon": {"type":"mod","compatibility":["firearm"],"modifies":{"conceal":"+20"},"traits":["concealable"]},
+      "cost": "Min/1",
+      "page": null
+    },
+
     "smart-cuffs": {
       "name": "Smart Cuffs (Cuffband)",
       "short": "Electronic handcuffs with remote operation and a built-in shock.",
@@ -3977,6 +4622,29 @@ const RULEBOOK_REFERENCE = {
       "implications": "Most mesh actions are Complex (your one combat action that round) or Task (out of combat, taking real time). The exception is your Muse, who can act in parallel with you. Plan your action economy: if you're hacking AND fighting in the same scene, you're going to fall behind unless someone else is keeping the opposition busy.",
       "page": 250
     }
+  },
+  "weapon_traits": {
+    "ap": { "label": "AP", "short": "Armor-Piercing — halves the relevant AV (Kinetic for firearms, Energy for beams)." },
+    "hollow-point": { "label": "Hollow-Point", "short": "Mushrooms on impact — +5 DV vs unarmored, −1d10 DV vs armored. Bad against synthmorphs." },
+    "smart-linked": { "label": "Smart-Linked", "short": "+10 to-hit when fired through a smartlinked weapon. Requires Basic Mesh Inserts or equivalent." },
+    "non-lethal": { "label": "Non-Lethal", "short": "Subdues rather than kills. Status-effect-based; status block lists save and escape." },
+    "area-control": { "label": "Area-Control", "short": "Affects an area, not a single target. Used for sprays, foams, smoke, jamming." },
+    "concealable": { "label": "Concealable", "short": "Easily hidden — bonus to resist Frisk checks. Most pistols, knives, and implants." },
+    "burst-capable": { "label": "Burst-Fire", "short": "Can fire short bursts (BF mode) for +1d10 DV or +10 to-hit at cost of extra ammo." },
+    "full-auto": { "label": "Full-Auto", "short": "Can fire fully automatic (FA mode) — area cone, multiple targets, heavy ammo cost." },
+    "homing": { "label": "Homing", "short": "Tracks the target via smartlink. Bypasses Fray ÷ 2 once smart-lock is established." },
+    "knockdown": { "label": "Knockdown", "short": "On hit, forces a SOM check or target falls Prone (and may be Stunned on heavy fail)." },
+    "suppressed": { "label": "Suppressed", "short": "−30 to others' Perceive tests to detect the shot. Costs −2 weapon DV." },
+    "gyromounted": { "label": "Gyromount", "short": "+20 to-hit when bracing (Quick Action). Forces two-handed handling while mounted." },
+    "two-handed": { "label": "Two-Handed", "short": "Requires two hands to wield. Cannot be used with another weapon simultaneously." },
+    "reach": { "label": "Reach", "short": "Extends melee range — opponents must move closer to retaliate." },
+    "monomolecular": { "label": "Monomolecular", "short": "Single-atom-thick edge. Implicit AP; cuts most matter trivially. Restricted." },
+    "flechette": { "label": "Flechette", "short": "Spray of fragments. Devastating vs unarmored, weak vs armor." },
+    "implant": { "label": "Implant", "short": "Built into the morph. Cannot be disarmed; passes weapon-scanners as biology/cybernetics." },
+    "shock": { "label": "Shock", "short": "Electric discharge — forces a SOM check or target is Stunned." },
+    "fire": { "label": "Fire", "short": "Ignites the target — 1d6/turn fire damage until extinguished (full action)." },
+    "heavy": { "label": "Heavy", "short": "Crew-served or braced — large, conspicuous, requires bracing for accuracy." },
+    "long-range": { "label": "Long-Range", "short": "Effective beyond standard weapon ranges. Pairs well with Aimed Action (+30)." }
   }
 };
 
@@ -4083,7 +4751,7 @@ function makeCharacterId() {
 }
 
 const newState = () => ({
-  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.10.10", mode:"chargen" },
+  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.11.0", mode:"chargen" },
   // v0.10: team-room metadata. Roomless local play has all nulls + empty teamName.
   // teamName persists locally even before joining a room (set it once, it sticks).
   team:{ roomId:null, teamName:"", lastPolledAt:null },
@@ -7673,6 +8341,423 @@ function buildStudioMesh(pc) {
   return wrap;
 }
 
+/* ── v0.11 Nanofab · Armaments Codex ──────────────────────────────────────
+   Game-dev framing: weapons/grenades/missiles/explosives/mines/ammo/mods
+   surface as a browseable codex (loadout + full library tabs), per
+   [[feedback_game-dev-catalogs]]. Reuses RULEBOOK_REFERENCE.gear_items
+   (any entry with `weapon != null`) + RULEBOOK_REFERENCE.weapon_traits.
+   Type-discriminated rendering via weapon.type. Reuses characterHasFabber()
+   for per-card fab badges. All additive — no schema-version bump. */
+
+const ARMAMENT_CLASS_TONES = {
+  firearm: "#c0392b",
+  beam: "#3498db",
+  spray: "#1abc9c",
+  melee: "#e67e22",
+  implant: "#27ae60",
+  grenade: "#f39c12",
+  missile: "#8e44ad",
+  explosive: "#d35400",
+  mine: "#7f8c8d",
+  ammo: "#95a5a6",
+  mod: "#16a085"
+};
+
+const ARMAMENT_CLASS_GROUPS = [
+  { key: "firearm",  label: "KINETIC",     match: e => e.category === "Kinetic Weapons" || (e.weapon && e.weapon.type === "firearm" && e.category !== "Seeker Launchers") },
+  { key: "beam",     label: "BEAM",        match: e => e.category === "Beam Weapons" },
+  { key: "spray",    label: "SPRAY",       match: e => e.category === "Spray Weapons" },
+  { key: "seeker",   label: "SEEKER",      match: e => e.category === "Seeker Launchers" },
+  { key: "melee",    label: "MELEE",       match: e => e.category === "Melee Weapons" },
+  { key: "implant",  label: "IMPLANT",     match: e => e.category === "Implant Weapons" },
+  { key: "grenade",  label: "GRENADES",    match: e => e.weapon && e.weapon.type === "grenade" },
+  { key: "missile",  label: "MISSILES",    match: e => e.weapon && e.weapon.type === "missile" },
+  { key: "explosive",label: "EXPLOSIVES & MINES", match: e => e.weapon && (e.weapon.type === "explosive" || e.weapon.type === "mine") },
+  { key: "ammo",     label: "AMMUNITION",  match: e => e.weapon && e.weapon.type === "ammo" },
+  { key: "mod",      label: "MODS",        match: e => e.weapon && e.weapon.type === "mod" }
+];
+
+function studioArmamentEntries() {
+  const items = (RULEBOOK_REFERENCE && RULEBOOK_REFERENCE.gear_items) || {};
+  const out = [];
+  Object.keys(items).forEach(key => {
+    const e = items[key];
+    if (e && e.weapon) out.push({ key, entry: e });
+  });
+  return out;
+}
+
+function studioArmamentClassOf(entry) {
+  for (const g of ARMAMENT_CLASS_GROUPS) {
+    if (g.match(entry)) return g.key;
+  }
+  return (entry.weapon && entry.weapon.type) || "firearm";
+}
+
+function studioArmamentOwnership(pc, entryKey, entry) {
+  const gear = (pc && pc.gear) || [];
+  // Match by id (slug equality) or by lowercased name slug.
+  const owned = gear.find(g => {
+    if (!g) return false;
+    if (g.id === entryKey) return true;
+    const nameSlug = (g.name || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    return nameSlug === entryKey;
+  });
+  if (owned) return owned.equipped ? "equipped" : "stowed";
+  const cost = (entry && entry.cost) || "";
+  if (/\/X(\/|$)/.test(cost)) return "illegal";
+  if (/\/R(\/|$)/.test(cost)) return "restricted";
+  return "available";
+}
+
+function studioArmamentFabReady(entry, pc) {
+  const fab = (typeof characterHasFabber === "function") ? characterHasFabber(pc) : null;
+  if (!fab) return false;
+  const cost = (entry && entry.cost) || "";
+  const complexity = cost.split("/")[0];
+  if (fab === "compact") return complexity === "Min";
+  if (fab === "medium") return complexity === "Min" || complexity === "Mod";
+  if (fab === "large" || fab === "fabber") return true;
+  return false;
+}
+
+function buildStudioWeaponTraitBadge(traitKey) {
+  const traits = (RULEBOOK_REFERENCE && RULEBOOK_REFERENCE.weapon_traits) || {};
+  const meta = traits[traitKey] || { label: traitKey, short: "" };
+  return h("span", {
+    class: "armament-trait-pill",
+    "data-tip": "weapon_traits." + traitKey,
+    style: { display:"inline-block", padding:"1px 7px", marginRight:"4px", marginBottom:"3px",
+             fontFamily:'"Share Tech Mono", ui-monospace, monospace', fontSize:"9.5px",
+             fontWeight:700, letterSpacing:"1.1px", textTransform:"uppercase",
+             color:"rgba(220,235,238,0.8)", background:"rgba(127,212,226,0.10)",
+             border:"1px solid rgba(127,212,226,0.30)", borderRadius:"2px", cursor:"help" }
+  }, meta.label || traitKey);
+}
+
+function buildStudioWeaponOwnershipChip(state) {
+  const conf = {
+    equipped:   { label:"EQUIPPED",   color:"#4caf50", bg:"rgba(76,175,80,0.12)" },
+    stowed:     { label:"IN LOADOUT", color:"#4fd4e0", bg:"rgba(79,212,224,0.12)" },
+    available:  { label:"AVAILABLE",  color:"#9aa3a8", bg:"rgba(154,163,168,0.10)" },
+    restricted: { label:"RESTRICTED", color:"#e6a23c", bg:"rgba(230,162,60,0.14)" },
+    illegal:    { label:"ILLEGAL",    color:"#c0392b", bg:"rgba(192,57,43,0.14)" }
+  }[state] || { label: state.toUpperCase(), color:"#9aa3a8", bg:"rgba(154,163,168,0.10)" };
+  return h("span", {
+    class: "armament-ownership-chip",
+    "data-ownership": state,
+    style: { padding:"2px 8px", fontFamily:'"Share Tech Mono", ui-monospace, monospace',
+             fontSize:"9px", fontWeight:800, letterSpacing:"1.4px",
+             color: conf.color, background: conf.bg,
+             border:"1px solid " + conf.color + "55", borderRadius:"2px" }
+  }, conf.label);
+}
+
+function buildStudioWeaponTierBadge(costStr) {
+  const cost = costStr || "—";
+  const parts = cost.split("/");
+  const complexity = parts[0] || "—";
+  const hasR = parts.some(p => p === "R");
+  const hasX = parts.some(p => p === "X");
+  const gp = parts.find(p => /^[0-9]+$/.test(p)) || "";
+  const tone = hasX ? "#c0392b" : hasR ? "#e6a23c" : "#7fd4e2";
+  const parts2 = [complexity];
+  if (hasR) parts2.push("R");
+  if (hasX) parts2.push("X");
+  if (gp) parts2.push(gp + " GP");
+  return h("span", {
+    class: "armament-tier-badge",
+    "data-cost": cost,
+    style: { padding:"2px 7px", fontFamily:'"Share Tech Mono", ui-monospace, monospace',
+             fontSize:"9px", fontWeight:700, letterSpacing:"1.2px",
+             color: tone, background:"rgba(7,24,29,0.5)",
+             border:"1px solid " + tone + "55", borderRadius:"2px" }
+  }, parts2.join(" · "));
+}
+
+function buildStudioWeaponFabBadge(entry, pc) {
+  const ready = studioArmamentFabReady(entry, pc);
+  const fab = (typeof characterHasFabber === "function") ? characterHasFabber(pc) : null;
+  const complexity = (entry && entry.cost || "").split("/")[0];
+  const needed = complexity === "Min" ? "Compact Fabber+"
+               : complexity === "Mod" ? "Medium Fabber+"
+               : complexity === "Maj" || complexity === "X" ? "Large Fabber"
+               : "Fabber";
+  const conf = ready
+    ? { label:"FABRICATABLE", color:"#4caf50", bg:"rgba(76,175,80,0.10)" }
+    : { label: fab ? ("NEEDS " + needed.toUpperCase()) : ("NEEDS " + needed.toUpperCase()), color:"#9aa3a8", bg:"rgba(154,163,168,0.10)" };
+  return h("span", {
+    class: "armament-fab-badge",
+    "data-fab-ready": ready ? "true" : "false",
+    style: { padding:"2px 7px", fontFamily:'"Share Tech Mono", ui-monospace, monospace',
+             fontSize:"9px", fontWeight:700, letterSpacing:"1.2px",
+             color: conf.color, background: conf.bg,
+             border:"1px solid " + conf.color + "55", borderRadius:"2px" }
+  }, conf.label);
+}
+
+function buildStudioRangeBands(weapon) {
+  if (!weapon) return null;
+  const type = weapon.type || "firearm";
+  if (!weapon.ranged || type === "melee" || type === "implant") {
+    const reach = weapon.reach || "short";
+    return h("div", { class:"armament-range-bands", style:{fontSize:"10.5px",color:"var(--st-ink-soft)",fontFamily:'"Share Tech Mono", ui-monospace, monospace',marginTop:"4px"} },
+      "▾ Melee · Reach: " + reach + " · opposed Melee test");
+  }
+  const r = weapon.range || 30;
+  return h("div", { class:"armament-range-bands", style:{fontSize:"10.5px",color:"var(--st-ink-soft)",fontFamily:'"Share Tech Mono", ui-monospace, monospace',marginTop:"4px",lineHeight:1.5} },
+    "▾ Range bands: PB (≤2m) +10 · Close (≤" + Math.max(2, Math.floor(r/3)) + "m) 0 · At-Range (≤" + r + "m) −10 · Beyond −10 per +" + Math.max(10, Math.floor(r/2)) + "m");
+}
+
+function buildStudioArmamentDefenderResponse(weapon) {
+  if (!weapon) return null;
+  const type = weapon.type || "firearm";
+  let text = null;
+  if (type === "melee" || type === "implant") text = "▾ Defender response: opposed Melee or Fray ÷ 2";
+  else if (type === "ammo" || type === "mod") text = null;
+  else if (type === "grenade" || type === "missile" || type === "explosive" || type === "mine") text = "▾ Defender response: Fray ÷ 2 vs area effect (halves DV on success)";
+  else if (weapon.ranged) text = "▾ Defender response: Fray ÷ 2 (ranged)";
+  if (!text) return null;
+  return h("div", { class:"armament-defender", style:{fontSize:"10.5px",color:"var(--st-ink-soft)",fontFamily:'"Share Tech Mono", ui-monospace, monospace',marginTop:"3px"} }, text);
+}
+
+function buildStudioArmamentStatChips(weapon) {
+  if (!weapon) return [];
+  const type = weapon.type || "firearm";
+  const tone = ARMAMENT_CLASS_TONES[type] || "#4fd4e0";
+  const mkChip = (label, value, accent) => h("span", {
+    class: "armament-stat-chip",
+    style: { display:"inline-block", padding:"3px 8px", marginRight:"6px", marginBottom:"4px",
+             fontFamily:'"Share Tech Mono", ui-monospace, monospace', fontSize:"10.5px",
+             fontWeight:700, letterSpacing:"0.6px",
+             color: accent || "var(--st-ink)", background:"rgba(7,24,29,0.55)",
+             border:"1px solid " + (accent || tone) + "55", borderRadius:"3px" }
+  },
+    h("span", { style:{opacity:0.55,marginRight:"4px",fontSize:"9px"} }, label),
+    String(value)
+  );
+  const chips = [];
+  if (weapon.nonLethal) {
+    const k = (weapon.status && weapon.status.kind) || "non-lethal";
+    chips.push(mkChip("STATUS", k.toUpperCase(), "#e6a23c"));
+  } else if (weapon.dv && weapon.dv !== "—") {
+    chips.push(mkChip("DV", weapon.dv, tone));
+  } else if (type === "ammo" || type === "mod") {
+    const m = weapon.modifies || {};
+    const mods = [];
+    if (m.dv) mods.push("DV " + m.dv);
+    if (m.toHit) mods.push(m.toHit);
+    if (m.armorPenetration) mods.push(m.armorPenetration);
+    if (m.ammoCapacity) mods.push("Capacity " + m.ammoCapacity);
+    if (m.range) mods.push("Range " + m.range);
+    if (m.detect) mods.push(m.detect);
+    if (m.conceal) mods.push("Conceal " + m.conceal);
+    if (m.status) mods.push(m.status);
+    if (m.note) mods.push(m.note);
+    chips.push(mkChip("EFFECT", mods.join(" · ") || "—", tone));
+  } else if (weapon.dv) {
+    chips.push(mkChip("DV", weapon.dv, tone));
+  }
+  if (type === "grenade" || type === "missile" || type === "explosive" || type === "mine") {
+    if (weapon.radius != null) chips.push(mkChip("BLAST", weapon.radius + "m"));
+    if (weapon.delay) chips.push(mkChip("DELAY", weapon.delay));
+    if (weapon.trigger) chips.push(mkChip("TRIGGER", weapon.trigger));
+    if (weapon.payload) chips.push(mkChip("PAYLOAD", weapon.payload));
+    if (weapon.throwRange) chips.push(mkChip("THROW", weapon.throwRange + "m"));
+    if (weapon.placement) chips.push(mkChip("PLACE", weapon.placement));
+  } else if (type === "ammo" || type === "mod") {
+    /* no further chips for modifier blueprints */
+  } else {
+    if (weapon.range != null && weapon.ranged) chips.push(mkChip("RANGE", weapon.range + "m"));
+    if (weapon.ammo != null && weapon.ammo !== null) chips.push(mkChip("AMMO", weapon.ammo));
+    if (weapon.modes && weapon.modes.length) chips.push(mkChip("MODES", weapon.modes.join("/")));
+    if (!weapon.ranged) chips.push(mkChip("REACH", weapon.reach || "short"));
+  }
+  return chips;
+}
+
+function buildStudioArmamentFooter(weapon) {
+  if (!weapon) return null;
+  const type = weapon.type || "firearm";
+  const kids = [];
+  if (weapon.nonLethal && weapon.status) {
+    kids.push(h("div", { class:"armament-status-block", style:{padding:"6px 8px",marginTop:"6px",background:"rgba(230,162,60,0.08)",border:"1px solid rgba(230,162,60,0.35)",borderRadius:"3px"} },
+      h("div", { style:{fontSize:"10px",color:"#e6a23c",fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontWeight:800,letterSpacing:"1.4px",marginBottom:"3px"} }, "STATUS · " + (weapon.status.kind || "non-lethal").toUpperCase()),
+      h("div", { style:{fontSize:"10.5px",color:"var(--st-ink-soft)",lineHeight:1.5} }, "▾ On hit: ", h("span", { style:{color:"var(--st-ink)"} }, weapon.status.save || "—")),
+      h("div", { style:{fontSize:"10.5px",color:"var(--st-ink-soft)",lineHeight:1.5} }, "▾ Escape: ", h("span", { style:{color:"var(--st-ink)"} }, weapon.status.escape || "—")),
+      weapon.status.notes ? h("div", { style:{fontSize:"10px",color:"var(--st-ink-mute)",fontStyle:"italic",marginTop:"2px"} }, weapon.status.notes) : null
+    ));
+  }
+  const defender = buildStudioArmamentDefenderResponse(weapon);
+  if (defender) kids.push(defender);
+  const ranges = buildStudioRangeBands(weapon);
+  if (ranges) kids.push(ranges);
+  if (type === "missile" && weapon.launcherCompat && weapon.launcherCompat.length) {
+    kids.push(h("div", { class:"armament-launcher-compat", style:{fontSize:"10px",color:"var(--st-ink-mute)",fontFamily:'"Share Tech Mono", ui-monospace, monospace',marginTop:"3px"} },
+      "▾ Loads into: " + weapon.launcherCompat.join(" · ")));
+  }
+  if ((type === "ammo" || type === "mod") && weapon.compatibility && weapon.compatibility.length) {
+    const verb = type === "ammo" ? "Loaded into" : "Attaches to";
+    kids.push(h("div", { class:"armament-compat", style:{fontSize:"10px",color:"var(--st-ink-mute)",fontFamily:'"Share Tech Mono", ui-monospace, monospace',marginTop:"3px"} },
+      "▾ " + verb + ": " + weapon.compatibility.join(" · ")));
+  }
+  if (kids.length === 0) return null;
+  return h("div", { class:"armament-footer", style:{marginTop:"6px"} }, ...kids);
+}
+
+function buildStudioArmamentCard(entryKey, entry, opts) {
+  opts = opts || {};
+  const mode = opts.mode || "codex";  // "codex" | "loadout"
+  const pc = opts.pc || null;
+  const owned = opts.owned || (pc ? studioArmamentOwnership(pc, entryKey, entry) : "available");
+  const weapon = (entry && entry.weapon) || {};
+  const cls = studioArmamentClassOf(entry);
+  const tone = ARMAMENT_CLASS_TONES[cls] || "#4fd4e0";
+  const lethalAttr = weapon.nonLethal ? "non-lethal" : "lethal";
+  const ownedAttr = (owned === "equipped" || owned === "stowed") ? "true" : "false";
+  const fabReady = pc ? studioArmamentFabReady(entry, pc) : false;
+  const headerRow = h("div", { class:"armament-card-header", style:{display:"flex",alignItems:"center",justifyContent:"space-between",gap:"8px",marginBottom:"4px",flexWrap:"wrap"} },
+    h("div", null,
+      h("span", { class:"armament-card-name", style:{fontSize:"13px",fontWeight:700,color:"var(--st-ink)"} }, entry.name || entryKey),
+      h("span", { class:"armament-card-class", style:{marginLeft:"8px",fontSize:"9.5px",fontFamily:'"Share Tech Mono", ui-monospace, monospace',color:tone,letterSpacing:"1.4px",fontWeight:700,textTransform:"uppercase"} }, "· " + cls)
+    ),
+    buildStudioWeaponOwnershipChip(owned)
+  );
+  const statChipsRow = h("div", { class:"armament-card-stats", style:{marginBottom:"4px"} }, ...buildStudioArmamentStatChips(weapon));
+  const modesLine = (weapon.skill || weapon.modes) ? h("div", { class:"armament-card-modeskill", style:{fontSize:"10.5px",color:"var(--st-ink-soft)",fontFamily:'"Share Tech Mono", ui-monospace, monospace',marginBottom:"4px"} },
+    (weapon.modes && weapon.modes.length ? "Modes: " + weapon.modes.join(" / ") + "  ·  " : "") +
+    (weapon.skill ? "Skill: " + weapon.skill : "")) : null;
+  const traits = weapon.traits || [];
+  const traitsRow = traits.length ? h("div", { class:"armament-card-traits", style:{marginBottom:"4px"} }, ...traits.map(t => buildStudioWeaponTraitBadge(t))) : null;
+  const footer = buildStudioArmamentFooter(weapon);
+  const tierFabRow = (mode === "codex") ? h("div", { class:"armament-card-tierfab", style:{display:"flex",gap:"6px",alignItems:"center",marginTop:"6px",flexWrap:"wrap"} },
+    buildStudioWeaponTierBadge(entry.cost),
+    buildStudioWeaponFabBadge(entry, pc)
+  ) : null;
+  const slug = entryKey;
+  return h("div", {
+    class: "armament-card",
+    "data-class": cls,
+    "data-lethal": lethalAttr,
+    "data-owned": ownedAttr,
+    "data-fab-ready": fabReady ? "true" : "false",
+    "data-tip": "gear_items." + slug,
+    style: { padding:"10px 12px", marginBottom:"8px", background:"linear-gradient(180deg, rgba(7,24,29,0.5), rgba(7,24,29,0.3))",
+             borderLeft:"4px solid " + tone, border:"1px solid rgba(127,212,226,0.22)", borderLeftWidth:"4px",
+             borderRadius:"3px" }
+  }, headerRow, statChipsRow, modesLine, traitsRow, footer, tierFabRow);
+}
+
+function buildStudioArmaments(pc) {
+  pc = pc || {};
+  const wrap = h("div", {
+    class:"armaments-panel",
+    "data-armaments-tab":"codex",
+    "data-filter-class":"all",
+    "data-filter-lethal":"all",
+    "data-filter-owned":"all",
+    "data-filter-fab":"all"
+  });
+  // Tab toggle
+  const tabRow = h("div", { class:"armaments-tabs", style:{display:"flex",gap:"4px",marginBottom:"10px"} });
+  const tabCodex = h("button", { class:"armaments-tab armaments-tab--active", "data-tab":"codex",
+    style:{flex:1,padding:"6px 10px",background:"rgba(79,212,224,0.18)",color:"var(--st-teal)",border:"1px solid rgba(127,212,226,0.55)",borderRadius:"3px",fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontSize:"10.5px",fontWeight:800,letterSpacing:"1.4px",textTransform:"uppercase",cursor:"pointer"},
+    onClick: () => { wrap.setAttribute("data-armaments-tab","codex"); tabCodex.classList.add("armaments-tab--active"); tabLoadout.classList.remove("armaments-tab--active"); tabCodex.style.background="rgba(79,212,224,0.18)"; tabLoadout.style.background="rgba(7,24,29,0.3)"; }
+  }, "Codex · ", h("span", { style:{opacity:0.6} }, "blueprint library"));
+  const tabLoadout = h("button", { class:"armaments-tab", "data-tab":"loadout",
+    style:{flex:1,padding:"6px 10px",background:"rgba(7,24,29,0.3)",color:"var(--st-ink-soft)",border:"1px solid rgba(127,212,226,0.30)",borderRadius:"3px",fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontSize:"10.5px",fontWeight:800,letterSpacing:"1.4px",textTransform:"uppercase",cursor:"pointer"},
+    onClick: () => { wrap.setAttribute("data-armaments-tab","loadout"); tabLoadout.classList.add("armaments-tab--active"); tabCodex.classList.remove("armaments-tab--active"); tabLoadout.style.background="rgba(79,212,224,0.18)"; tabLoadout.style.color="var(--st-teal)"; tabCodex.style.background="rgba(7,24,29,0.3)"; tabCodex.style.color="var(--st-ink-soft)"; }
+  }, "My Loadout · ", h("span", { style:{opacity:0.6} }, "equipped"));
+  tabRow.appendChild(tabCodex);
+  tabRow.appendChild(tabLoadout);
+  wrap.appendChild(tabRow);
+
+  // Filter chips
+  const filtersRow = h("div", { class:"armaments-filters", style:{display:"flex",flexWrap:"wrap",gap:"4px",marginBottom:"10px",padding:"6px",background:"rgba(7,24,29,0.3)",borderRadius:"3px"} });
+  const mkFilterChip = (groupAttr, value, label) => {
+    const chip = h("button", { class:"armaments-filter-chip", "data-group":groupAttr, "data-value":value,
+      style:{padding:"3px 8px",background:"rgba(7,24,29,0.4)",color:"var(--st-ink-soft)",border:"1px solid rgba(127,212,226,0.25)",borderRadius:"2px",fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontSize:"9.5px",fontWeight:700,letterSpacing:"1.0px",textTransform:"uppercase",cursor:"pointer"},
+      onClick: () => {
+        wrap.setAttribute("data-filter-" + groupAttr, value);
+        // Update active state for same-group chips
+        const groupChips = filtersRow.querySelectorAll('button[data-group="' + groupAttr + '"]');
+        groupChips.forEach(c => { c.style.background = "rgba(7,24,29,0.4)"; c.style.color = "var(--st-ink-soft)"; });
+        chip.style.background = "rgba(79,212,224,0.20)";
+        chip.style.color = "var(--st-teal)";
+      }
+    }, label);
+    return chip;
+  };
+  // Class filter
+  filtersRow.appendChild(mkFilterChip("class", "all", "All"));
+  ARMAMENT_CLASS_GROUPS.forEach(g => filtersRow.appendChild(mkFilterChip("class", g.key, g.label)));
+  // Lethality filter
+  filtersRow.appendChild(h("span", { style:{width:"1px",background:"rgba(127,212,226,0.25)",margin:"0 4px"} }));
+  filtersRow.appendChild(mkFilterChip("lethal", "all", "Lethal+Non"));
+  filtersRow.appendChild(mkFilterChip("lethal", "lethal", "Lethal"));
+  filtersRow.appendChild(mkFilterChip("lethal", "non-lethal", "Non-Lethal"));
+  // Ownership filter
+  filtersRow.appendChild(h("span", { style:{width:"1px",background:"rgba(127,212,226,0.25)",margin:"0 4px"} }));
+  filtersRow.appendChild(mkFilterChip("owned", "all", "All Items"));
+  filtersRow.appendChild(mkFilterChip("owned", "true", "Owned Only"));
+  // Fab filter
+  filtersRow.appendChild(h("span", { style:{width:"1px",background:"rgba(127,212,226,0.25)",margin:"0 4px"} }));
+  filtersRow.appendChild(mkFilterChip("fab", "all", "Any Fab"));
+  filtersRow.appendChild(mkFilterChip("fab", "true", "Fab-Ready"));
+  wrap.appendChild(filtersRow);
+
+  // Codex body — grouped by 11 sub-categories
+  const codexBody = h("div", { class:"armaments-codex-body", "data-armaments-view":"codex" });
+  const entries = studioArmamentEntries();
+  let totalRendered = 0;
+  ARMAMENT_CLASS_GROUPS.forEach(group => {
+    const groupEntries = entries.filter(({ entry }) => group.match(entry));
+    if (groupEntries.length === 0) return;
+    const ownedCount = groupEntries.filter(({ key, entry }) => {
+      const s = studioArmamentOwnership(pc, key, entry);
+      return s === "equipped" || s === "stowed";
+    }).length;
+    const header = h("div", { class:"armaments-group-header", style:{padding:"4px 8px",margin:"10px 0 6px",background:"rgba(7,24,29,0.6)",borderLeft:"3px solid " + (ARMAMENT_CLASS_TONES[group.key] || "#4fd4e0"),fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontSize:"10.5px",fontWeight:800,letterSpacing:"1.6px",color:"var(--st-teal)",textTransform:"uppercase"} },
+      "▸ " + group.label + " · " + groupEntries.length + " blueprints · " + ownedCount + " owned");
+    codexBody.appendChild(header);
+    groupEntries.forEach(({ key, entry }) => {
+      codexBody.appendChild(buildStudioArmamentCard(key, entry, { mode:"codex", pc }));
+      totalRendered++;
+    });
+  });
+  wrap.appendChild(codexBody);
+
+  // Loadout body — only weapons in pc.gear
+  const loadoutBody = h("div", { class:"armaments-loadout-body", "data-armaments-view":"loadout", style:{display:"none"} });
+  const pcWeapons = ((pc && pc.gear) || []).filter(g => g && g.weapon);
+  if (pcWeapons.length === 0) {
+    loadoutBody.appendChild(h("div", { style:{padding:"14px",fontSize:"12px",color:"var(--st-ink-mute)",fontStyle:"italic",textAlign:"center"} },
+      "No weapons in loadout. Switch to ", h("strong", { style:{color:"var(--st-teal)"} }, "Codex"), " to browse the full blueprint library."));
+  } else {
+    pcWeapons.forEach(g => {
+      const slug = (g.id) || (g.name || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      const refEntry = (RULEBOOK_REFERENCE && RULEBOOK_REFERENCE.gear_items && RULEBOOK_REFERENCE.gear_items[slug])
+        ? RULEBOOK_REFERENCE.gear_items[slug]
+        : { name: g.name, weapon: g.weapon, cost: g.cost || "—", category: "Weapons" };
+      loadoutBody.appendChild(buildStudioArmamentCard(slug, refEntry, { mode:"loadout", pc, owned: g.equipped ? "equipped" : "stowed" }));
+    });
+  }
+  wrap.appendChild(loadoutBody);
+
+  // CSS-driven tab switching: react to data-armaments-tab on wrap
+  // Inline-driven for harness compatibility — toggles display:none / display:block on bodies
+  const observer = (typeof MutationObserver !== "undefined") ? new MutationObserver(() => {
+    const t = wrap.getAttribute("data-armaments-tab");
+    codexBody.style.display = (t === "codex") ? "" : "none";
+    loadoutBody.style.display = (t === "loadout") ? "" : "none";
+  }) : null;
+  if (observer && typeof wrap.setAttribute === "function" && wrap.addEventListener) {
+    try { observer.observe(wrap, { attributes: true, attributeFilter: ["data-armaments-tab"] }); } catch(e) {}
+  }
+
+  return wrap;
+}
+
 function buildStudioGearItem(g) {
   const slug = g.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   return h("div", {
@@ -9541,6 +10626,16 @@ function buildStudioSheet() {
       buildStudioTurnCoach(pc)
     ));
   }
+  // v0.11 Nanofab · Armaments — codex of weapons/grenades/missiles/explosives/
+  // mines/ammo/mods. Codex (default) tab browses the full blueprint library;
+  // Loadout tab filters to PC's equipped weapons. Open by default in play,
+  // collapsed in chargen but kicker advertises catalog reach.
+  rightRail.appendChild(buildStudioSection({ key:"armaments", title:"Nanofab · Armaments", color:"var(--st-teal)", icon:"combat",
+    kicker:"codex · 70+ blueprints · 11 classes · loadout view",
+    defaultOpen: isPlay,
+    panelStyle:{ maxHeight:"640px", overflowY:"auto" } },
+    buildStudioArmaments(pc)
+  ));
   // Roll Log — always visible (helps both chargen [verify mechanic] and play).
   rightRail.appendChild(buildStudioSection({ key:"rollLog", title:"Roll Log", color:"var(--st-teal)", icon:"log", kicker:"last 12 rolls", defaultOpen: isPlay },
     buildStudioRollLog(pc)

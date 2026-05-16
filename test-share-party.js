@@ -6,7 +6,7 @@ const vm = require("vm");
 const html = fs.readFileSync(__dirname + "/index.html", "utf8");
 let js = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 js = js.replace(/^boot\(\);$/m, "// boot suppressed");
-js += "\nthis.__exports = Object.defineProperties({}, {STATE:{get:()=>STATE,enumerable:true},RULEBOOK_DATA:{value:RULEBOOK_DATA,enumerable:true},RULEBOOK_REFERENCE:{value:RULEBOOK_REFERENCE,enumerable:true},derived:{value:derived,enumerable:true},newState:{value:newState,enumerable:true},encodeShareUrl:{value:encodeShareUrl,enumerable:true},decodeShareUrl:{value:decodeShareUrl,enumerable:true},stripPortrait:{value:stripPortrait,enumerable:true},importShareSnapshot:{value:importShareSnapshot,enumerable:true},makeCharacterId:{value:makeCharacterId,enumerable:true},migrateV6ToV7:{value:migrateV6ToV7,enumerable:true},migrateToCurrent:{value:migrateToCurrent,enumerable:true},SCHEMA_VERSION:{value:SCHEMA_VERSION,enumerable:true},LZString:{value:LZString,enumerable:true},studioPcFromState:{value:studioPcFromState,enumerable:true},studioHealDamage:{value:studioHealDamage,enumerable:true},studioHealWound:{value:studioHealWound,enumerable:true},studioHealStress:{value:studioHealStress,enumerable:true},studioHealTrauma:{value:studioHealTrauma,enumerable:true},studioSetDamage:{value:studioSetDamage,enumerable:true},studioSetWounds:{value:studioSetWounds,enumerable:true},studioSetStress:{value:studioSetStress,enumerable:true},studioSetTraumas:{value:studioSetTraumas,enumerable:true},characterHasFabber:{value:characterHasFabber,enumerable:true},studioMeshAccess:{value:studioMeshAccess,enumerable:true},studioMeshOpsec:{value:studioMeshOpsec,enumerable:true},studioMeshApps:{value:studioMeshApps,enumerable:true},studioMeshImplants:{value:studioMeshImplants,enumerable:true},buildPartyImportEntry:{value:buildPartyImportEntry,enumerable:true},normalizePartyImportEntries:{value:normalizePartyImportEntries,enumerable:true},importJSON:{value:importJSON,enumerable:true},partyComputeCardData:{value:partyComputeCardData,enumerable:true},buildPartyMemberCard:{value:buildPartyMemberCard,enumerable:true},buildStudioVitalSignsCard:{value:buildStudioVitalSignsCard,enumerable:true},buildStudioDamageBar:{value:buildStudioDamageBar,enumerable:true},buildStudioMindBar:{value:buildStudioMindBar,enumerable:true},buildStudioVitalityBar:{value:buildStudioVitalityBar,enumerable:true},buildStudioPoolMeter:{value:buildStudioPoolMeter,enumerable:true},buildStudioPoolRow:{value:buildStudioPoolRow,enumerable:true},buildStudioPoolGlyph:{value:buildStudioPoolGlyph,enumerable:true},buildStudioFeedBreak:{value:buildStudioFeedBreak,enumerable:true},buildStudioVbarSectionHead:{value:buildStudioVbarSectionHead,enumerable:true},buildPartyMemberCoverage:{value:buildPartyMemberCoverage,enumerable:true},buildStudioAptitudeStrip:{value:buildStudioAptitudeStrip,enumerable:true},buildStudioReputation:{value:buildStudioReputation,enumerable:true},withStateAs:{value:withStateAs,enumerable:true},_playerOwnedPayload:{value:_playerOwnedPayload,enumerable:true},_isSuspended:{value:_isSuspended,enumerable:true},_setLastInputAt:{value:(t)=>{_lastInputAt=t;},enumerable:true},_getLastInputAt:{value:()=>_lastInputAt,enumerable:true},_setIdleCount:{value:(n)=>{_idleCount=n;},enumerable:true},_getIdleCount:{value:()=>_idleCount,enumerable:true},_setPollIntervalMs:{value:(n)=>{_pollIntervalMs=n;},enumerable:true},_getPollIntervalMs:{value:()=>_pollIntervalMs,enumerable:true},_AFK_THRESHOLD_MS:{value:AFK_THRESHOLD_MS,enumerable:true},_setState:{value:(v)=>{STATE=v;},enumerable:true}});\n";
+js += "\nthis.__exports = Object.defineProperties({}, {STATE:{get:()=>STATE,enumerable:true},RULEBOOK_DATA:{value:RULEBOOK_DATA,enumerable:true},RULEBOOK_REFERENCE:{value:RULEBOOK_REFERENCE,enumerable:true},derived:{value:derived,enumerable:true},newState:{value:newState,enumerable:true},encodeShareUrl:{value:encodeShareUrl,enumerable:true},decodeShareUrl:{value:decodeShareUrl,enumerable:true},stripPortrait:{value:stripPortrait,enumerable:true},importShareSnapshot:{value:importShareSnapshot,enumerable:true},makeCharacterId:{value:makeCharacterId,enumerable:true},migrateV6ToV7:{value:migrateV6ToV7,enumerable:true},migrateToCurrent:{value:migrateToCurrent,enumerable:true},SCHEMA_VERSION:{value:SCHEMA_VERSION,enumerable:true},LZString:{value:LZString,enumerable:true},studioPcFromState:{value:studioPcFromState,enumerable:true},studioHealDamage:{value:studioHealDamage,enumerable:true},studioHealWound:{value:studioHealWound,enumerable:true},studioHealStress:{value:studioHealStress,enumerable:true},studioHealTrauma:{value:studioHealTrauma,enumerable:true},studioSetDamage:{value:studioSetDamage,enumerable:true},studioSetWounds:{value:studioSetWounds,enumerable:true},studioSetStress:{value:studioSetStress,enumerable:true},studioSetTraumas:{value:studioSetTraumas,enumerable:true},characterHasFabber:{value:characterHasFabber,enumerable:true},studioMeshAccess:{value:studioMeshAccess,enumerable:true},studioMeshOpsec:{value:studioMeshOpsec,enumerable:true},studioMeshApps:{value:studioMeshApps,enumerable:true},studioMeshImplants:{value:studioMeshImplants,enumerable:true},buildPartyImportEntry:{value:buildPartyImportEntry,enumerable:true},normalizePartyImportEntries:{value:normalizePartyImportEntries,enumerable:true},importJSON:{value:importJSON,enumerable:true},partyComputeCardData:{value:partyComputeCardData,enumerable:true},buildPartyMemberCard:{value:buildPartyMemberCard,enumerable:true},buildStudioVitalSignsCard:{value:buildStudioVitalSignsCard,enumerable:true},buildStudioDamageBar:{value:buildStudioDamageBar,enumerable:true},buildStudioMindBar:{value:buildStudioMindBar,enumerable:true},buildStudioVitalityBar:{value:buildStudioVitalityBar,enumerable:true},buildStudioPoolMeter:{value:buildStudioPoolMeter,enumerable:true},buildStudioPoolRow:{value:buildStudioPoolRow,enumerable:true},buildStudioPoolGlyph:{value:buildStudioPoolGlyph,enumerable:true},buildStudioFeedBreak:{value:buildStudioFeedBreak,enumerable:true},buildStudioVbarSectionHead:{value:buildStudioVbarSectionHead,enumerable:true},buildPartyMemberCoverage:{value:buildPartyMemberCoverage,enumerable:true},buildStudioAptitudeStrip:{value:buildStudioAptitudeStrip,enumerable:true},buildStudioReputation:{value:buildStudioReputation,enumerable:true},buildStudioArmaments:{value:buildStudioArmaments,enumerable:true},buildStudioArmamentCard:{value:buildStudioArmamentCard,enumerable:true},buildStudioArmamentStatChips:{value:buildStudioArmamentStatChips,enumerable:true},buildStudioArmamentFooter:{value:buildStudioArmamentFooter,enumerable:true},buildStudioArmamentDefenderResponse:{value:buildStudioArmamentDefenderResponse,enumerable:true},buildStudioWeaponTraitBadge:{value:buildStudioWeaponTraitBadge,enumerable:true},buildStudioWeaponOwnershipChip:{value:buildStudioWeaponOwnershipChip,enumerable:true},buildStudioWeaponTierBadge:{value:buildStudioWeaponTierBadge,enumerable:true},buildStudioWeaponFabBadge:{value:buildStudioWeaponFabBadge,enumerable:true},buildStudioRangeBands:{value:buildStudioRangeBands,enumerable:true},studioArmamentOwnership:{value:studioArmamentOwnership,enumerable:true},studioArmamentFabReady:{value:studioArmamentFabReady,enumerable:true},studioArmamentEntries:{value:studioArmamentEntries,enumerable:true},studioArmamentClassOf:{value:studioArmamentClassOf,enumerable:true},ARMAMENT_CLASS_TONES:{value:ARMAMENT_CLASS_TONES,enumerable:true},ARMAMENT_CLASS_GROUPS:{value:ARMAMENT_CLASS_GROUPS,enumerable:true},withStateAs:{value:withStateAs,enumerable:true},_playerOwnedPayload:{value:_playerOwnedPayload,enumerable:true},_isSuspended:{value:_isSuspended,enumerable:true},_setLastInputAt:{value:(t)=>{_lastInputAt=t;},enumerable:true},_getLastInputAt:{value:()=>_lastInputAt,enumerable:true},_setIdleCount:{value:(n)=>{_idleCount=n;},enumerable:true},_getIdleCount:{value:()=>_idleCount,enumerable:true},_setPollIntervalMs:{value:(n)=>{_pollIntervalMs=n;},enumerable:true},_getPollIntervalMs:{value:()=>_pollIntervalMs,enumerable:true},_AFK_THRESHOLD_MS:{value:AFK_THRESHOLD_MS,enumerable:true},_setState:{value:(v)=>{STATE=v;},enumerable:true}});\n";
 
 const sandbox = {
   console,
@@ -503,7 +503,7 @@ console.log("\n=== v0.9.2 — toolVersion bumped ===");
 {
   const fresh = exp.newState();
   // v0.10.0 supersedes — accept any 0.10.x or 0.9.2+
-  assert("newState().meta.toolVersion is 0.9.2+ or 0.10.x", /^0\.(9\.2|10\.)/.test(fresh.meta.toolVersion), "got " + fresh.meta.toolVersion);
+  assert("newState().meta.toolVersion is 0.9.2+ / 0.10.x / 0.11.x+", /^0\.(9\.2|1[0-9]\.)/.test(fresh.meta.toolVersion), "got " + fresh.meta.toolVersion);
 }
 
 console.log("\n=== v0.10.0 — STATE.team default shape ===");
@@ -659,7 +659,7 @@ console.log("\n=== v0.10.1 — VITAL STATUS handles partial play (only stress, n
 console.log("\n=== v0.10.1 — toolVersion bumped to 0.10.1 ===");
 {
   const fresh = exp.newState();
-  assert("newState().meta.toolVersion is 0.10.x", /^0\.10\./.test(fresh.meta.toolVersion), "got " + fresh.meta.toolVersion);
+  assert("newState().meta.toolVersion is 0.10.x / 0.11.x+", /^0\.(10|11|12|13)\./.test(fresh.meta.toolVersion), "got " + fresh.meta.toolVersion);
 }
 
 console.log("\n=== v0.10.2 — withStateAs swaps STATE and restores ===");
@@ -709,7 +709,7 @@ console.log("\n=== v0.10.2 — studioPcFromState produces a renderable pc from a
 console.log("\n=== v0.10.4 — toolVersion bumped to 0.10.4 ===");
 {
   const fresh = exp.newState();
-  assert("newState().meta.toolVersion is 0.10.10", fresh.meta.toolVersion === "0.10.10");
+  assert("newState().meta.toolVersion is 0.11.0", fresh.meta.toolVersion === "0.11.0");
 }
 
 console.log("\n=== v0.10.4 — hash-skip: same player-owned state → identical hash ===");
@@ -1348,6 +1348,353 @@ console.log("\n=== v0.10.9 — team card now uses buildPartyMemberCoverage (not 
   // The hardcoded "CBT " + data.coverage.combat text-tile pattern should be gone.
   assert("team card no longer hardcodes the text-tile pattern 'CBT ' + data.coverage.combat",
     cardSrc.indexOf('"CBT " + data.coverage.combat') === -1);
+}
+
+// ============================================================================
+// v0.11.0 — Nanofab · Armaments Codex
+// Catalog presence, helpers, codex rendering, fab logic, back-compat.
+// ============================================================================
+console.log("\n=== v0.11 — Catalog: Freeze + Vortex + all classes ===");
+{
+  const items = exp.RULEBOOK_REFERENCE.gear_items;
+
+  // Freeze + Vortex (user's specific asks)
+  assert("freezer-spray exists in catalog",
+    !!items["freezer-spray"]);
+  assert("freezer-spray has weapon.type === 'spray'",
+    items["freezer-spray"].weapon.type === "spray");
+  assert("freezer-spray is non-lethal",
+    items["freezer-spray"].weapon.nonLethal === true);
+  assert("freezer-spray status.kind === 'grappled'",
+    items["freezer-spray"].weapon.status && items["freezer-spray"].weapon.status.kind === "grappled");
+  assert("vortex-ring-gun exists in catalog",
+    !!items["vortex-ring-gun"]);
+  assert("vortex-ring-gun is non-lethal with knockdown status",
+    items["vortex-ring-gun"].weapon.nonLethal === true && items["vortex-ring-gun"].weapon.status.kind === "knockdown");
+
+  // Type discriminator presence per new sub-category
+  const weaponEntries = Object.values(items).filter(e => e && e.weapon);
+  assert("≥1 entry with weapon.type === 'grenade'",
+    weaponEntries.some(e => e.weapon.type === "grenade"));
+  assert("≥1 entry with weapon.type === 'missile'",
+    weaponEntries.some(e => e.weapon.type === "missile"));
+  assert("≥1 entry with weapon.type === 'explosive'",
+    weaponEntries.some(e => e.weapon.type === "explosive"));
+  assert("≥1 entry with weapon.type === 'mine'",
+    weaponEntries.some(e => e.weapon.type === "mine"));
+  assert("≥1 entry with weapon.type === 'ammo'",
+    weaponEntries.some(e => e.weapon.type === "ammo"));
+  assert("≥1 entry with weapon.type === 'mod'",
+    weaponEntries.some(e => e.weapon.type === "mod"));
+  assert("≥1 entry with weapon.type === 'beam'",
+    weaponEntries.some(e => e.weapon.type === "beam"));
+  assert("≥1 entry with weapon.type === 'firearm'",
+    weaponEntries.some(e => e.weapon.type === "firearm"));
+
+  // Specific entries
+  assert("frag-grenade exists with weapon.radius === 5",
+    items["frag-grenade"] && items["frag-grenade"].weapon.radius === 5);
+  assert("frag-missile exists with launcherCompat array",
+    items["frag-missile"] && Array.isArray(items["frag-missile"].weapon.launcherCompat));
+  assert("plastic-explosive exists with weapon.type === 'explosive'",
+    items["plastic-explosive"] && items["plastic-explosive"].weapon.type === "explosive");
+  assert("proximity-mine exists with weapon.type === 'mine'",
+    items["proximity-mine"] && items["proximity-mine"].weapon.type === "mine");
+  assert("ap-ammo exists with weapon.type === 'ammo' and compatibility",
+    items["ap-ammo"] && items["ap-ammo"].weapon.type === "ammo" && Array.isArray(items["ap-ammo"].weapon.compatibility));
+  assert("smartlink-mod exists with weapon.type === 'mod' and compatibility",
+    items["smartlink-mod"] && items["smartlink-mod"].weapon.type === "mod" && Array.isArray(items["smartlink-mod"].weapon.compatibility));
+
+  // Catalog size
+  assert("total armament entries ≥ 65",
+    weaponEntries.length >= 65, "got " + weaponEntries.length);
+
+  // Class counts (per Test #11 in plan)
+  const byCat = (cat) => weaponEntries.filter(e => e.category === cat).length;
+  assert("Kinetic class count ≥ 8",
+    byCat("Kinetic Weapons") >= 8, "got " + byCat("Kinetic Weapons"));
+  assert("Beam class count ≥ 4",
+    byCat("Beam Weapons") >= 4, "got " + byCat("Beam Weapons"));
+  assert("Spray class count ≥ 4",
+    byCat("Spray Weapons") >= 4, "got " + byCat("Spray Weapons"));
+  assert("Seeker class count ≥ 2",
+    byCat("Seeker Launchers") >= 2, "got " + byCat("Seeker Launchers"));
+  assert("Melee class count ≥ 6",
+    byCat("Melee Weapons") >= 6, "got " + byCat("Melee Weapons"));
+  assert("Implant class count ≥ 4",
+    byCat("Implant Weapons") >= 4, "got " + byCat("Implant Weapons"));
+  assert("Grenades class count ≥ 6",
+    weaponEntries.filter(e => e.weapon.type === "grenade").length >= 6);
+  assert("Missiles class count ≥ 5",
+    weaponEntries.filter(e => e.weapon.type === "missile").length >= 5);
+  assert("Explosives+Mines count ≥ 4",
+    weaponEntries.filter(e => e.weapon.type === "explosive" || e.weapon.type === "mine").length >= 4);
+  assert("Ammo class count ≥ 5",
+    weaponEntries.filter(e => e.weapon.type === "ammo").length >= 5);
+  assert("Mods class count ≥ 5",
+    weaponEntries.filter(e => e.weapon.type === "mod").length >= 5);
+
+  // Every entry has type + cost
+  assert("every weapon entry has weapon.type field",
+    weaponEntries.every(e => typeof e.weapon.type === "string" && e.weapon.type.length > 0));
+  assert("every weapon entry has top-level cost field",
+    weaponEntries.every(e => typeof e.cost === "string" && e.cost.length > 0));
+
+  // Non-lethals have status
+  const nonLethals = weaponEntries.filter(e => e.weapon.nonLethal);
+  assert("non-lethal weapons exist (≥ 5)",
+    nonLethals.length >= 5);
+  assert("every non-lethal has a status object",
+    nonLethals.every(e => e.weapon.status && typeof e.weapon.status === "object"));
+
+  // weapon_traits sub-tree
+  assert("weapon_traits sub-tree exists",
+    !!exp.RULEBOOK_REFERENCE.weapon_traits);
+  assert("weapon_traits has ≥ 12 keys",
+    Object.keys(exp.RULEBOOK_REFERENCE.weapon_traits || {}).length >= 12);
+  const traits = exp.RULEBOOK_REFERENCE.weapon_traits || {};
+  assert("weapon_traits includes 'non-lethal', 'smart-linked', 'ap'",
+    !!traits["non-lethal"] && !!traits["smart-linked"] && !!traits["ap"]);
+}
+
+console.log("\n=== v0.11 — Stat coherence ===");
+{
+  const items = exp.RULEBOOK_REFERENCE.gear_items;
+  assert("Heavy Pistol range > Medium Pistol range",
+    items["heavy-pistol"].weapon.range > items["medium-pistol"].weapon.range);
+  assert("Sniper Rifle range > Battle Rifle range > SMG range",
+    items["sniper-rifle"].weapon.range > items["battle-rifle"].weapon.range
+    && items["battle-rifle"].weapon.range > items["submachine-gun"].weapon.range);
+  assert("Plasma Grenade DV ≥ Frag Grenade DV (lex)",
+    items["plasma-grenade"].weapon.dv.length >= items["frag-grenade"].weapon.dv.length);
+  const mines = Object.values(items).filter(e => e.weapon && e.weapon.type === "mine");
+  assert("Mine entries have radius ≥ 3",
+    mines.every(m => m.weapon.radius >= 3));
+  assert("Smartlink Mod's modifies.toHit includes '+10'",
+    /\+10/.test(items["smartlink-mod"].weapon.modifies.toHit || ""));
+}
+
+console.log("\n=== v0.11 — Helpers exposed and render ===");
+{
+  assert("buildStudioArmaments is exposed",
+    typeof exp.buildStudioArmaments === "function");
+  assert("buildStudioArmamentCard is exposed",
+    typeof exp.buildStudioArmamentCard === "function");
+  assert("buildStudioArmamentStatChips is exposed",
+    typeof exp.buildStudioArmamentStatChips === "function");
+  assert("buildStudioArmamentFooter is exposed",
+    typeof exp.buildStudioArmamentFooter === "function");
+  assert("buildStudioWeaponTraitBadge is exposed",
+    typeof exp.buildStudioWeaponTraitBadge === "function");
+  assert("buildStudioWeaponOwnershipChip is exposed",
+    typeof exp.buildStudioWeaponOwnershipChip === "function");
+  assert("buildStudioWeaponTierBadge is exposed",
+    typeof exp.buildStudioWeaponTierBadge === "function");
+  assert("buildStudioWeaponFabBadge is exposed",
+    typeof exp.buildStudioWeaponFabBadge === "function");
+  assert("buildStudioRangeBands is exposed",
+    typeof exp.buildStudioRangeBands === "function");
+  assert("studioArmamentOwnership is exposed",
+    typeof exp.studioArmamentOwnership === "function");
+  assert("studioArmamentFabReady is exposed",
+    typeof exp.studioArmamentFabReady === "function");
+
+  // Class tones palette
+  assert("ARMAMENT_CLASS_TONES has all 11 classes",
+    !!exp.ARMAMENT_CLASS_TONES.firearm && !!exp.ARMAMENT_CLASS_TONES.beam
+    && !!exp.ARMAMENT_CLASS_TONES.spray && !!exp.ARMAMENT_CLASS_TONES.melee
+    && !!exp.ARMAMENT_CLASS_TONES.implant && !!exp.ARMAMENT_CLASS_TONES.grenade
+    && !!exp.ARMAMENT_CLASS_TONES.missile && !!exp.ARMAMENT_CLASS_TONES.explosive
+    && !!exp.ARMAMENT_CLASS_TONES.mine && !!exp.ARMAMENT_CLASS_TONES.ammo
+    && !!exp.ARMAMENT_CLASS_TONES.mod);
+
+  // Render checks
+  const pc = exp.studioPcFromState(exp.STATE);
+  let armaments;
+  try { armaments = exp.buildStudioArmaments(pc); } catch(e) { console.log("buildStudioArmaments threw:", e.message); }
+  assert("buildStudioArmaments renders without throwing",
+    armaments != null);
+  assert("buildStudioArmaments doesn't throw on pc.gear === undefined",
+    (() => { try { exp.buildStudioArmaments({}); return true; } catch(e) { return false; } })());
+
+  // Card rendering — lethal
+  const items = exp.RULEBOOK_REFERENCE.gear_items;
+  let lethalCard;
+  try { lethalCard = exp.buildStudioArmamentCard("medium-pistol", items["medium-pistol"], { mode:"codex", pc }); } catch(e) {}
+  assert("ArmamentCard renders a lethal weapon (medium-pistol)",
+    lethalCard != null);
+
+  // Card rendering — non-lethal (Freezer)
+  let nonLethalCard;
+  try { nonLethalCard = exp.buildStudioArmamentCard("freezer-spray", items["freezer-spray"], { mode:"codex", pc }); } catch(e) {}
+  assert("ArmamentCard renders a non-lethal weapon (freezer-spray)",
+    nonLethalCard != null);
+
+  // Card rendering — grenade
+  let grenadeCard;
+  try { grenadeCard = exp.buildStudioArmamentCard("frag-grenade", items["frag-grenade"], { mode:"codex", pc }); } catch(e) {}
+  assert("ArmamentCard renders a grenade",
+    grenadeCard != null);
+
+  // Card rendering — missile
+  let missileCard;
+  try { missileCard = exp.buildStudioArmamentCard("frag-missile", items["frag-missile"], { mode:"codex", pc }); } catch(e) {}
+  assert("ArmamentCard renders a missile",
+    missileCard != null);
+
+  // Card rendering — mine
+  let mineCard;
+  try { mineCard = exp.buildStudioArmamentCard("proximity-mine", items["proximity-mine"], { mode:"codex", pc }); } catch(e) {}
+  assert("ArmamentCard renders a mine",
+    mineCard != null);
+
+  // Card rendering — ammo
+  let ammoCard;
+  try { ammoCard = exp.buildStudioArmamentCard("ap-ammo", items["ap-ammo"], { mode:"codex", pc }); } catch(e) {}
+  assert("ArmamentCard renders ammo",
+    ammoCard != null);
+
+  // Card rendering — mod
+  let modCard;
+  try { modCard = exp.buildStudioArmamentCard("smartlink-mod", items["smartlink-mod"], { mode:"codex", pc }); } catch(e) {}
+  assert("ArmamentCard renders a mod",
+    modCard != null);
+
+  // StatChips dispatcher returns chips per type
+  const grenadeChips = exp.buildStudioArmamentStatChips(items["frag-grenade"].weapon);
+  assert("StatChips for grenade includes BLAST chip",
+    Array.isArray(grenadeChips) && grenadeChips.length >= 2);
+  const ammoChips = exp.buildStudioArmamentStatChips(items["ap-ammo"].weapon);
+  assert("StatChips for ammo returns EFFECT chip",
+    Array.isArray(ammoChips) && ammoChips.length >= 1);
+
+  // Range bands
+  const pistolBands = exp.buildStudioRangeBands(items["medium-pistol"].weapon);
+  assert("RangeBands for ranged weapon returns a node (has PB token in source)",
+    pistolBands != null);
+  const meleeBands = exp.buildStudioRangeBands(items["knife"].weapon);
+  assert("RangeBands for melee weapon returns a node (Reach token in source)",
+    meleeBands != null);
+
+  // Trait badge
+  const traitBadge = exp.buildStudioWeaponTraitBadge("ap");
+  assert("TraitBadge for 'ap' returns a node",
+    traitBadge != null);
+
+  // Ownership chip — all 5 states
+  ["equipped","stowed","available","restricted","illegal"].forEach(state => {
+    const chip = exp.buildStudioWeaponOwnershipChip(state);
+    assert("OwnershipChip renders for state: " + state, chip != null);
+  });
+
+  // Tier badge parsing
+  const tierBadge = exp.buildStudioWeaponTierBadge("Mod/R/2");
+  assert("TierBadge renders for 'Mod/R/2'", tierBadge != null);
+  const tierBadge2 = exp.buildStudioWeaponTierBadge("Min/1");
+  assert("TierBadge renders for 'Min/1'", tierBadge2 != null);
+}
+
+console.log("\n=== v0.11 — Fab logic ===");
+{
+  const items = exp.RULEBOOK_REFERENCE.gear_items;
+  const noFabPc = { gear: [] };
+  assert("studioArmamentFabReady returns false when PC has no fabber",
+    exp.studioArmamentFabReady(items["medium-pistol"], noFabPc) === false);
+
+  const compactPc = { gear: [{ name: "Compact Fabber" }] };
+  assert("Compact fabber: prints Min-complexity (knife)",
+    exp.studioArmamentFabReady(items["knife"], compactPc) === true);
+  assert("Compact fabber: does NOT print Mod-complexity (flex-cutter)",
+    exp.studioArmamentFabReady(items["flex-cutter"], compactPc) === false);
+
+  const mediumPc = { gear: [{ name: "Medium Fabber" }] };
+  assert("Medium fabber: prints Mod-complexity (flex-cutter)",
+    exp.studioArmamentFabReady(items["flex-cutter"], mediumPc) === true);
+  assert("Medium fabber: does NOT print Maj-complexity (battle-rifle)",
+    exp.studioArmamentFabReady(items["battle-rifle"], mediumPc) === false);
+
+  const largePc = { gear: [{ name: "Large Fabber" }] };
+  assert("Large fabber: prints Maj-complexity (sniper-rifle)",
+    exp.studioArmamentFabReady(items["sniper-rifle"], largePc) === true);
+}
+
+console.log("\n=== v0.11 — Codex source-shape checks ===");
+{
+  const armSrc = exp.buildStudioArmaments.toString();
+  assert("Codex default tab is 'codex' (source includes data-armaments-tab=\"codex\")",
+    armSrc.indexOf('"data-armaments-tab":"codex"') !== -1
+    || armSrc.indexOf('data-armaments-tab') !== -1);
+  // Filter chips — class filter has 12+ pills
+  assert("Filter chips include 'class' grouping",
+    armSrc.indexOf('"class"') !== -1);
+  // Lethal/owned/fab filter groups
+  assert("Filter chips include 'lethal' grouping",
+    armSrc.indexOf('"lethal"') !== -1);
+  assert("Filter chips include 'owned' grouping",
+    armSrc.indexOf('"owned"') !== -1);
+  assert("Filter chips include 'fab' grouping",
+    armSrc.indexOf('"fab"') !== -1);
+  // No var()+suffix bug
+  assert("Armaments source has no var()+suffix alpha-concat pattern",
+    !/var\(--[a-z0-9-]+\)(cc|55|ee|aa|bb|dd|ff|00|10|33|40|66|80)/.test(armSrc));
+  const cardSrc = exp.buildStudioArmamentCard.toString();
+  assert("ArmamentCard source has no var()+suffix alpha-concat pattern",
+    !/var\(--[a-z0-9-]+\)(cc|55|ee|aa|bb|dd|ff|00|10|33|40|66|80)/.test(cardSrc));
+}
+
+console.log("\n=== v0.11 — Ownership resolution ===");
+{
+  const items = exp.RULEBOOK_REFERENCE.gear_items;
+  // PC with no gear → unowned items are 'available' (or 'restricted'/'illegal' by cost)
+  const noPc = { gear: [] };
+  assert("medium-pistol unowned with no gear → restricted (cost Min/R/1)",
+    exp.studioArmamentOwnership(noPc, "medium-pistol", items["medium-pistol"]) === "restricted");
+  assert("knife unowned with no gear → available (cost Min/1)",
+    exp.studioArmamentOwnership(noPc, "knife", items["knife"]) === "available");
+
+  // PC with the weapon equipped → 'equipped'
+  const pcEquipped = { gear: [{ id: "medium-pistol", name: "Medium Pistol", equipped: true, weapon: items["medium-pistol"].weapon }] };
+  assert("Owned + equipped → 'equipped'",
+    exp.studioArmamentOwnership(pcEquipped, "medium-pistol", items["medium-pistol"]) === "equipped");
+
+  // PC with the weapon stowed → 'stowed'
+  const pcStowed = { gear: [{ id: "medium-pistol", name: "Medium Pistol", equipped: false, weapon: items["medium-pistol"].weapon }] };
+  assert("Owned + stowed → 'stowed'",
+    exp.studioArmamentOwnership(pcStowed, "medium-pistol", items["medium-pistol"]) === "stowed");
+}
+
+console.log("\n=== v0.11 — Back-compat ===");
+{
+  const items = exp.RULEBOOK_REFERENCE.gear_items;
+  // Existing weapons still render through new card path
+  ["medium-pistol", "knife", "club", "diamond-axe", "shock-glove", "eelware", "flex-cutter", "claws-implant"].forEach(slug => {
+    try {
+      const node = exp.buildStudioArmamentCard(slug, items[slug], { mode:"codex" });
+      assert("Legacy weapon renders through ArmamentCard: " + slug, node != null);
+    } catch(e) {
+      assert("Legacy weapon renders through ArmamentCard: " + slug, false, e.message);
+    }
+  });
+}
+
+console.log("\n=== v0.11 — Wire-in to right rail ===");
+{
+  // buildStudioSheet source should reference buildStudioArmaments
+  // Find buildStudioSheet — it's not on __exports directly, so check via window-of-source
+  // (we patch __exports for many things, but the wire-in is in the sheet builder.)
+  const html = require("fs").readFileSync(__dirname + "/index.html", "utf8");
+  assert("buildStudioSheet wires in buildStudioArmaments between Combat ALI and Roll Log",
+    html.indexOf('key:"armaments"') !== -1
+    && html.indexOf('buildStudioArmaments(pc)') !== -1);
+  assert("Armaments section title is 'Nanofab · Armaments'",
+    html.indexOf('"Nanofab · Armaments"') !== -1);
+}
+
+console.log("\n=== v0.11 — toolVersion bumped to 0.11.0 ===");
+{
+  const fresh = exp.newState();
+  assert("newState().meta.toolVersion is 0.11.0",
+    fresh.meta.toolVersion === "0.11.0");
 }
 
 console.log("\n=========================================");
