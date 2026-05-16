@@ -2,6 +2,27 @@
 
 All notable changes to this project. Format follows the spirit of [Keep a Changelog](https://keepachangelog.com/), versioned by milestone.
 
+## [0.10.2] — 2026-05-16 — "Click Any Teammate"
+
+**The togetherness piece.** Wave C of v0.10. The team page used to show summary cards; you'd have to ask each player "what's your INT?" to see their real numbers. Now you tap a teammate's banner and their full Studio sheet slides up — every aptitude, every skill, every wound, every piece of gear. Live. Read-only. Yours to see.
+
+### Added
+- **Click any teammate card's banner → drawer opens** with their complete Studio sheet (Vital Signs, Aptitudes & Derived, Reputation, Party Coverage, Skills, Gear, Mesh, everything). Renders via `withStateAs(entry.full, () => buildStudioSheet())` — same code path the player uses on their own sheet, just temporarily pointed at the teammate's state.
+- **READ-ONLY enforcement**: all interactive elements inside the drawer (rollers, +/- buttons, textareas, section toggles) are disabled via CSS `pointer-events: none`. Text selection + scroll work; everything else is inert.
+- **All collapsibles auto-expanded** in the drawer — when viewing someone else's sheet, you want to see everything, not click through their accordions.
+- **"▸ VIEW SHEET" affordance** badge added to each imported card's banner — discoverable click target (cursor-pointer alone wasn't a strong-enough signal).
+- **Drawer chrome**: bottom-anchored full-height panel, portrait + name + "VIEWING [name]'s SHEET · READ-ONLY" header, close on X / ESC / backdrop click.
+
+### Engine
+- New function `showTeamMemberDrawer(entry)`. Reuses `buildStudioSheet`, `studioPcFromState`, `withStateAs` — no parallel sheet implementation.
+- Banner click handler attached only to non-self cards.
+- Graceful failure: if `buildStudioSheet` throws on a malformed teammate state, the drawer body shows an error message with the exception text, never blocks closing.
+
+### Cross-cutting principle
+**Reuse what works.** The Studio sheet is already the canonical view of a character — for the player. To show it to teammates, swap the STATE pointer and re-render. No new "summary view" component. No data duplication. The same code that renders my own sheet renders yours.
+
+---
+
 ## [0.10.1] — 2026-05-16 — "Auto-Derive from PC Sheets"
 
 **The trust shift.** Wave B of v0.10. The GM no longer tracks teammates' wounds/stress with +/- buttons — those values now come straight from each player's live sheet. Manual GM tracking was always a tax on executive function; this removes the tax.

@@ -6,7 +6,7 @@ const vm = require("vm");
 const html = fs.readFileSync(__dirname + "/index.html", "utf8");
 let js = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 js = js.replace(/^boot\(\);$/m, "// boot suppressed");
-js += "\nthis.__exports = Object.defineProperties({}, {STATE:{get:()=>STATE,enumerable:true},RULEBOOK_DATA:{value:RULEBOOK_DATA,enumerable:true},RULEBOOK_REFERENCE:{value:RULEBOOK_REFERENCE,enumerable:true},derived:{value:derived,enumerable:true},newState:{value:newState,enumerable:true},encodeShareUrl:{value:encodeShareUrl,enumerable:true},decodeShareUrl:{value:decodeShareUrl,enumerable:true},stripPortrait:{value:stripPortrait,enumerable:true},importShareSnapshot:{value:importShareSnapshot,enumerable:true},makeCharacterId:{value:makeCharacterId,enumerable:true},migrateV6ToV7:{value:migrateV6ToV7,enumerable:true},migrateToCurrent:{value:migrateToCurrent,enumerable:true},SCHEMA_VERSION:{value:SCHEMA_VERSION,enumerable:true},LZString:{value:LZString,enumerable:true},studioPcFromState:{value:studioPcFromState,enumerable:true},studioHealDamage:{value:studioHealDamage,enumerable:true},studioHealWound:{value:studioHealWound,enumerable:true},studioHealStress:{value:studioHealStress,enumerable:true},studioHealTrauma:{value:studioHealTrauma,enumerable:true},characterHasFabber:{value:characterHasFabber,enumerable:true},studioMeshAccess:{value:studioMeshAccess,enumerable:true},studioMeshOpsec:{value:studioMeshOpsec,enumerable:true},studioMeshApps:{value:studioMeshApps,enumerable:true},studioMeshImplants:{value:studioMeshImplants,enumerable:true},buildPartyImportEntry:{value:buildPartyImportEntry,enumerable:true},normalizePartyImportEntries:{value:normalizePartyImportEntries,enumerable:true},importJSON:{value:importJSON,enumerable:true},partyComputeCardData:{value:partyComputeCardData,enumerable:true},_setState:{value:(v)=>{STATE=v;},enumerable:true}});\n";
+js += "\nthis.__exports = Object.defineProperties({}, {STATE:{get:()=>STATE,enumerable:true},RULEBOOK_DATA:{value:RULEBOOK_DATA,enumerable:true},RULEBOOK_REFERENCE:{value:RULEBOOK_REFERENCE,enumerable:true},derived:{value:derived,enumerable:true},newState:{value:newState,enumerable:true},encodeShareUrl:{value:encodeShareUrl,enumerable:true},decodeShareUrl:{value:decodeShareUrl,enumerable:true},stripPortrait:{value:stripPortrait,enumerable:true},importShareSnapshot:{value:importShareSnapshot,enumerable:true},makeCharacterId:{value:makeCharacterId,enumerable:true},migrateV6ToV7:{value:migrateV6ToV7,enumerable:true},migrateToCurrent:{value:migrateToCurrent,enumerable:true},SCHEMA_VERSION:{value:SCHEMA_VERSION,enumerable:true},LZString:{value:LZString,enumerable:true},studioPcFromState:{value:studioPcFromState,enumerable:true},studioHealDamage:{value:studioHealDamage,enumerable:true},studioHealWound:{value:studioHealWound,enumerable:true},studioHealStress:{value:studioHealStress,enumerable:true},studioHealTrauma:{value:studioHealTrauma,enumerable:true},characterHasFabber:{value:characterHasFabber,enumerable:true},studioMeshAccess:{value:studioMeshAccess,enumerable:true},studioMeshOpsec:{value:studioMeshOpsec,enumerable:true},studioMeshApps:{value:studioMeshApps,enumerable:true},studioMeshImplants:{value:studioMeshImplants,enumerable:true},buildPartyImportEntry:{value:buildPartyImportEntry,enumerable:true},normalizePartyImportEntries:{value:normalizePartyImportEntries,enumerable:true},importJSON:{value:importJSON,enumerable:true},partyComputeCardData:{value:partyComputeCardData,enumerable:true},withStateAs:{value:withStateAs,enumerable:true},_setState:{value:(v)=>{STATE=v;},enumerable:true}});\n";
 
 const sandbox = {
   console,
@@ -660,6 +660,56 @@ console.log("\n=== v0.10.1 — toolVersion bumped to 0.10.1 ===");
 {
   const fresh = exp.newState();
   assert("newState().meta.toolVersion is 0.10.x", /^0\.10\./.test(fresh.meta.toolVersion), "got " + fresh.meta.toolVersion);
+}
+
+console.log("\n=== v0.10.2 — withStateAs swaps STATE and restores ===");
+{
+  exp._setState(exp.newState());
+  exp.STATE.ego.name = "Original";
+  const teammate = exp.newState();
+  teammate.ego.name = "Teammate";
+  // Capture the name observed during the swapped context
+  let observedDuring = null;
+  const result = exp.withStateAs(teammate, () => {
+    observedDuring = exp.STATE.ego.name;
+    return "rv";
+  });
+  assert("withStateAs returns the inner function's value", result === "rv");
+  assert("inside withStateAs, STATE points to the swapped state", observedDuring === "Teammate");
+  assert("after withStateAs, STATE is restored", exp.STATE.ego.name === "Original");
+}
+
+console.log("\n=== v0.10.2 — withStateAs restores STATE even on throw ===");
+{
+  exp._setState(exp.newState());
+  exp.STATE.ego.name = "Original";
+  const teammate = exp.newState();
+  teammate.ego.name = "Teammate";
+  let caught = null;
+  try {
+    exp.withStateAs(teammate, () => { throw new Error("boom"); });
+  } catch (e) { caught = e; }
+  assert("withStateAs propagates inner throw", caught && caught.message === "boom");
+  assert("STATE restored to original after inner throw", exp.STATE.ego.name === "Original");
+}
+
+console.log("\n=== v0.10.2 — studioPcFromState produces a renderable pc from a teammate STATE ===");
+{
+  exp._setState(exp.newState());
+  // Build a teammate-shaped state (a clone of newState with name/aptitudes)
+  const teammate = JSON.parse(JSON.stringify(exp.newState()));
+  teammate.ego.name = "Sheet Test";
+  teammate.ego.aptitudes = { COG:15, INT:15, REF:15, SOM:15, SAV:15, WIL:20 };
+  // studioPcFromState reads STATE internally via withStateAs caller; we exercise the call
+  const pc = exp.withStateAs(teammate, () => exp.studioPcFromState());
+  assert("studioPcFromState returns a pc object for the swapped STATE", pc && typeof pc === "object");
+  assert("pc.name matches the teammate STATE.ego.name", pc.name === "Sheet Test");
+}
+
+console.log("\n=== v0.10.2 — toolVersion bumped to 0.10.2 ===");
+{
+  const fresh = exp.newState();
+  assert("newState().meta.toolVersion is 0.10.2", fresh.meta.toolVersion === "0.10.2");
 }
 
 console.log("\n=== v0.10.0 — STATE.team.teamName persists through save/load roundtrip ===");
