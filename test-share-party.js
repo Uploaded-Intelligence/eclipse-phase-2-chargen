@@ -6,7 +6,7 @@ const vm = require("vm");
 const html = fs.readFileSync(__dirname + "/index.html", "utf8");
 let js = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 js = js.replace(/^boot\(\);$/m, "// boot suppressed");
-js += "\nthis.__exports = Object.defineProperties({}, {STATE:{get:()=>STATE,enumerable:true},RULEBOOK_DATA:{value:RULEBOOK_DATA,enumerable:true},RULEBOOK_REFERENCE:{value:RULEBOOK_REFERENCE,enumerable:true},derived:{value:derived,enumerable:true},newState:{value:newState,enumerable:true},encodeShareUrl:{value:encodeShareUrl,enumerable:true},decodeShareUrl:{value:decodeShareUrl,enumerable:true},stripPortrait:{value:stripPortrait,enumerable:true},importShareSnapshot:{value:importShareSnapshot,enumerable:true},makeCharacterId:{value:makeCharacterId,enumerable:true},migrateV6ToV7:{value:migrateV6ToV7,enumerable:true},migrateToCurrent:{value:migrateToCurrent,enumerable:true},SCHEMA_VERSION:{value:SCHEMA_VERSION,enumerable:true},LZString:{value:LZString,enumerable:true},studioPcFromState:{value:studioPcFromState,enumerable:true},studioHealDamage:{value:studioHealDamage,enumerable:true},studioHealWound:{value:studioHealWound,enumerable:true},studioHealStress:{value:studioHealStress,enumerable:true},studioHealTrauma:{value:studioHealTrauma,enumerable:true},studioSetDamage:{value:studioSetDamage,enumerable:true},studioSetWounds:{value:studioSetWounds,enumerable:true},studioSetStress:{value:studioSetStress,enumerable:true},studioSetTraumas:{value:studioSetTraumas,enumerable:true},characterHasFabber:{value:characterHasFabber,enumerable:true},studioMeshAccess:{value:studioMeshAccess,enumerable:true},studioMeshOpsec:{value:studioMeshOpsec,enumerable:true},studioMeshApps:{value:studioMeshApps,enumerable:true},studioMeshImplants:{value:studioMeshImplants,enumerable:true},buildPartyImportEntry:{value:buildPartyImportEntry,enumerable:true},normalizePartyImportEntries:{value:normalizePartyImportEntries,enumerable:true},importJSON:{value:importJSON,enumerable:true},partyComputeCardData:{value:partyComputeCardData,enumerable:true},buildPartyMemberCard:{value:buildPartyMemberCard,enumerable:true},buildStudioVitalSignsCard:{value:buildStudioVitalSignsCard,enumerable:true},buildStudioDamageBar:{value:buildStudioDamageBar,enumerable:true},buildStudioMindBar:{value:buildStudioMindBar,enumerable:true},buildStudioVitalityBar:{value:buildStudioVitalityBar,enumerable:true},buildStudioPoolMeter:{value:buildStudioPoolMeter,enumerable:true},buildStudioPoolRow:{value:buildStudioPoolRow,enumerable:true},buildStudioPoolGlyph:{value:buildStudioPoolGlyph,enumerable:true},buildStudioAptitudeStrip:{value:buildStudioAptitudeStrip,enumerable:true},buildStudioReputation:{value:buildStudioReputation,enumerable:true},withStateAs:{value:withStateAs,enumerable:true},_playerOwnedPayload:{value:_playerOwnedPayload,enumerable:true},_isSuspended:{value:_isSuspended,enumerable:true},_setLastInputAt:{value:(t)=>{_lastInputAt=t;},enumerable:true},_getLastInputAt:{value:()=>_lastInputAt,enumerable:true},_setIdleCount:{value:(n)=>{_idleCount=n;},enumerable:true},_getIdleCount:{value:()=>_idleCount,enumerable:true},_setPollIntervalMs:{value:(n)=>{_pollIntervalMs=n;},enumerable:true},_getPollIntervalMs:{value:()=>_pollIntervalMs,enumerable:true},_AFK_THRESHOLD_MS:{value:AFK_THRESHOLD_MS,enumerable:true},_setState:{value:(v)=>{STATE=v;},enumerable:true}});\n";
+js += "\nthis.__exports = Object.defineProperties({}, {STATE:{get:()=>STATE,enumerable:true},RULEBOOK_DATA:{value:RULEBOOK_DATA,enumerable:true},RULEBOOK_REFERENCE:{value:RULEBOOK_REFERENCE,enumerable:true},derived:{value:derived,enumerable:true},newState:{value:newState,enumerable:true},encodeShareUrl:{value:encodeShareUrl,enumerable:true},decodeShareUrl:{value:decodeShareUrl,enumerable:true},stripPortrait:{value:stripPortrait,enumerable:true},importShareSnapshot:{value:importShareSnapshot,enumerable:true},makeCharacterId:{value:makeCharacterId,enumerable:true},migrateV6ToV7:{value:migrateV6ToV7,enumerable:true},migrateToCurrent:{value:migrateToCurrent,enumerable:true},SCHEMA_VERSION:{value:SCHEMA_VERSION,enumerable:true},LZString:{value:LZString,enumerable:true},studioPcFromState:{value:studioPcFromState,enumerable:true},studioHealDamage:{value:studioHealDamage,enumerable:true},studioHealWound:{value:studioHealWound,enumerable:true},studioHealStress:{value:studioHealStress,enumerable:true},studioHealTrauma:{value:studioHealTrauma,enumerable:true},studioSetDamage:{value:studioSetDamage,enumerable:true},studioSetWounds:{value:studioSetWounds,enumerable:true},studioSetStress:{value:studioSetStress,enumerable:true},studioSetTraumas:{value:studioSetTraumas,enumerable:true},characterHasFabber:{value:characterHasFabber,enumerable:true},studioMeshAccess:{value:studioMeshAccess,enumerable:true},studioMeshOpsec:{value:studioMeshOpsec,enumerable:true},studioMeshApps:{value:studioMeshApps,enumerable:true},studioMeshImplants:{value:studioMeshImplants,enumerable:true},buildPartyImportEntry:{value:buildPartyImportEntry,enumerable:true},normalizePartyImportEntries:{value:normalizePartyImportEntries,enumerable:true},importJSON:{value:importJSON,enumerable:true},partyComputeCardData:{value:partyComputeCardData,enumerable:true},buildPartyMemberCard:{value:buildPartyMemberCard,enumerable:true},buildStudioVitalSignsCard:{value:buildStudioVitalSignsCard,enumerable:true},buildStudioDamageBar:{value:buildStudioDamageBar,enumerable:true},buildStudioMindBar:{value:buildStudioMindBar,enumerable:true},buildStudioVitalityBar:{value:buildStudioVitalityBar,enumerable:true},buildStudioPoolMeter:{value:buildStudioPoolMeter,enumerable:true},buildStudioPoolRow:{value:buildStudioPoolRow,enumerable:true},buildStudioPoolGlyph:{value:buildStudioPoolGlyph,enumerable:true},buildStudioFeedBreak:{value:buildStudioFeedBreak,enumerable:true},buildPartyMemberCoverage:{value:buildPartyMemberCoverage,enumerable:true},buildStudioAptitudeStrip:{value:buildStudioAptitudeStrip,enumerable:true},buildStudioReputation:{value:buildStudioReputation,enumerable:true},withStateAs:{value:withStateAs,enumerable:true},_playerOwnedPayload:{value:_playerOwnedPayload,enumerable:true},_isSuspended:{value:_isSuspended,enumerable:true},_setLastInputAt:{value:(t)=>{_lastInputAt=t;},enumerable:true},_getLastInputAt:{value:()=>_lastInputAt,enumerable:true},_setIdleCount:{value:(n)=>{_idleCount=n;},enumerable:true},_getIdleCount:{value:()=>_idleCount,enumerable:true},_setPollIntervalMs:{value:(n)=>{_pollIntervalMs=n;},enumerable:true},_getPollIntervalMs:{value:()=>_pollIntervalMs,enumerable:true},_AFK_THRESHOLD_MS:{value:AFK_THRESHOLD_MS,enumerable:true},_setState:{value:(v)=>{STATE=v;},enumerable:true}});\n";
 
 const sandbox = {
   console,
@@ -709,7 +709,7 @@ console.log("\n=== v0.10.2 — studioPcFromState produces a renderable pc from a
 console.log("\n=== v0.10.4 — toolVersion bumped to 0.10.4 ===");
 {
   const fresh = exp.newState();
-  assert("newState().meta.toolVersion is 0.10.8", fresh.meta.toolVersion === "0.10.8");
+  assert("newState().meta.toolVersion is 0.10.9", fresh.meta.toolVersion === "0.10.9");
 }
 
 console.log("\n=== v0.10.4 — hash-skip: same player-owned state → identical hash ===");
@@ -1235,6 +1235,109 @@ console.log("\n=== v0.10.8 — full pool meter renders without throwing ===");
     threw === null, threw ? (threw.message || String(threw)) : "");
   assert("buildStudioPoolMeter returns a DOM-like node",
     !!result);
+}
+
+// v0.10.9 — Aligned · Coverage Sliders · BODY/MIND Divider.
+// (a) Always-rendered warning banner so vitals embed height is consistent
+// across team cards (was: SMOKED's MORPH DOWN banner pushed UNNA's/PUFT's
+// aptitudes/coverage rows down). (b) Rich per-character coverage sliders
+// (label + big number + traffic-light bar + emphasised treatment for high
+// tier) replacing the v0.10.5 text-only tiles. (c) FeedBreak labeled
+// divider between damage and mind bars (ported from Claude Design).
+
+console.log("\n=== v0.10.9 — FeedBreak helper exists with destructured opts signature ===");
+{
+  assert("buildStudioFeedBreak is exposed",
+    typeof exp.buildStudioFeedBreak === "function");
+  // The existing FeedBreak (line ~8942) takes destructured { label, accent }
+  // opts and was already in the codebase for the dossier off-feed marker.
+  // v0.10.9 reuses it for HP↔STRESS rather than adding a parallel helper.
+  let threw = null, result = null;
+  try { result = exp.buildStudioFeedBreak({ label: "// MIND", accent: "#6b9eff" }); }
+  catch (e) { threw = e; }
+  assert("buildStudioFeedBreak renders without throwing (destructured opts)",
+    threw === null, threw ? (threw.message || String(threw)) : "");
+  assert("buildStudioFeedBreak returns a DOM-like node",
+    !!result);
+  // Must use literal hex throughout (var()+suffix would silently break the
+  // gradient — see v0.10.7).
+  const src = exp.buildStudioFeedBreak.toString();
+  assert("buildStudioFeedBreak source has no var(--…) refs (alpha-concat would break)",
+    src.indexOf("var(--") === -1);
+  // Default accent fallback uses literal hex (current pattern: `const accentColor = accent || "#XXXXXX"`)
+  assert("buildStudioFeedBreak default accent is a literal hex fallback",
+    /accent\s*\|\|\s*"#[0-9a-fA-F]{6}"/.test(src));
+}
+
+console.log("\n=== v0.10.9 — buildStudioVitalSignsCard uses FeedBreak for HP↔STRESS divider ===");
+{
+  const vSrc = exp.buildStudioVitalSignsCard.toString();
+  assert("buildStudioVitalSignsCard now references buildStudioFeedBreak",
+    vSrc.indexOf("buildStudioFeedBreak") !== -1);
+  // The call site uses the destructured opts form with a MIND label.
+  assert("FeedBreak is called with a MIND label (destructured opts form)",
+    /buildStudioFeedBreak\(\s*\{\s*label:\s*["'][\s/]*MIND/.test(vSrc));
+  assert("FeedBreak gets the mind-bar accent hex (#6b9eff)",
+    vSrc.indexOf("#6b9eff") !== -1);
+}
+
+console.log("\n=== v0.10.9 — warning banners are always rendered (height reserved) ===");
+{
+  const dSrc = exp.buildStudioDamageBar.toString();
+  const mSrc = exp.buildStudioMindBar.toString();
+  // The previous gate was `if (isDown || woundCrossed || pc.woundsTaken > 0) {`
+  // — should be gone. Replaced by an always-append with a showWarning flag.
+  assert("DamageBar no longer wraps warning in an `if (… || …) { … }` gate",
+    !/if\s*\(isDown\s*\|\|\s*woundCrossed\s*\|\|\s*pc\.woundsTaken\s*>\s*0\)\s*\{/.test(dSrc));
+  assert("MindBar no longer wraps warning in an `if (… || …) { … }` gate",
+    !/if\s*\(isBroken\s*\|\|\s*traumaCrossed\s*\|\|\s*pc\.traumasTaken\s*>\s*0\)\s*\{/.test(mSrc));
+  // Both should now use a showWarning / showMindWarning flag + always append.
+  assert("DamageBar uses a showWarning boolean to gate content (not the element)",
+    /showWarning/.test(dSrc));
+  assert("MindBar uses a showMindWarning boolean to gate content",
+    /showMindWarning/.test(mSrc));
+  // The --placeholder class is the empty-state marker.
+  assert("DamageBar applies --placeholder class when no warning is active",
+    /studio-vbar-warning--placeholder/.test(dSrc));
+  assert("MindBar applies --placeholder class when no warning is active",
+    /studio-vbar-warning--placeholder/.test(mSrc));
+}
+
+console.log("\n=== v0.10.9 — buildPartyMemberCoverage exposed and emphasises high tier ===");
+{
+  assert("buildPartyMemberCoverage is exposed",
+    typeof exp.buildPartyMemberCoverage === "function");
+  let threw = null, result = null;
+  try { result = exp.buildPartyMemberCoverage({ combat: 70, face: 50, hacker: 30, sci: 65 }); }
+  catch (e) { threw = e; }
+  assert("buildPartyMemberCoverage renders without throwing",
+    threw === null, threw ? (threw.message || String(threw)) : "");
+  assert("buildPartyMemberCoverage returns a DOM-like node",
+    !!result);
+
+  const src = exp.buildPartyMemberCoverage.toString();
+  assert("source contains pc-cov-slider class",
+    src.indexOf("pc-cov-slider") !== -1);
+  assert("source has three tier branches (high/mid/low)",
+    src.indexOf('"high"') !== -1 && src.indexOf('"mid"') !== -1 && src.indexOf('"low"') !== -1);
+  assert("source emphasises high tier via pc-cov-slider--emphasized class",
+    src.indexOf("pc-cov-slider--emphasized") !== -1);
+  // Self-only coverage (no party-union readout)
+  assert("source does NOT call derived.partyCoverage() (self-only)",
+    src.indexOf("partyCoverage()") === -1);
+}
+
+console.log("\n=== v0.10.9 — team card now uses buildPartyMemberCoverage (not text-only tiles) ===");
+{
+  const cardSrc = exp.buildPartyMemberCard.toString();
+  assert("team card now appends buildPartyMemberCoverage(data.coverage)",
+    cardSrc.indexOf("buildPartyMemberCoverage(data.coverage)") !== -1);
+  // The old text-tile tierClass local function should be gone from the card body.
+  assert("team card no longer defines a local tierClass for pc-cov tiles",
+    !/const\s+tierClass\s*=/.test(cardSrc));
+  // The hardcoded "CBT " + data.coverage.combat text-tile pattern should be gone.
+  assert("team card no longer hardcodes the text-tile pattern 'CBT ' + data.coverage.combat",
+    cardSrc.indexOf('"CBT " + data.coverage.combat') === -1);
 }
 
 console.log("\n=========================================");

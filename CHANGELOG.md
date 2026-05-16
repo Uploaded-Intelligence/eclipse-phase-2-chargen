@@ -2,6 +2,39 @@
 
 All notable changes to this project. Format follows the spirit of [Keep a Changelog](https://keepachangelog.com/), versioned by milestone.
 
+## [0.10.9] — 2026-05-17 — "Aligned · Coverage Sliders · BODY/MIND Divider"
+
+**Three pointed observations from a single team-page screenshot, all addressed in one wave.** The user pointed at three cards (SMOKED · UNNA · PUFT) and said: *"look at how uneven this is. Think well how to best organise and auto-align all the sections."* Plus: *"zone coverage should be sliders with red/yellow/green colourings + number (and consider emphasized design if they have high stats for a zone)."* Plus: *"i want a proper intuitive line/divider separation or some way to easily tell apart HP from STRESS."*
+
+### Fixed
+- **Cross-card alignment**: The warning banner (`.studio-vbar-warning`) in `buildStudioDamageBar` and `buildStudioMindBar` is now **always rendered** with `min-height: 36px`, instead of conditionally appended. When no warning condition is active, a `--placeholder` class applies `visibility: hidden`. Result: the vitals embed has the same height on every team card, whether a character is fresh or wounded or both. SMOKED's MORPH DOWN banner no longer pushes UNNA's and PUFT's APTITUDES / ZONE COVERAGE / REPUTATION / TEAM TOOLS rows down by 40-80px. Scanning the team's HP/coverage/rep laterally finally lines up.
+
+### Added
+- **Reused `buildStudioFeedBreak({ label, accent })`** (line ~8942) — already in the codebase for the dossier off-feed marker; now also used between the damage and mind bars inside Vital Signs. Labeled section divider with corner brackets, gradient flow-lines flowing from both sides, and a centered uppercase italic pill with a glow shadow. Other dashed dividers in the panel stay (they're sub-section breaks, not the major HP↔STRESS boundary). My first pass added a duplicate; tests caught the duplicate-name collision (function hoisting silently picks the later definition); the duplicate was removed in favour of the existing helper.
+- **`buildPartyMemberCoverage(coverage)`** (line ~7615) — rich slider tiles for the per-character ZONE COVERAGE row on team cards. Each tile shows: zone label + big number + traffic-light progress bar (green ≥60, amber 40–59, red <40). High-tier (≥60) zones get **emphasized treatment**: green glow border, larger number (17px vs 14px), taller bar (7px vs 5px). Replaces the v0.10.5 text-only `pc-cov` tiles which had only background-tint colour cues. Models on `buildStudioPartyCoverage`'s per-zone tile pattern (line 7615) but simplified to self-only data.
+
+### Changed
+- **HP ↔ STRESS divider** in `buildStudioVitalSignsCard` (line ~8568) replaced from `1px dashed var(--st-line)` to a `buildStudioFeedBreak("MIND", "#6b9eff")` call. The mind-bar's blue accent echoes through the divider's brackets, gradient, and pill — visually announcing "this is where one tracker ends and the next begins" instead of blending in with every other dashed divider on the panel.
+
+### Notes on the var()+suffix bug class
+The new `buildStudioFeedBreak` concatenates accent with alpha suffixes (`"40"`, `"55"`, `"80"`) inside gradient and border strings. Per v0.10.7's lesson, `accent` MUST be a literal hex string (never a `var(--…)` ref) or the gradient silently breaks. The function's default accent is literal hex; the call site passes literal hex. Tests guard against future regressions.
+
+### Tests
+- ~16 new source-check + smoke-render assertions in `test-share-party.js`:
+  - `buildStudioFeedBreak` exposed; renders without throwing; uses literal hex throughout (no `var(--`).
+  - `buildStudioVitalSignsCard` calls FeedBreak with `MIND` label + `#6b9eff` accent.
+  - Damage and mind warning banners are always rendered (no `if (… || …)` gate); use `showWarning`/`showMindWarning` flag; apply `--placeholder` class when empty.
+  - `buildPartyMemberCoverage` exposed; renders; source contains tier branches + emphasized class; doesn't call `partyCoverage()` (self-only).
+  - `buildPartyMemberCard` swapped to `buildPartyMemberCoverage(data.coverage)`; old `tierClass` local + text-tile hardcodes removed.
+
+### What did NOT change
+- **No CSS subgrid** — the always-rendered banner equalizes 90% of the variance. Remaining minor variance from top-skills line wrap is acceptable; can clamp in a follow-up if needed.
+- **No top-of-page coverage radar redesign** — already used the rich slider design via `buildStudioPartyCoverage`. Unchanged.
+- **No other dashed-divider replacements** — only the HP↔STRESS one got the FeedBreak treatment.
+- **The legacy `.pc-cov` CSS rules stay** — kept in case any non-team-card surface still references them. Audit/remove as a separate cleanup wave.
+
+---
+
 ## [0.10.8] — 2026-05-17 — "Pool Iconography Restored"
 
 **The pool meters got their faces back.** Each pool now has its own SVG glyph — INSIGHT (circle frame with crosshair), MOXIE (pentagon with face glyphs), VIGOR (hexagon with vertical bars), FLEX (diamond with 4-point star) — rendered both as a small inline glyph in the meter header and as a large faded watermark anchored to the meter's top-right corner. *Each pool gets its own frame shape so the shape alone telegraphs the pool*, even at 12% opacity behind the data, even to a colourblind player.

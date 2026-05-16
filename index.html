@@ -118,11 +118,48 @@ body.party-mode .layout { display: none; }
 .party-card .pc-section-label { font-family: var(--mono); font-size: 9.5px; letter-spacing: 1.5px; color: var(--accent-2); font-weight: 800; text-transform: uppercase; margin-bottom: 4px; }
 .party-card .pc-apt-row { display: flex; gap: 6px; flex-wrap: wrap; }
 .party-card .pc-apt { font-family: var(--mono); font-size: 11px; color: rgba(220,235,238,0.85); padding: 2px 6px; background: rgba(0,0,0,0.25); border-radius: 2px; min-width: 38px; text-align: center; }
-.party-card .pc-coverage-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.party-card .pc-coverage-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+/* Legacy pc-cov text tiles (pre-v0.10.9) — kept for any non-team-card use. */
 .party-card .pc-cov { padding: 4px 6px; text-align: center; font-family: var(--mono); font-size: 10px; border-radius: 2px; border: 1px solid; letter-spacing: 0.6px; }
 .party-card .pc-cov--high { color: var(--good); border-color: rgba(86,211,100,0.4); background: rgba(86,211,100,0.06); }
 .party-card .pc-cov--mid { color: var(--warn); border-color: rgba(227,179,65,0.4); background: rgba(227,179,65,0.06); }
 .party-card .pc-cov--low { color: var(--bad); border-color: rgba(232,86,98,0.35); background: rgba(232,86,98,0.05); }
+/* v0.10.9: rich coverage-slider tiles — label + big number + traffic-light
+   progress bar. High-tier (≥60) zones get an emphasised treatment: green
+   glow border, larger number, taller bar. */
+.party-card .pc-cov-slider {
+  padding: 5px 7px;
+  background: rgba(7, 24, 29, 0.5);
+  border: 1px solid rgba(127, 212, 226, 0.18);
+  border-radius: 3px;
+}
+.party-card .pc-cov-slider--emphasized {
+  border-color: rgba(86, 211, 100, 0.55);
+  box-shadow: 0 0 8px rgba(86, 211, 100, 0.18);
+  background: rgba(86, 211, 100, 0.06);
+}
+.party-card .pc-cov-slider-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 4px;
+}
+.party-card .pc-cov-slider-label {
+  font-family: var(--mono); font-size: 9.5px; font-weight: 800;
+  letter-spacing: 1.2px;
+}
+.party-card .pc-cov-slider-val {
+  font-family: var(--mono); font-size: 14px; font-weight: 800;
+  font-variant-numeric: tabular-nums; line-height: 1;
+}
+.party-card .pc-cov-slider--emphasized .pc-cov-slider-val { font-size: 17px; }
+.party-card .pc-cov-slider-bar {
+  position: relative; height: 5px; margin-top: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px; overflow: hidden;
+}
+.party-card .pc-cov-slider-fill {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  transition: width 0.2s;
+}
+.party-card .pc-cov-slider--emphasized .pc-cov-slider-bar { height: 7px; }
 .party-card .gm-tracker { padding: 8px 10px; background: rgba(194,84,26,0.06); border: 1px dashed rgba(194,84,26,0.4); border-radius: 2px; margin-top: 4px; }
 .party-card .gm-tracker-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; color: var(--narrative); font-weight: 800; text-transform: uppercase; margin-bottom: 6px; }
 .party-card .gm-stat-row { display: flex; align-items: center; gap: 10px; font-size: 12px; margin-bottom: 4px; }
@@ -861,6 +898,11 @@ body.play-mode .preview-mech { background: transparent; padding: 0; border: none
   font-size: 11.5px; font-weight: 700;
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
   background: #fff1ec; border: 1px solid var(--st-red); color: var(--st-red);
+  /* v0.10.9: reserve consistent height so an active vs. empty warning slot
+     doesn't shift the rest of the vital signs panel. Required for cross-card
+     alignment on the team page (SMOKED's MORPH DOWN banner would otherwise
+     push UNNA's/PUFT's aptitudes/coverage rows down). */
+  min-height: 36px; box-sizing: border-box;
 }
 .studio-sheet .studio-vbar-warning.dead {
   background: #3a0c0c; color: #ffb8a8;
@@ -868,6 +910,12 @@ body.play-mode .preview-mech { background: transparent; padding: 0; border: none
 }
 .studio-sheet .studio-vbar-warning.stress { background: #f1ecff; border-color: #9333ea; color: #6b21a8; }
 .studio-sheet .studio-vbar-warning.stress.dead { background: #1a0c3a; color: #d8b8ff; }
+/* v0.10.9: placeholder variant — height reserved, visuals suppressed. Used
+   when no warning condition is active so cross-card vitals embeds match. */
+.studio-sheet .studio-vbar-warning--placeholder {
+  visibility: hidden; pointer-events: none;
+  /* keep min-height but neutralise the alert background/border via visibility */
+}
 
 /* Skill row — grid: chip | name | total | mini-bar | dice-button */
 .studio-sheet .studio-skill-row {
@@ -4035,7 +4083,7 @@ function makeCharacterId() {
 }
 
 const newState = () => ({
-  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.10.8", mode:"chargen" },
+  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.10.9", mode:"chargen" },
   // v0.10: team-room metadata. Roomless local play has all nulls + empty teamName.
   // teamName persists locally even before joining a room (set it once, it sticks).
   team:{ roomId:null, teamName:"", lastPolledAt:null },
@@ -7043,13 +7091,21 @@ function buildStudioDamageBar(pc, opts) {
     dataTip: "derivedStats.DUR",
     readOnly: !!opts.readOnly
   }));
-  if (isDown || woundCrossed || pc.woundsTaken > 0) {
-    wrap.appendChild(h("div", { class: "studio-vbar-warning" + (isDown ? " dead" : "") },
-      isDown ? h("span", null, "⚠ MORPH DOWN · INCAPACITATED · " + (nearDeath ? "DEATH IMMINENT" : "stabilize to revive")) : null,
-      !isDown && woundCrossed ? h("span", null, h("b", null, "DAMAGE ≥ WOUND THRESHOLD."), " // auto-ticked at WT.") : null,
-      pc.woundsTaken > 0 ? h("span", { style:{opacity:0.85} }, pc.woundsTaken + " wound" + (pc.woundsTaken > 1 ? "s" : "") + " · " + (pc.woundsTaken*-10) + " to all actions") : null
-    ));
-  }
+  // v0.10.9: ALWAYS append the warning slot — height is reserved via the
+  // .studio-vbar-warning { min-height: 36px } CSS rule. When no warning
+  // condition is active, render an empty placeholder (visibility:hidden via
+  // --placeholder class) so the vitals embed height is identical across
+  // every team-card. Was: conditional render → SMOKED's MORPH DOWN banner
+  // shifted UNNA's/PUFT's aptitudes/coverage rows down by ~40px per banner.
+  const showWarning = isDown || woundCrossed || pc.woundsTaken > 0;
+  wrap.appendChild(h("div", {
+    class: "studio-vbar-warning" + (isDown ? " dead" : "") + (showWarning ? "" : " studio-vbar-warning--placeholder"),
+    "aria-hidden": showWarning ? null : "true"
+  },
+    showWarning && isDown ? h("span", null, "⚠ MORPH DOWN · INCAPACITATED · " + (nearDeath ? "DEATH IMMINENT" : "stabilize to revive")) : null,
+    showWarning && !isDown && woundCrossed ? h("span", null, h("b", null, "DAMAGE ≥ WOUND THRESHOLD."), " // auto-ticked at WT.") : null,
+    showWarning && pc.woundsTaken > 0 ? h("span", { style:{opacity:0.85} }, pc.woundsTaken + " wound" + (pc.woundsTaken > 1 ? "s" : "") + " · " + (pc.woundsTaken*-10) + " to all actions") : null
+  ));
   return wrap;
 }
 
@@ -7077,13 +7133,18 @@ function buildStudioMindBar(pc, opts) {
     dataTip: "derivedStats.LUC",
     readOnly: !!opts.readOnly
   }));
-  if (isBroken || traumaCrossed || pc.traumasTaken > 0) {
-    wrap.appendChild(h("div", { class: "studio-vbar-warning stress" + (isBroken ? " dead" : "") },
-      isBroken ? h("span", null, "⚠ MENTAL BREAKDOWN · CATATONIC 1d6 HRS · " + (nearMeltdown ? "EGO MELTDOWN IMMINENT" : "shock state")) : null,
-      !isBroken && traumaCrossed ? h("span", null, h("b", null, "STRESS ≥ TRAUMA THRESHOLD."), " // auto-ticked · WIL check vs disorientation.") : null,
-      pc.traumasTaken > 0 ? h("span", { style:{opacity:0.85} }, pc.traumasTaken + " trauma" + (pc.traumasTaken > 1 ? "s" : "") + " · " + (pc.traumasTaken*-10) + " to actions · −" + pc.traumasTaken + " init") : null
-    ));
-  }
+  // v0.10.9: symmetric with DamageBar — always-rendered warning slot with
+  // --placeholder class when no condition is active. Cross-card vitals
+  // embed height stays consistent.
+  const showMindWarning = isBroken || traumaCrossed || pc.traumasTaken > 0;
+  wrap.appendChild(h("div", {
+    class: "studio-vbar-warning stress" + (isBroken ? " dead" : "") + (showMindWarning ? "" : " studio-vbar-warning--placeholder"),
+    "aria-hidden": showMindWarning ? null : "true"
+  },
+    showMindWarning && isBroken ? h("span", null, "⚠ MENTAL BREAKDOWN · CATATONIC 1d6 HRS · " + (nearMeltdown ? "EGO MELTDOWN IMMINENT" : "shock state")) : null,
+    showMindWarning && !isBroken && traumaCrossed ? h("span", null, h("b", null, "STRESS ≥ TRAUMA THRESHOLD."), " // auto-ticked · WIL check vs disorientation.") : null,
+    showMindWarning && pc.traumasTaken > 0 ? h("span", { style:{opacity:0.85} }, pc.traumasTaken + " trauma" + (pc.traumasTaken > 1 ? "s" : "") + " · " + (pc.traumasTaken*-10) + " to actions · −" + pc.traumasTaken + " init") : null
+  ));
   return wrap;
 }
 
@@ -7612,6 +7673,44 @@ function buildStudioGearItem(g) {
    zones (combat / face / hacker / sci) reach the 60+ "adequate" tier.
    Imported party members (chrome bar's Load Party) union their coverage
    into the per-zone max. */
+/* v0.10.9: per-character coverage sliders for the team-card surface.
+   Modelled on buildStudioPartyCoverage's per-zone tile (the rich one used
+   by the top-of-page team radar + the studio sheet), but self-only — no
+   party-union readout. Adds the "emphasised design for high stats"
+   affordance the user asked for: tier ≥60 → green glow border + bigger
+   number + taller bar. Replaces the v0.10.5 text-only pc-coverage-row
+   tiles which had only background-tint colour cues. */
+function buildPartyMemberCoverage(coverage) {
+  coverage = coverage || {};
+  const zones = [
+    { key: "combat", label: "CBT",  source: "Guns / Melee / Fray" },
+    { key: "face",   label: "FACE", source: "Persuade / Deceive / Kinesics" },
+    { key: "hacker", label: "HACK", source: "Infosec / Interface / Program" },
+    { key: "sci",    label: "SCI",  source: "Research / Medicine / Hardware / Know" }
+  ];
+  const grid = h("div", { class: "pc-coverage-row" });
+  zones.forEach(z => {
+    const v = coverage[z.key] || 0;
+    const tier = v >= 60 ? "high" : v >= 40 ? "mid" : "low";
+    const tone = tier === "high" ? "var(--good)" : tier === "mid" ? "var(--warn)" : "var(--bad)";
+    const emphasize = tier === "high";
+    const tile = h("div", {
+      class: "pc-cov-slider pc-cov-slider--" + tier + (emphasize ? " pc-cov-slider--emphasized" : ""),
+      title: z.source + " — coverage " + v
+    },
+      h("div", { class: "pc-cov-slider-head" },
+        h("span", { class: "pc-cov-slider-label", style: { color: tone } }, z.label),
+        h("span", { class: "pc-cov-slider-val", style: { color: emphasize ? tone : "rgba(220,235,238,0.9)" } }, String(v))
+      ),
+      h("div", { class: "pc-cov-slider-bar" },
+        h("div", { class: "pc-cov-slider-fill", style: { width: Math.min(100, v) + "%", background: tone } })
+      )
+    );
+    grid.appendChild(tile);
+  });
+  return grid;
+}
+
 function buildStudioPartyCoverage(pc) {
   const cov = derived.partyCoverage();
   const zones = [
@@ -7951,17 +8050,14 @@ function buildPartyMemberCard(stateLike, entry) {
     card.appendChild(aptWrap);
   }
 
-  // 4-zone coverage — kept as-is (fixed-structure grid, sits cleanly between
-  // the rich panels and the variable-length top-skills text).
-  const tierClass = (v) => v >= 60 ? "pc-cov pc-cov--high" : v >= 40 ? "pc-cov pc-cov--mid" : "pc-cov pc-cov--low";
+  // v0.10.9: 4-zone coverage — replaced the text-only pc-cov tiles with
+  // buildPartyMemberCoverage's rich slider tiles (label + big number +
+  // traffic-light progress bar + emphasized treatment for high tier).
+  // Matches the design of the top-of-page team radar; high (≥60) zones
+  // get a green glow + bigger number so competence reads at a glance.
   card.appendChild(h("div", {class:"pc-section"},
     h("div", {class:"pc-section-label"}, "▸ ZONE COVERAGE"),
-    h("div", {class:"pc-coverage-row"},
-      h("div", {class: tierClass(data.coverage.combat)}, "CBT " + data.coverage.combat),
-      h("div", {class: tierClass(data.coverage.face)}, "FACE " + data.coverage.face),
-      h("div", {class: tierClass(data.coverage.hacker)}, "HACK " + data.coverage.hacker),
-      h("div", {class: tierClass(data.coverage.sci)}, "SCI " + data.coverage.sci)
-    )
+    buildPartyMemberCoverage(data.coverage)
   ));
 
   // Top skills — variable-length text; lives below the fixed-structure rows.
@@ -8566,7 +8662,16 @@ function buildStudioVitalSignsCard(pc, opts) {
   const kicker = vitalsOnly ? "body · mind · pools" : "body · mind · pools · recharge · healing";
   return buildStudioSection({ key:"vitals", title:"Vital Signs", color:"var(--st-teal)", icon:"vitals", kicker },
     buildStudioDamageBar(pc, { readOnly: ro }),
-    h("div", { style:{borderTop:"1px dashed var(--st-line)",paddingTop:"14px",marginTop:"14px"} },
+    // v0.10.9: replaced the indistinguishable 1px-dashed separator with the
+    // existing Claude Design FeedBreak (line ~8942) — corner brackets +
+    // gradient lines + a "// MIND" pill — so the body→mind boundary is
+    // visually announced, not just implied. Other dashed dividers in this
+    // panel stay as-is; they're sub-section breaks (pools, recharge,
+    // stats), not the major HP↔STRESS boundary. The mind-bar's blue
+    // accent (#6b9eff) echoes through the bracket/gradient/pill so the
+    // colour itself signals "this is the stress side."
+    h("div", null,
+      buildStudioFeedBreak({ label: "// MIND", accent: "#6b9eff" }),
       buildStudioMindBar(pc, { readOnly: ro })
     ),
     h("div", { style:{marginTop:"14px"} }, buildStudioPoolRow(pc, { readOnly: ro })),
