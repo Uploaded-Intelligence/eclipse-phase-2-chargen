@@ -79,7 +79,9 @@ body.play-mode .preview-mech { position: static; max-height: none; overflow-y: v
 body.party-mode .rail,
 body.party-mode .play-mode-banner,
 body.party-mode .layout { display: none; }
-.party-page { max-width: 1500px; margin: 0 auto; padding: 16px 18px 80px; color: var(--fg); font-family: var(--font); }
+.party-page { max-width: 1500px; margin: 0 auto; padding: 16px 18px 80px; color: var(--fg); font-family: var(--font); position: relative; }
+.party-page.team-dropzone--active { outline: 2px dashed var(--accent); outline-offset: -10px; background: rgba(127,212,226,0.04); }
+.party-page.team-dropzone--active .team-dropzone-hint { color: var(--accent); border-color: var(--accent); background: rgba(127,212,226,0.08); }
 .party-page-header { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--accent); }
 .party-page-header h1 { font-size: 22px; letter-spacing: 3px; margin: 0; text-transform: uppercase; color: #fff; font-weight: 900; }
 .party-page-header .sub { font-family: var(--mono); font-size: 11.5px; color: rgba(220,235,238,0.55); letter-spacing: 1.4px; }
@@ -3987,7 +3989,10 @@ function makeCharacterId() {
 }
 
 const newState = () => ({
-  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.9.2", mode:"chargen" },
+  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.10.0", mode:"chargen" },
+  // v0.10: team-room metadata. Roomless local play has all nulls + empty teamName.
+  // teamName persists locally even before joining a room (set it once, it sticks).
+  team:{ roomId:null, teamName:"", lastPolledAt:null },
   step:1,
   ego:{
     name:"",
@@ -4333,6 +4338,14 @@ function migrateToCurrent(loaded) {
   // v0.9.2: keep toolVersion in sync with newState() default on every load,
   // so footer doesn't show stale "v0.7.0" forever for legacy localStorage saves.
   if (loaded.meta) loaded.meta.toolVersion = newState().meta.toolVersion;
+  // v0.10: ensure STATE.team is always present (additive field; no schema bump).
+  if (!loaded.team || typeof loaded.team !== "object") {
+    loaded.team = { roomId:null, teamName:"", lastPolledAt:null };
+  } else {
+    if (!("roomId" in loaded.team)) loaded.team.roomId = null;
+    if (typeof loaded.team.teamName !== "string") loaded.team.teamName = "";
+    if (!("lastPolledAt" in loaded.team)) loaded.team.lastPolledAt = null;
+  }
   return loaded;
 }
 
@@ -5105,10 +5118,12 @@ function studioConsumeGear(id, delta) {
   });
 }
 
-function dispatch(mutator) {
+function dispatch(mutator, opts) {
   try { mutator(STATE); } catch(e) { console.error("dispatch error", e); }
   scheduleSave();
-  rerender();
+  // v0.10: opts.skipRerender lets text-input handlers commit without losing focus
+  // (rerender would re-mount the input and drop the cursor). Always saves.
+  if (!opts || !opts.skipRerender) rerender();
 }
 
 const scheduleSave = debounce(() => {
@@ -5811,15 +5826,15 @@ function buildChrome() {
         onClick: () => dispatch(s => { s.meta.mode = "play"; })}, "Play"),
       h("button", {class:"mode" + (STATE.meta.mode === "party" ? " active" : ""),
         onClick: () => dispatch(s => { s.meta.mode = "party"; }),
-        title: "Party Page · GM Command Centre — all imported members + live tracking"
-      }, "Party")
+        title: "Team Page · Command Centre — all teammates + live coverage"
+      }, "Team")
     ),
     h("div", {class:"actions"},
       h("button", {class:"icon lex-btn",
         onClick: () => dispatch(s => { s.meta.lexiconOpen = !s.meta.lexiconOpen; })}, "Lexicon"),
       h("button", {class:"icon", onClick: () => showShareModal(), title:"Share via link, QR, live push, or file"}, "Share"),
       h("button", {class:"icon", onClick: () => triggerImport(false)}, "Import"),
-      h("button", {class:"icon", onClick: () => triggerImport(true)}, "Load Party"),
+      h("button", {class:"icon", onClick: () => triggerImport(true), title:"Load a teammate from a .ep2.json file (or drag-drop onto the Team page)"}, "Load Team"),
       h("button", {class:"icon", onClick: () => { if (confirm("Discard this character and start over?")) { STATE = newState(); scheduleSave(); rerender(); } }}, "New")
     ),
     crumb.length ? h("div", {class:"crumb"}, h("b", null, e.name || "Unnamed"), " · " + crumb.join(" / ")) : null
@@ -6979,7 +6994,7 @@ function buildStudioPartyCoverage(pc) {
   if (!allCovered) {
     wrap.appendChild(h("div", {
       style:{fontSize:"10.5px", color:"var(--st-ink-mute)", fontStyle:"italic", lineHeight:1.45}
-    }, "// Load Party (chrome bar) to import allies and union their coverage. Or train missing skills in chargen Step 6."));
+    }, "// Load Team (chrome bar) to import teammates and union their coverage. Or train missing skills in chargen Step 6."));
   }
   return wrap;
 }
@@ -7033,6 +7048,8 @@ function partyComputeCardData(stateLike) {
     return {
       name: ego.name || "Unnamed",
       concept: (ego.narrative && ego.narrative.concept) || "",
+      // v0.10: portrait for team cards — visceral team identity, not just a row.
+      avatarDataUrl: (ego.narrative && ego.narrative.avatarDataUrl) || null,
       lifepath,
       faction: factionName,
       morph: ms && ms.morph ? { name: ms.morph.name, type: ms.morph.type } : null,
@@ -7041,6 +7058,9 @@ function partyComputeCardData(stateLike) {
       coverage: cov,
       reputation: ego.rep || {},
       wounds: (stateLike.play && stateLike.play.wounds) || 0,
+      // v0.10: also surface play.woundsTaken / traumasTaken for auto-derive in Wave B
+      woundsTaken: (stateLike.play && stateLike.play.woundsTaken) || 0,
+      traumasTaken: (stateLike.play && stateLike.play.traumasTaken) || 0,
       stress: (stateLike.play && stateLike.play.stress) || 0,
       WT: ms && ms.morph ? ms.morph.WT : 0,
       DUR: ms && ms.morph ? ms.morph.DUR : 0,
@@ -7057,13 +7077,31 @@ function buildPartyMemberCard(stateLike, entry) {
   // v0.9.2: tolerate entries missing the v7 .source/.gmNotes fields (e.g. legacy
   // saves whose live state predates normalizePartyImportEntries firing).
   const source = isSelf ? "self" : (typeof entry.source === "string" ? entry.source : "file");
-  const gm = (entry && entry.gmNotes) || null;
+  // v0.10 A4: defensive default so imported members always render the tracker
+  // block even if gmNotes is somehow falsy (the PUFT-yes / UNNA-no bug).
+  // Wave B replaces this UI with auto-derived display; this is a holdover.
+  const gm = (entry && entry.gmNotes) || { wounds:0, stress:0, initiative:null, statusEffects:[], notes:"" };
 
   const cls = "party-card" + (isSelf ? " party-card--self" : "") + (source === "live" ? " party-card--live" : "");
   const card = h("div", {class: cls});
 
-  // Banner: name + morph + source badge
-  const banner = h("div", {class:"pc-banner"});
+  // v0.10 A1: portrait thumbnail leads the banner — viscerally seeing the team.
+  // Falls back to a glyph silhouette when no avatar is set.
+  const portraitThumb = data.avatarDataUrl
+    ? h("img", {
+        src: data.avatarDataUrl,
+        alt: data.name + " portrait",
+        class: "pc-portrait-thumb",
+        style: {width:"64px",height:"64px",objectFit:"cover",borderRadius:"3px",border:"1px solid rgba(127,212,226,0.3)",flex:"0 0 64px"}
+      })
+    : h("div", {
+        class: "pc-portrait-thumb pc-portrait-thumb--empty",
+        style: {width:"64px",height:"64px",borderRadius:"3px",border:"1px dashed rgba(127,212,226,0.25)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontSize:"22px",color:"rgba(127,212,226,0.4)",flex:"0 0 64px",background:"rgba(7,24,29,0.4)"}
+      }, (data.name || "?").trim().charAt(0).toUpperCase() || "?");
+
+  // Banner: portrait + name + morph + source badge
+  const banner = h("div", {class:"pc-banner", style:{display:"flex",alignItems:"center",gap:"12px"}});
+  banner.appendChild(portraitThumb);
   banner.appendChild(h("div", {style:{flex:"1 1 auto",minWidth:0}},
     h("div", {class:"pc-name"}, data.name),
     data.concept ? h("div", {class:"pc-lifepath"}, "// " + data.concept.toUpperCase()) : null
@@ -7128,8 +7166,11 @@ function buildPartyMemberCard(stateLike, entry) {
     ));
   }
 
-  // GM Tracker (only on imported members, not self)
-  if (!isSelf && gm) {
+  // GM Tracker (only on imported members, not self).
+  // v0.10 A4: `gm` is always a truthy object now (defaulted at top of fn). The
+  // legacy `&& gm` truthy-check was hiding the tracker for any entry whose
+  // gmNotes hadn't been normalized — that was the PUFT-yes / UNNA-no bug.
+  if (!isSelf) {
     const idx = STATE.partyImports.indexOf(entry);
     const tracker = h("div", {class:"gm-tracker"});
     tracker.appendChild(h("div", {class:"gm-tracker-label"}, "▾ GM TRACKING · LOCAL OVERLAY"));
@@ -7228,52 +7269,90 @@ function buildPartyMemberCard(stateLike, entry) {
   return card;
 }
 
-/* buildPartyPage — the full party-page layout (header + coverage radar + grid). */
+/* buildPartyPage — the full team-page layout (header + team name + coverage radar + grid).
+   v0.10: rebranded "Party" → "Team" in user copy; legacy code identifiers unchanged. */
 function buildPartyPage() {
   const page = h("div", {class:"party-page"});
 
   // Header
-  const partyCount = (STATE.partyImports || []).length;
+  const teamMembers = (STATE.partyImports || []).length;
   const liveCount = (STATE.partyImports || []).filter(p => p.source === "live").length;
   const polling = !!_partyPollAbort;
+  const teamName = (STATE.team && STATE.team.teamName) || "";
+
+  // v0.10 A2: inline-editable team name input. Persists locally even pre-room.
+  const teamNameInput = h("input", {
+    type:"text",
+    value: teamName,
+    placeholder: "// NAME YOUR TEAM",
+    class: "team-name-input",
+    style: {
+      width:"100%", maxWidth:"480px", padding:"6px 10px",
+      background:"rgba(7,24,29,0.4)", color:"#fff",
+      border:"1px solid rgba(127,212,226,0.3)", borderRadius:"2px",
+      fontFamily:"var(--mono)", fontSize:"14px", letterSpacing:"1.5px",
+      textTransform:"uppercase", fontWeight:700, marginTop:"6px"
+    },
+    onInput: (ev) => {
+      // local-only update (live debounce / team-doc PATCH comes in Wave D).
+      const v = ev.target.value;
+      dispatch(s => {
+        if (!s.team) s.team = { roomId:null, teamName:"", lastPolledAt:null };
+        s.team.teamName = v;
+      }, { skipRerender:true });
+    }
+  });
+
   const header = h("div", {class:"party-page-header"},
-    h("div", null,
-      h("h1", null, "Party · Command Centre"),
-      h("div", {class:"sub"}, "// " + partyCount + " imported member" + (partyCount === 1 ? "" : "s") + (liveCount > 0 ? " · " + liveCount + " 🟢 live" : "") + (polling && liveCount > 0 ? " · polling every 30s" : ""))
+    h("div", {style:{flex:"1 1 auto",minWidth:0}},
+      h("h1", null, "Team · Command Centre"),
+      h("div", {class:"sub"}, "// " + teamMembers + " teammate" + (teamMembers === 1 ? "" : "s") + (liveCount > 0 ? " · " + liveCount + " 🟢 live" : "") + (polling && liveCount > 0 ? " · polling every 30s" : "")),
+      teamNameInput
     ),
-    h("div", {style:{display:"flex",gap:"8px",flexWrap:"wrap"}},
+    h("div", {style:{display:"flex",gap:"8px",flexWrap:"wrap",alignItems:"flex-start"}},
       // Roll Initiative for all
-      partyCount > 0 ? h("button", {
+      teamMembers > 0 ? h("button", {
         style:{padding:"8px 14px",background:"transparent",color:"#7fd4e2",border:"1px solid var(--accent)",borderRadius:"2px",fontFamily:"var(--mono)",fontSize:"11px",letterSpacing:"1.5px",fontWeight:700,textTransform:"uppercase",cursor:"pointer"},
         onClick: () => dispatch(s => {
           s.partyImports.forEach(p => {
             const ref = (p.full && p.full.ego && p.full.ego.aptitudes && p.full.ego.aptitudes.REF) || 0;
+            if (!p.gmNotes) p.gmNotes = { wounds:0, stress:0, initiative:null, statusEffects:[], notes:"" };
             p.gmNotes.initiative = Math.floor(Math.random() * 10) + 1 + Math.floor(ref / 10);
           });
         })
       }, "🎲 Roll Initiative · All") : null,
-      // Load Party shortcut
+      // Load Party shortcut (v0.10: relabel + dropzone copy)
       h("button", {
         style:{padding:"8px 14px",background:"transparent",color:"rgba(220,235,238,0.85)",border:"1px solid rgba(127,212,226,0.4)",borderRadius:"2px",fontFamily:"var(--mono)",fontSize:"11px",letterSpacing:"1.5px",fontWeight:700,textTransform:"uppercase",cursor:"pointer"},
         onClick: () => triggerImport(true)
-      }, "+ Add Member (file)")
+      }, "+ Add Member (or drop file)")
     )
   );
   page.appendChild(header);
 
+  // v0.10 A3: drag-and-drop dropzone — whole page accepts JSON drops, with a
+  // visible affordance + overlay state on dragover. ADHD-friendly: no aiming.
+  const dropzone = h("div", {class:"team-dropzone"},
+    h("div", {class:"team-dropzone-hint", style:{padding:"10px 14px",border:"1px dashed rgba(127,212,226,0.35)",borderRadius:"2px",background:"rgba(7,24,29,0.25)",fontFamily:"var(--mono)",fontSize:"11px",letterSpacing:"1.2px",color:"rgba(127,212,226,0.7)",textTransform:"uppercase",textAlign:"center",margin:"12px 0"}},
+      "// drop teammate .ep2.json files here (one or many)"
+    )
+  );
+  // wire dropzone handlers via addEventListener AFTER it's in the DOM (see end of buildPartyPage)
+  page.appendChild(dropzone);
+
   // 4-zone party-coverage radar (reuses buildStudioPartyCoverage with self adapter)
   const studioPc = studioPcFromState();
   const coverageBlock = h("div", {class:"party-page-coverage"},
-    h("div", {style:{fontFamily:"var(--mono)",fontSize:"11px",letterSpacing:"1.5px",fontWeight:800,color:"var(--accent-2)",textTransform:"uppercase",marginBottom:"8px"}}, "▸ Party · 4-Zone Coverage"),
+    h("div", {style:{fontFamily:"var(--mono)",fontSize:"11px",letterSpacing:"1.5px",fontWeight:800,color:"var(--accent-2)",textTransform:"uppercase",marginBottom:"8px"}}, "▸ Team · 4-Zone Coverage"),
     buildStudioPartyCoverage(studioPc)
   );
   page.appendChild(coverageBlock);
 
   // Empty state
-  if (partyCount === 0) {
+  if (teamMembers === 0) {
     const empty = h("div", {class:"party-empty"},
-      h("h2", null, "No party members imported yet."),
-      h("p", null, "Share your character via the Share button above, then send the link to your players. When they share back, their characters appear here. The GM Command Centre tracks vitals + initiative for each."),
+      h("h2", null, "No teammates yet."),
+      h("p", null, "Drop a teammate's .ep2.json file anywhere on this page — or click ↗ Share to send your character via link, and your team-mates can share back. Each teammate's full sheet shows up live here."),
       h("button", {onClick: () => showShareModal()}, "↗ Share Your Character")
     );
     page.appendChild(empty);
@@ -7299,6 +7378,49 @@ function buildPartyPage() {
     if (m && m.full) grid.appendChild(buildPartyMemberCard(m.full, m));
   });
   page.appendChild(grid);
+
+  // v0.10 A3: attach drag-and-drop handlers to the page-level dropzone.
+  // Whole-page drop is intentional (ADHD-friendly: no aiming). Visual feedback
+  // via the .team-dropzone--active class toggles a highlight ring.
+  let dragDepth = 0;
+  const onDragEnter = (ev) => {
+    if (!ev.dataTransfer || !Array.from(ev.dataTransfer.types || []).includes("Files")) return;
+    ev.preventDefault();
+    dragDepth++;
+    page.classList.add("team-dropzone--active");
+  };
+  const onDragOver = (ev) => {
+    if (!ev.dataTransfer || !Array.from(ev.dataTransfer.types || []).includes("Files")) return;
+    ev.preventDefault();
+  };
+  const onDragLeave = (ev) => {
+    if (!ev.dataTransfer || !Array.from(ev.dataTransfer.types || []).includes("Files")) return;
+    dragDepth--;
+    if (dragDepth <= 0) {
+      dragDepth = 0;
+      page.classList.remove("team-dropzone--active");
+    }
+  };
+  const onDrop = (ev) => {
+    ev.preventDefault();
+    dragDepth = 0;
+    page.classList.remove("team-dropzone--active");
+    const files = ev.dataTransfer && ev.dataTransfer.files ? Array.from(ev.dataTransfer.files) : [];
+    const jsonFiles = files.filter(f => /\.(json|ep2\.json)$/i.test(f.name) || f.type === "application/json");
+    if (jsonFiles.length === 0) {
+      showToast("No .json files in drop");
+      return;
+    }
+    jsonFiles.forEach(f => {
+      const reader = new FileReader();
+      reader.onload = () => { try { importJSON(reader.result, true); } catch (e) { console.error("[drop import]", e); } };
+      reader.readAsText(f);
+    });
+  };
+  page.addEventListener("dragenter", onDragEnter);
+  page.addEventListener("dragover", onDragOver);
+  page.addEventListener("dragleave", onDragLeave);
+  page.addEventListener("drop", onDrop);
 
   return page;
 }

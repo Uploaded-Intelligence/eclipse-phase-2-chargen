@@ -2,6 +2,28 @@
 
 All notable changes to this project. Format follows the spirit of [Keep a Changelog](https://keepachangelog.com/), versioned by milestone.
 
+## [0.10.0] — 2026-05-16 — "The Team is Visible"
+
+**Vocabulary shift: "Party" → "Team" throughout user-facing copy.** Mili-scifi over fantasy. Code identifiers (`partyImports`, `buildPartyMemberCard`) stay legacy for diff hygiene; user-facing text uses Team. This is Wave A of v0.10 "The Team" — three more waves coming.
+
+### Added
+- **Portraits on team cards.** Every teammate card now leads with a 64×64 portrait thumbnail (from `ego.narrative.avatarDataUrl`). Missing-portrait fallback: large monospace initial-letter glyph in a dashed-border slot. The team page becomes visceral — faces, not rows.
+- **Team name field** in the page header. Inline-editable input, persists in `STATE.team.teamName`. The team name is yours from the moment you type it; promoted to the shared team doc in Wave D when team rooms ship.
+- **Drag-and-drop file import.** The whole Team page is now a drop target. Drag one or many `.ep2.json` files onto it; each becomes a team member via `importJSON`. Existing "+ Add Member" button stays as the click-to-pick fallback (and the only mobile path). Visible dropzone hint with active-state highlight ring when you drag over.
+
+### Fixed
+- **GM Tracker missing on some team cards** (the PUFT-yes / UNNA-no bug). The render gate was `if (!isSelf && gm)` — entries with falsy `gmNotes` silently skipped the tracker. Defended at two points: (1) `gm` defaults to a fresh tracker object if the entry's `gmNotes` is missing, (2) the gate is now just `if (!isSelf)`. Belt and suspenders. **Wave B will replace this UI entirely with auto-derived display**; this is a holdover so the symptom doesn't ship in v0.10.0.
+
+### Engine
+- `STATE.team` field added (additive — schemaVersion stays at v7). Default `{ roomId:null, teamName:"", lastPolledAt:null }` populated via `newState()` and back-filled in `migrateToCurrent` for legacy saves.
+- `partyComputeCardData` now returns `avatarDataUrl`, `woundsTaken`, `traumasTaken` — surfaces what Wave B's auto-derive needs.
+- `dispatch(mutator, opts)` accepts optional `{skipRerender:true}` so text-input handlers can commit without losing focus + cursor position.
+
+### Cross-cutting principle
+**The page is for the team, not the GM.** Wave A is the visible re-framing. Wave B (auto-derive) is the trust shift. Wave C (open any sheet) is the togetherness. Wave D (shared room URL) is the relief.
+
+---
+
 ## [0.9.2] — 2026-05-16 — "Load Party defense in depth"
 
 **The bug that wouldn't die.** v0.9.1 fixed the URL-share import path but missed that "Load Party" (file upload) goes through a *different* function — `importJSON` — that still produced v6-shape partyImports entries. The next render hit `buildPartyMemberCard`, called `.toUpperCase()` on the undefined `source` field, and threw — wrapped in the import try/catch as `Import failed: can't access property "toUpperCase", source is undefined`. **Same symptom, different producer.** v0.9.2 fixes it systemically.
