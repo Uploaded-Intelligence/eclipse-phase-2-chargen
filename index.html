@@ -3987,7 +3987,7 @@ function makeCharacterId() {
 }
 
 const newState = () => ({
-  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.7.0", mode:"chargen" },
+  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.9.1", mode:"chargen" },
   step:1,
   ego:{
     name:"",
@@ -5165,7 +5165,11 @@ function importJSON(text, asPartyMember) {
       scheduleSave(); rerender();
       showToast("Imported character: " + (STATE.ego.name || "Unnamed"));
     }
-  } catch(e) { alert("Import failed: " + e.message); }
+  } catch(e) {
+    // v0.9.1: log full stack to console for diagnosis.
+    console.error("[importJSON] failed:", e);
+    alert("Import failed: " + e.message + "\n\nThis is a bug. Open the browser console (F12 → Console tab) and copy the error details for the developer.");
+  }
 }
 
 function showToast(msg) {
@@ -5398,12 +5402,28 @@ function showImportPromptModal(parsedState, sourceLabel) {
 }
 
 /* importShareSnapshot — apply a parsed state as party member or self.
-   Reuses migrateToCurrent + the same shape as importJSON's two paths. */
+   Reuses migrateToCurrent + the same shape as importJSON's two paths.
+   v0.9.1: defensive — validates parsedState shape before mutating STATE, and
+   logs full stack to console on failure so users can DM the trace. */
 function importShareSnapshot(parsedState, asPartyMember, sourceLabel) {
+  // v0.9.1: validate BEFORE entering try block so we report shape errors
+  // distinctly from migration/rerender errors.
+  if (!parsedState || typeof parsedState !== "object") {
+    alert("Import failed: share data is empty or not an object. The share link may be corrupted.");
+    return;
+  }
+  if (!parsedState.meta || typeof parsedState.meta.schemaVersion !== "number") {
+    alert("Import failed: share data is missing required metadata (meta.schemaVersion). The share link may be from a different tool or corrupted.");
+    return;
+  }
+  if (!parsedState.ego || typeof parsedState.ego !== "object") {
+    alert("Import failed: share data is missing the ego object. The share link is malformed.");
+    return;
+  }
   try {
     let loaded = migrateToCurrent(parsedState);
     if (loaded.meta.schemaVersion !== SCHEMA_VERSION) {
-      alert("This share is from a newer tool version. Cannot import.");
+      alert("This share is from a newer tool version (v" + loaded.meta.schemaVersion + ") than this tool supports (v" + SCHEMA_VERSION + "). Cannot import.");
       return;
     }
     if (asPartyMember) {
@@ -5424,8 +5444,14 @@ function importShareSnapshot(parsedState, asPartyMember, sourceLabel) {
       };
       dispatch(s => {
         if (existingIdx >= 0) {
-          // Preserve gmNotes from existing entry; replace .full
-          entry.gmNotes = s.partyImports[existingIdx].gmNotes;
+          // Preserve gmNotes from existing entry; replace .full.
+          // Defensively rebuild gmNotes if existing entry was missing fields
+          // (could happen with very old saves).
+          const existingGm = s.partyImports[existingIdx].gmNotes || {};
+          entry.gmNotes = Object.assign(
+            { wounds:0, stress:0, initiative:null, statusEffects:[], notes:"" },
+            existingGm
+          );
           entry.syncUrl = s.partyImports[existingIdx].syncUrl;
           s.partyImports[existingIdx] = entry;
         } else {
@@ -5442,12 +5468,29 @@ function importShareSnapshot(parsedState, asPartyMember, sourceLabel) {
       fresh.ego.slotAllocations = (loaded.ego && loaded.ego.slotAllocations) || {};
       fresh.ego.customSlots = (loaded.ego && loaded.ego.customSlots) || [];
       fresh.ego.customSlotCounter = (loaded.ego && loaded.ego.customSlotCounter) || 0;
+      // v0.9.1: ensure play substate isn't missing keys after merge (older
+      // exports may have play.wounds but not woundsTaken, etc.)
+      fresh.play = Object.assign(newState().play, loaded.play || {});
+      fresh.play.pools = Object.assign(newState().play.pools, (loaded.play && loaded.play.pools) || {});
+      // partyImports from an incoming "load-as-self" share should NOT clobber
+      // the GM's own party list — keep whatever was already loaded.
+      if (Array.isArray(loaded.partyImports) && loaded.partyImports.length > 0 && STATE.partyImports.length === 0) {
+        fresh.partyImports = loaded.partyImports;
+      } else {
+        fresh.partyImports = STATE.partyImports;
+      }
       delete fresh.summary;
       STATE = fresh;
       scheduleSave(); rerender();
       showToast("Imported: " + (STATE.ego.name || "Unnamed"));
     }
-  } catch (e) { alert("Import failed: " + e.message); }
+  } catch (e) {
+    // v0.9.1: dump full stack to console for diagnosis; show a more helpful
+    // message in the alert. The most common failure mode is the rerender
+    // hitting an unsafe property access on freshly-imported state.
+    console.error("[importShareSnapshot] failed:", e);
+    alert("Import failed: " + e.message + "\n\nThis is a bug. Open the browser console (F12 → Console tab) and copy the error details for the developer.");
+  }
 }
 
 /* handleShareHash — runs once on page load. If URL has #share=..., decode and
@@ -6630,9 +6673,15 @@ function buildStudioMesh(pc) {
   const opsec = studioMeshOpsec(pc);
   const apps = studioMeshApps(pc);
   const implants = studioMeshImplants(pc);
+  // studioPcFromState produces pc.skills entries with `.total` (not `.value`).
+  // Also handle "Program:<field>" — Program is keyed without a field, but the
+  // skill display name may carry one. Match by skill prefix.
   const findSkill = (name) => {
-    const s = ((pc && pc.skills) || []).find(sk => sk.name === name);
-    return s ? (s.value || 0) : 0;
+    const list = ((pc && pc.skills) || []);
+    const exact = list.find(sk => sk.name === name);
+    if (exact) return exact.total || exact.value || 0;
+    const prefix = list.find(sk => sk.name && sk.name.split(":")[0] === name);
+    return prefix ? (prefix.total || prefix.value || 0) : 0;
   };
   const infosec = findSkill("Infosec");
   const iface   = findSkill("Interface");
@@ -8353,18 +8402,22 @@ function buildStudioSheet() {
       ));
     });
     sheet.appendChild(gearRow);
-
-    // v0.8 — Gear Guide: loadout brief, GP/Complexity primer, fabrication detection.
-    // Makes existing affordances discoverable. Counts weapons/armor/apps; detects
-    // fabber and surfaces what the character can craft in play.
-    sheet.appendChild(buildStudioGearGuide(pc));
-
-    // v0.9 — The Mesh: every PC's mesh access made legible.
-    // Surfaces Muse, OPSEC stack, hacking dice (Infosec/Interface/Program),
-    // mesh apps, common actions, privilege ladder, and mesh-relevant ware.
-    // Pure projection — no schema change, derives everything from existing STATE.
-    sheet.appendChild(buildStudioMesh(pc));
   }
+
+  // v0.8 — Gear Guide: loadout brief, GP/Complexity primer, fabrication detection.
+  // Makes existing affordances discoverable. Counts weapons/armor/apps; detects
+  // fabber and surfaces what the character can craft in play.
+  // v0.9.1: hoisted out of `packNames > 0` gate so imported PCs (which may have
+  // no gear yet) still see the GP/Complexity primer + fab guidance.
+  sheet.appendChild(buildStudioGearGuide(pc));
+
+  // v0.9 — The Mesh: every PC's mesh access made legible.
+  // Surfaces Muse, OPSEC stack, hacking dice (Infosec/Interface/Program),
+  // mesh apps, common actions, privilege ladder, and mesh-relevant ware.
+  // Pure projection — no schema change, derives everything from existing STATE.
+  // v0.9.1: hoisted out of `packNames > 0` gate. Mesh access derives from morph
+  // ware + skills, not gear — every PC needs this section even pre-gear.
+  sheet.appendChild(buildStudioMesh(pc));
 
   // ── DOSSIER · OFF-FEED ──────────────────────────────────────────
   // Below the live mechanics, the sheet switches into narrative territory:

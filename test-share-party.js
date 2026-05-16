@@ -320,6 +320,43 @@ assert("hacker+exalt PC has mesh access (not 'none')", liveAccess !== "none", "g
 const liveOpsec = exp.studioMeshOpsec(pcMesh);
 assert("studioMeshOpsec returns a level on real PC", ["GOOD","FAIR","POOR"].includes(liveOpsec.level), "got " + liveOpsec.level);
 
+console.log("\n=== v0.9.1 — pc.skills shape uses .total (regression guard) ===");
+// studioPcFromState produces entries with `.total`, not `.value`. The Mesh
+// section's findSkill must read `.total`. v0.9 originally read `.value` →
+// Infosec/Interface/Program tiles always showed 0.
+assert("pc.skills entries have .total", pcMesh.skills.length === 0 || "total" in pcMesh.skills[0]);
+assert("pc.skills entries do NOT have .value", pcMesh.skills.length === 0 || !("value" in pcMesh.skills[0]));
+
+console.log("\n=== v0.9.1 — importShareSnapshot defensive validation ===");
+// Empty / undefined parsedState should NOT throw; should alert with shape error.
+let threwOnNull = false;
+try { exp.importShareSnapshot(null, true, "URL"); } catch (e) { threwOnNull = true; }
+assert("importShareSnapshot(null) does not throw (guarded)", !threwOnNull);
+let threwOnEmpty = false;
+try { exp.importShareSnapshot({}, true, "URL"); } catch (e) { threwOnEmpty = true; }
+assert("importShareSnapshot({}) does not throw (guarded)", !threwOnEmpty);
+let threwOnNoEgo = false;
+try { exp.importShareSnapshot({meta:{schemaVersion:7}}, true, "URL"); } catch (e) { threwOnNoEgo = true; }
+assert("importShareSnapshot({meta:...}) without ego does not throw (guarded)", !threwOnNoEgo);
+
+console.log("\n=== v0.9.1 — toolVersion bumped ===");
+const freshState = exp.newState();
+assert("newState().meta.toolVersion is 0.9.x (not stale 0.7.0)", /^0\.9\./.test(freshState.meta.toolVersion), "got " + freshState.meta.toolVersion);
+
+console.log("\n=== v0.9.1 — self-import preserves GM's existing partyImports ===");
+exp._setState(exp.newState());
+// GM has an existing party member
+exp.STATE.partyImports.push({ id:"existing-1", name:"Pre-existing", source:"file", gmNotes:{ wounds:0, stress:0, initiative:null, statusEffects:[], notes:"" }, full:{ meta:{schemaVersion:7}, ego:{name:"Pre-existing"}, partyImports:[] } });
+// Player B shares their character, GM imports as self
+const playerB = exp.newState();
+playerB.ego.name = "Player B";
+const urlB = exp.encodeShareUrl(playerB);
+const parsedB = exp.decodeShareUrl(urlB);
+exp.importShareSnapshot(parsedB, false, "URL");
+assert("self-import keeps GM's existing partyImports", exp.STATE.partyImports.length === 1);
+assert("self-import GM's existing entry preserved", exp.STATE.partyImports[0] && exp.STATE.partyImports[0].name === "Pre-existing");
+assert("self-import replaced ego.name to Player B", exp.STATE.ego.name === "Player B");
+
 console.log("\n=========================================");
 console.log("FINAL: " + pass + " pass, " + fail + " fail");
 console.log("=========================================");
