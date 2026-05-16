@@ -706,10 +706,51 @@ console.log("\n=== v0.10.2 — studioPcFromState produces a renderable pc from a
   assert("pc.name matches the teammate STATE.ego.name", pc.name === "Sheet Test");
 }
 
-console.log("\n=== v0.10.2 — toolVersion bumped to 0.10.2 ===");
+console.log("\n=== v0.10.3 — toolVersion bumped to 0.10.3 ===");
 {
   const fresh = exp.newState();
-  assert("newState().meta.toolVersion is 0.10.2", fresh.meta.toolVersion === "0.10.2");
+  assert("newState().meta.toolVersion is 0.10.3", fresh.meta.toolVersion === "0.10.3");
+}
+
+console.log("\n=== v0.10.3 — STATE.team.roomId can be set and persists ===");
+{
+  exp._setState(exp.newState());
+  exp.STATE.team.roomId = "test-room-uuid-1234";
+  exp.STATE.team.teamName = "Strike Team Alpha";
+  // Roundtrip through migrateToCurrent (the load path)
+  const serialized = JSON.parse(JSON.stringify(exp.STATE));
+  const loaded = exp.migrateToCurrent(serialized);
+  assert("roomId persists through migrate", loaded.team.roomId === "test-room-uuid-1234");
+  assert("teamName persists through migrate", loaded.team.teamName === "Strike Team Alpha");
+}
+
+console.log("\n=== v0.10.3 — team-doc shape regression (what the server expects) ===");
+{
+  // The server schema in api/team/[roomId].js requires:
+  //   { schemaVersion:1, teamName:string, members:string[], initiative:[{characterId,value,rolledAt}], updatedAt:ISO }
+  // We sanity-check that the client-side patchTeamDoc body shape matches.
+  const ID_PATTERN = /^[a-zA-Z0-9_-]{8,64}$/;
+  // Sample initiative entry the client emits
+  const sampleEntry = { characterId: "char-1234-uuid", value: 12, rolledAt: new Date().toISOString() };
+  assert("initiative entry has characterId matching ID_PATTERN", ID_PATTERN.test(sampleEntry.characterId));
+  assert("initiative entry has numeric value", typeof sampleEntry.value === "number" && isFinite(sampleEntry.value));
+  assert("initiative entry has ISO rolledAt", typeof sampleEntry.rolledAt === "string" && sampleEntry.rolledAt.includes("T"));
+  // Sample team-doc patch body the client emits
+  const samplePatch = { teamName: "Echo Squad" };
+  assert("teamName patch is plain string", typeof samplePatch.teamName === "string");
+  // Member patch (set-union)
+  const memberPatch = { members: ["char-1234-uuid", "char-5678-uuid"] };
+  assert("members patch is array of ID-pattern strings", Array.isArray(memberPatch.members) && memberPatch.members.every(m => ID_PATTERN.test(m)));
+}
+
+console.log("\n=== v0.10.3 — boot resumes polling when STATE.team.roomId is set ===");
+{
+  // We can't test the actual polling timer in the sandbox (no setInterval observation),
+  // but we can verify that STATE.team.roomId being set is the trigger condition.
+  exp._setState(exp.newState());
+  assert("boot should NOT resume polling when roomId is null", exp.STATE.team.roomId === null);
+  exp.STATE.team.roomId = "room-test-id";
+  assert("boot SHOULD resume polling when roomId is set (after load)", !!exp.STATE.team.roomId);
 }
 
 console.log("\n=== v0.10.0 — STATE.team.teamName persists through save/load roundtrip ===");

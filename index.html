@@ -4001,7 +4001,7 @@ function makeCharacterId() {
 }
 
 const newState = () => ({
-  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.10.2", mode:"chargen" },
+  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.10.3", mode:"chargen" },
   // v0.10: team-room metadata. Roomless local play has all nulls + empty teamName.
   // teamName persists locally even before joining a room (set it once, it sticks).
   team:{ roomId:null, teamName:"", lastPolledAt:null },
@@ -5675,6 +5675,367 @@ async function handleLiveParam() {
     showToast("Live fetch failed: " + e.message);
   }
 }
+
+/* ================================================================== */
+/* === v0.10 Wave D — Team Room shared live-sync                  === */
+/* ================================================================== */
+
+/* createTeamRoom — generates a fresh roomId, pushes own character to layer 1,
+   POSTs a new team doc to layer 2, sets STATE.team.roomId. Used by the
+   "Create Team Room" button. */
+async function createTeamRoom() {
+  // Ensure own character has an id (pushToLive does this too, but we need it
+  // before the POST body is built).
+  if (!STATE.ego.characterId) {
+    dispatch(s => { s.ego.characterId = makeCharacterId(); });
+  }
+  // Disable double-click via window-level flag.
+  if (window.__teamCreateInFlight) return;
+  window.__teamCreateInFlight = true;
+  try {
+    // Push self to layer 1 first so the room has at least one fetchable member.
+    await pushSelfQuietly();
+    const roomId = makeCharacterId();
+    const body = {
+      teamName: (STATE.team && STATE.team.teamName) || "",
+      members: [STATE.ego.characterId],
+      initiative: []
+    };
+    let resp = await fetch("/api/team/" + encodeURIComponent(roomId), {
+      method: "POST",
+      headers: {"content-type":"application/json"},
+      body: JSON.stringify(body)
+    });
+    if (resp.status === 409) {
+      // 1-in-2^128 chance of UUID collision; retry once with fresh id.
+      const retryId = makeCharacterId();
+      resp = await fetch("/api/team/" + encodeURIComponent(retryId), {
+        method: "POST", headers: {"content-type":"application/json"}, body: JSON.stringify(body)
+      });
+      if (!resp.ok) {
+        showToast("Team room create failed (" + resp.status + ")");
+        return;
+      }
+      dispatch(s => { s.team.roomId = retryId; });
+    } else if (!resp.ok) {
+      const text = await resp.text();
+      showToast("Team room create failed (" + resp.status + ") — " + text.slice(0, 80));
+      return;
+    } else {
+      dispatch(s => { s.team.roomId = roomId; });
+    }
+    showTeamRoomCreatedModal();
+    startTeamRoomPolling();
+  } catch (e) {
+    console.error("[createTeamRoom]", e);
+    showToast("Team room create failed: " + e.message);
+  } finally {
+    window.__teamCreateInFlight = false;
+  }
+}
+
+/* pushSelfQuietly — push current STATE to /api/share/{characterId} without
+   opening the post-push modal. Used internally by team-room flows. */
+async function pushSelfQuietly() {
+  if (!STATE.ego.characterId) {
+    dispatch(s => { s.ego.characterId = makeCharacterId(); });
+  }
+  const id = STATE.ego.characterId;
+  const payload = JSON.stringify({
+    data: LZString.compressToEncodedURIComponent(JSON.stringify(STATE)),
+    name: STATE.ego.name || "Unnamed",
+    updatedAt: new Date().toISOString()
+  });
+  const resp = await fetch("/api/share/" + encodeURIComponent(id), {
+    method: "POST", headers: {"content-type":"application/json"}, body: payload
+  });
+  if (!resp.ok) {
+    throw new Error("share push failed: " + resp.status);
+  }
+}
+
+/* showTeamRoomCreatedModal — small confirmation modal with the joinable URL. */
+function showTeamRoomCreatedModal() {
+  const roomId = STATE.team && STATE.team.roomId;
+  if (!roomId) return;
+  const teamUrl = location.origin + location.pathname + "?team=" + encodeURIComponent(roomId);
+  const existing = document.getElementById("team-room-created-modal-root");
+  if (existing) existing.remove();
+  const root = h("div", {id:"team-room-created-modal-root",
+    style:{position:"fixed",inset:0,zIndex:1100,display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}});
+  const backdrop = h("div", {style:{position:"absolute",inset:0,background:"rgba(7,24,29,0.85)",backdropFilter:"blur(4px)"}, onClick:()=>root.remove()});
+  root.appendChild(backdrop);
+  const panel = h("div", {style:{position:"relative",background:"linear-gradient(180deg, #0a242c 0%, #07181d 100%)",border:"1px solid var(--good)",borderRadius:"4px",padding:"24px 22px 18px",maxWidth:"560px",width:"100%",color:"rgba(220,235,238,0.92)",boxShadow:"0 8px 40px rgba(0,0,0,0.6)"}});
+  panel.appendChild(h("div", {style:{position:"absolute",top:"-14px",left:"18px",height:"28px",padding:"0 16px 0 12px",display:"inline-flex",alignItems:"center",background:"var(--good)",color:"#06141a",border:"1px solid var(--good)",clipPath:"polygon(0 0, calc(100% - 12px) 0, 100% 100%, 0 100%)",fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontSize:"10.5px",letterSpacing:"2px",fontWeight:800}}, "// TEAM ROOM CREATED"));
+  panel.appendChild(h("button", {style:{position:"absolute",top:"8px",right:"10px",background:"transparent",border:"none",color:"rgba(220,235,238,0.6)",cursor:"pointer",fontSize:"18px",padding:"4px 8px"},onClick:()=>root.remove(),title:"Close (Esc)"}, "✕"));
+  panel.appendChild(h("div", {style:{marginTop:"6px",marginBottom:"14px",fontSize:"13px",color:"rgba(220,235,238,0.85)",lineHeight:1.5}}, "Share this URL with your teammates. When they open it, they're invited to join. Each member's full sheet auto-syncs every 60 seconds while in TEAM mode."));
+  const teamInput = h("input", {type:"text", readonly:true, value: teamUrl,
+    style:{width:"100%",padding:"8px 10px",background:"rgba(0,0,0,0.3)",border:"1px solid var(--good)",borderRadius:"2px",color:"#7eb",fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontSize:"11.5px",marginBottom:"12px"},
+    onClick:(ev)=>ev.target.select()});
+  panel.appendChild(teamInput);
+  panel.appendChild(h("button", {style:{padding:"10px 14px",background:"#1d8493",color:"#06141a",border:"1px solid #7fd4e2",borderRadius:"2px",fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontSize:"11px",letterSpacing:"1.5px",fontWeight:700,textTransform:"uppercase",cursor:"pointer",width:"100%"},
+    onClick: async () => {
+      try { await navigator.clipboard.writeText(teamUrl); showToast("Team URL copied"); }
+      catch(e) { teamInput.select(); document.execCommand("copy"); showToast("Copied (fallback)"); }
+    }}, "📋 Copy Team URL"));
+  panel.appendChild(h("div", {style:{fontSize:"11px",color:"rgba(220,235,238,0.55)",fontFamily:'"Share Tech Mono", ui-monospace, monospace',marginTop:"12px",lineHeight:1.5}},
+    "// PRIVACY: joining shares your FULL character sheet with all members. ",
+    h("br"),
+    "// TTL: 30 days inactive → room expires. Any member can re-create."
+  ));
+  root.appendChild(panel);
+  document.body.appendChild(root);
+  const onKey = (ev) => { if (ev.key === "Escape") { root.remove(); document.removeEventListener("keydown", onKey); } };
+  document.addEventListener("keydown", onKey);
+}
+
+/* joinTeamRoom — fetch the team doc, push own character to layer 1, PATCH the
+   doc to add own characterId, set local STATE.team.roomId. */
+async function joinTeamRoom(roomId) {
+  if (!roomId) return;
+  try {
+    // Verify room exists
+    const checkResp = await fetch("/api/team/" + encodeURIComponent(roomId));
+    if (!checkResp.ok) {
+      showToast("Team room not found or expired");
+      return false;
+    }
+    const remoteDoc = await checkResp.json();
+    // Ensure own characterId
+    if (!STATE.ego.characterId) {
+      dispatch(s => { s.ego.characterId = makeCharacterId(); });
+    }
+    // Push self to layer 1
+    await pushSelfQuietly();
+    // PATCH team doc to add self as member (set-union; safe if already present)
+    const patchResp = await fetch("/api/team/" + encodeURIComponent(roomId), {
+      method: "PATCH", headers: {"content-type":"application/json"},
+      body: JSON.stringify({ members: [STATE.ego.characterId] })
+    });
+    if (!patchResp.ok) {
+      showToast("Join failed (" + patchResp.status + ")");
+      return false;
+    }
+    dispatch(s => {
+      s.team.roomId = roomId;
+      // Pull teamName from remote so the joiner sees what the host typed.
+      if (remoteDoc && typeof remoteDoc.teamName === "string") s.team.teamName = remoteDoc.teamName;
+    });
+    showToast("Joined team " + (remoteDoc.teamName || ""));
+    startTeamRoomPolling();
+    return true;
+  } catch (e) {
+    console.error("[joinTeamRoom]", e);
+    showToast("Join failed: " + e.message);
+    return false;
+  }
+}
+
+/* handleTeamParam — runs once on page load. If URL has ?team={roomId}, fetch
+   the team doc and show join modal. */
+async function handleTeamParam() {
+  const params = new URLSearchParams(location.search);
+  const teamId = params.get("team");
+  if (!teamId) return;
+  // Clear param so refresh doesn't re-prompt
+  history.replaceState(null, "", location.pathname);
+  try {
+    const resp = await fetch("/api/team/" + encodeURIComponent(teamId));
+    if (!resp.ok) {
+      showToast("Team room not found or expired");
+      return;
+    }
+    const remoteDoc = await resp.json();
+    showTeamJoinModal(teamId, remoteDoc);
+  } catch (e) {
+    showToast("Team fetch failed: " + e.message);
+  }
+}
+
+/* showTeamJoinModal — invitation prompt when a user clicks a ?team={roomId} URL. */
+function showTeamJoinModal(roomId, remoteDoc) {
+  const existing = document.getElementById("team-join-modal-root");
+  if (existing) existing.remove();
+  const teamName = (remoteDoc && remoteDoc.teamName) || "Unnamed Team";
+  const memberCount = (remoteDoc && Array.isArray(remoteDoc.members)) ? remoteDoc.members.length : 0;
+  const root = h("div", {id:"team-join-modal-root",
+    style:{position:"fixed",inset:0,zIndex:1100,display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}});
+  const backdrop = h("div", {style:{position:"absolute",inset:0,background:"rgba(7,24,29,0.85)",backdropFilter:"blur(4px)"}, onClick:()=>root.remove()});
+  root.appendChild(backdrop);
+  const panel = h("div", {style:{position:"relative",background:"linear-gradient(180deg, #0a242c 0%, #07181d 100%)",border:"1px solid var(--accent)",borderRadius:"4px",padding:"24px 22px 18px",maxWidth:"480px",width:"100%",color:"rgba(220,235,238,0.92)",boxShadow:"0 8px 40px rgba(0,0,0,0.6)"}});
+  panel.appendChild(h("div", {style:{position:"absolute",top:"-14px",left:"18px",height:"28px",padding:"0 16px 0 12px",display:"inline-flex",alignItems:"center",background:"var(--accent)",color:"#06141a",border:"1px solid var(--accent)",clipPath:"polygon(0 0, calc(100% - 12px) 0, 100% 100%, 0 100%)",fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontSize:"10.5px",letterSpacing:"2px",fontWeight:800}}, "// TEAM INVITATION"));
+  panel.appendChild(h("button", {style:{position:"absolute",top:"8px",right:"10px",background:"transparent",border:"none",color:"rgba(220,235,238,0.6)",cursor:"pointer",fontSize:"18px",padding:"4px 8px"},onClick:()=>root.remove(),title:"Dismiss (Esc)"}, "✕"));
+  panel.appendChild(h("div", {style:{marginTop:"6px",marginBottom:"6px",fontSize:"20px",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"#fff"}}, teamName));
+  panel.appendChild(h("div", {style:{marginBottom:"16px",fontSize:"12px",color:"rgba(220,235,238,0.55)",fontFamily:"var(--mono)",letterSpacing:"0.8px"}}, "// " + memberCount + " teammate" + (memberCount === 1 ? "" : "s") + " currently in room"));
+  panel.appendChild(h("div", {style:{marginBottom:"18px",fontSize:"13px",color:"rgba(220,235,238,0.85)",lineHeight:1.5}}, "Joining shares your full character sheet with everyone in this team room. You'll see their sheets too, updating live."));
+
+  const btnStyle = {padding:"12px 14px",background:"transparent",color:"#7fd4e2",border:"1px solid #1d8493",borderRadius:"2px",fontFamily:"var(--mono)",fontSize:"11.5px",letterSpacing:"1.5px",fontWeight:700,textTransform:"uppercase",cursor:"pointer",width:"100%",marginBottom:"8px"};
+  const btnPrimaryStyle = Object.assign({}, btnStyle, {background:"#1d8493",color:"#06141a",boxShadow:"0 0 12px rgba(127,212,226,0.35)"});
+
+  panel.appendChild(h("button", {style:btnPrimaryStyle, onClick: async () => {
+    root.remove();
+    const ok = await joinTeamRoom(roomId);
+    if (ok) {
+      dispatch(s => { s.meta.mode = "party"; });
+    }
+  }}, "▸ Join with my character"));
+
+  panel.appendChild(h("button", {style:Object.assign({}, btnStyle, {borderColor:"rgba(220,235,238,0.3)",color:"rgba(220,235,238,0.6)"}),
+    onClick: () => root.remove()
+  }, "✕ Dismiss"));
+
+  root.appendChild(panel);
+  document.body.appendChild(root);
+  const onKey = (ev) => { if (ev.key === "Escape") { root.remove(); document.removeEventListener("keydown", onKey); } };
+  document.addEventListener("keydown", onKey);
+}
+
+/* leaveTeamRoom — clears local roomId and stops polling. Server doc is unchanged
+   (the member's characterId stays in members[] until TTL expires; that's
+   acceptable for v0.10). */
+function leaveTeamRoom() {
+  stopTeamRoomPolling();
+  dispatch(s => { s.team.roomId = null; });
+  showToast("Left team");
+}
+
+/* Team-room polling — cost-aware. Default 60s interval; pauses when tab is
+   hidden; uses updatedAt short-circuit so member docs only refetch when their
+   listed updatedAt has advanced. */
+let _teamRoomPollHandle = null;
+let _teamRoomPollLastTeamDoc = null;
+
+async function pollTeamRoomOnce() {
+  if (!STATE.team || !STATE.team.roomId) return;
+  const roomId = STATE.team.roomId;
+  try {
+    const resp = await fetch("/api/team/" + encodeURIComponent(roomId));
+    if (!resp.ok) {
+      if (resp.status === 404) {
+        // Room expired or was deleted
+        showToast("Team room expired — leaving locally");
+        leaveTeamRoom();
+      }
+      return;
+    }
+    const teamDoc = await resp.json();
+    _teamRoomPollLastTeamDoc = teamDoc;
+    // Sync team metadata from remote
+    let metaChanged = false;
+    dispatch(s => {
+      if (typeof teamDoc.teamName === "string" && teamDoc.teamName !== s.team.teamName) {
+        s.team.teamName = teamDoc.teamName;
+        metaChanged = true;
+      }
+      s.team.lastPolledAt = new Date().toISOString();
+    }, { skipRerender: true });
+
+    // For each member in the team doc (except self), fetch their char if we haven't
+    // cached it or if there's no cached lastSyncedAt match.
+    const remoteMembers = Array.isArray(teamDoc.members) ? teamDoc.members : [];
+    let anyMemberUpdated = false;
+    for (const memberId of remoteMembers) {
+      if (memberId === STATE.ego.characterId) continue; // skip self
+      // Find or create the partyImports entry for this member
+      let entry = STATE.partyImports.find(p => p.id === memberId);
+      // Fetch the member's live share
+      const memberResp = await fetch("/api/share/" + encodeURIComponent(memberId));
+      if (!memberResp.ok) continue; // member's share might not exist yet (or expired)
+      const memberShare = await memberResp.json();
+      if (!memberShare || !memberShare.data) continue;
+      // Short-circuit: skip if our cached lastSyncedAt matches the remote updatedAt
+      if (entry && entry.lastSyncedAt === memberShare.updatedAt) continue;
+      // Decode
+      let parsed = null;
+      try {
+        const json = LZString.decompressFromEncodedURIComponent(memberShare.data);
+        parsed = json ? JSON.parse(json) : null;
+      } catch (e) { continue; }
+      if (!parsed) continue;
+      const migrated = migrateToCurrent(parsed);
+      // Update or insert
+      const teammateEntry = buildPartyImportEntry(migrated, "live");
+      teammateEntry.id = memberId;
+      teammateEntry.lastSyncedAt = memberShare.updatedAt;
+      dispatch(s => {
+        const idx = s.partyImports.findIndex(p => p.id === memberId);
+        if (idx >= 0) {
+          // Preserve gmNotes from existing entry
+          const existingGm = s.partyImports[idx].gmNotes || {};
+          teammateEntry.gmNotes = Object.assign(
+            { wounds:0, stress:0, initiative:null, statusEffects:[], notes:"" },
+            existingGm
+          );
+          s.partyImports[idx] = teammateEntry;
+        } else {
+          s.partyImports.push(teammateEntry);
+        }
+      }, { skipRerender: true });
+      anyMemberUpdated = true;
+    }
+
+    // Rerender if anything changed
+    if (metaChanged || anyMemberUpdated) {
+      rerender();
+    }
+  } catch (e) {
+    // Polling errors shouldn't surface to the user as toasts — they happen
+    // silently. Show offline indicator on next render cycle.
+    console.warn("[poll team room]", e && e.message);
+  }
+}
+
+function startTeamRoomPolling() {
+  stopTeamRoomPolling();
+  // Immediate one-shot
+  pollTeamRoomOnce();
+  // 60s interval; pause when tab hidden
+  const intervalMs = 60 * 1000;
+  _teamRoomPollHandle = setInterval(() => {
+    if (document.visibilityState !== "visible") return; // pause when hidden
+    // Also pause if drawer is open (R17 in plan)
+    if (document.getElementById("team-member-drawer-root")) return;
+    pollTeamRoomOnce();
+  }, intervalMs);
+
+  // On tab becoming visible again, do an immediate one-shot
+  document.addEventListener("visibilitychange", _teamRoomVisibilityHandler);
+}
+
+function stopTeamRoomPolling() {
+  if (_teamRoomPollHandle) {
+    clearInterval(_teamRoomPollHandle);
+    _teamRoomPollHandle = null;
+  }
+  document.removeEventListener("visibilitychange", _teamRoomVisibilityHandler);
+}
+
+function _teamRoomVisibilityHandler() {
+  if (document.visibilityState === "visible" && STATE.team && STATE.team.roomId) {
+    pollTeamRoomOnce();
+  }
+}
+
+/* patchTeamDoc — used by team name editor + initiative roller to push partial
+   updates to the team doc. Debounced via the caller. */
+async function patchTeamDoc(partial) {
+  if (!STATE.team || !STATE.team.roomId) return;
+  try {
+    const resp = await fetch("/api/team/" + encodeURIComponent(STATE.team.roomId), {
+      method: "PATCH", headers: {"content-type":"application/json"},
+      body: JSON.stringify(partial)
+    });
+    if (!resp.ok) {
+      console.warn("[patchTeamDoc]", resp.status);
+    }
+  } catch (e) {
+    console.warn("[patchTeamDoc]", e.message);
+  }
+}
+
+const debouncedPatchTeamName = debounce((name) => {
+  patchTeamDoc({ teamName: name });
+}, 600);
 
 /* Combat 101 — collapsible book-grounded combat explainer for play mode.
    Sources content from RULEBOOK_REFERENCE.combat (extracted by subagent). */
@@ -7433,7 +7794,9 @@ function buildPartyPage() {
   const polling = !!_partyPollAbort;
   const teamName = (STATE.team && STATE.team.teamName) || "";
 
-  // v0.10 A2: inline-editable team name input. Persists locally even pre-room.
+  // v0.10 A2 + D5: inline-editable team name input. Persists locally;
+  // when in a team room, debounced-PATCHes to the team doc.
+  const inTeamRoom = !!(STATE.team && STATE.team.roomId);
   const teamNameInput = h("input", {
     type:"text",
     value: teamName,
@@ -7447,33 +7810,80 @@ function buildPartyPage() {
       textTransform:"uppercase", fontWeight:700, marginTop:"6px"
     },
     onInput: (ev) => {
-      // local-only update (live debounce / team-doc PATCH comes in Wave D).
       const v = ev.target.value;
       dispatch(s => {
         if (!s.team) s.team = { roomId:null, teamName:"", lastPolledAt:null };
         s.team.teamName = v;
       }, { skipRerender:true });
+      // v0.10 Wave D: when in a team room, debounce-PATCH the team doc
+      if (typeof debouncedPatchTeamName === "function" && STATE.team && STATE.team.roomId) {
+        debouncedPatchTeamName(v);
+      }
     }
   });
 
+  // v0.10 D: room state badge
+  const roomBadge = inTeamRoom
+    ? h("span", {style:{display:"inline-block",padding:"3px 8px",background:"rgba(126,238,184,0.15)",border:"1px solid var(--good)",borderRadius:"2px",fontFamily:"var(--mono)",fontSize:"9.5px",color:"var(--good)",letterSpacing:"1.3px",fontWeight:700,textTransform:"uppercase",marginLeft:"8px"}}, "🟢 IN ROOM")
+    : null;
+
   const header = h("div", {class:"party-page-header"},
     h("div", {style:{flex:"1 1 auto",minWidth:0}},
-      h("h1", null, "Team · Command Centre"),
-      h("div", {class:"sub"}, "// " + teamMembers + " teammate" + (teamMembers === 1 ? "" : "s") + (liveCount > 0 ? " · " + liveCount + " 🟢 live" : "") + (polling && liveCount > 0 ? " · polling every 30s" : "")),
+      h("h1", null, "Team · Command Centre", roomBadge),
+      h("div", {class:"sub"}, "// " + teamMembers + " teammate" + (teamMembers === 1 ? "" : "s") + (liveCount > 0 ? " · " + liveCount + " 🟢 live" : "") + (inTeamRoom ? " · syncing every 60s" : (polling && liveCount > 0 ? " · polling every 30s" : ""))),
       teamNameInput
     ),
     h("div", {style:{display:"flex",gap:"8px",flexWrap:"wrap",alignItems:"flex-start"}},
       // Roll Initiative for all
       teamMembers > 0 ? h("button", {
         style:{padding:"8px 14px",background:"transparent",color:"#7fd4e2",border:"1px solid var(--accent)",borderRadius:"2px",fontFamily:"var(--mono)",fontSize:"11px",letterSpacing:"1.5px",fontWeight:700,textTransform:"uppercase",cursor:"pointer"},
-        onClick: () => dispatch(s => {
-          s.partyImports.forEach(p => {
-            const ref = (p.full && p.full.ego && p.full.ego.aptitudes && p.full.ego.aptitudes.REF) || 0;
-            if (!p.gmNotes) p.gmNotes = { wounds:0, stress:0, initiative:null, statusEffects:[], notes:"" };
-            p.gmNotes.initiative = Math.floor(Math.random() * 10) + 1 + Math.floor(ref / 10);
+        onClick: () => {
+          // v0.10 D5: when in a room, write initiative to the team doc (shared);
+          // otherwise fall back to per-entry gmNotes (legacy local-only).
+          const rolled = [];
+          // Include self
+          const selfRef = (STATE.ego && STATE.ego.aptitudes && STATE.ego.aptitudes.REF) || 0;
+          if (STATE.ego.characterId) {
+            rolled.push({
+              characterId: STATE.ego.characterId,
+              value: Math.floor(Math.random() * 10) + 1 + Math.floor(selfRef / 10),
+              rolledAt: new Date().toISOString()
+            });
+          }
+          dispatch(s => {
+            s.partyImports.forEach(p => {
+              const ref = (p.full && p.full.ego && p.full.ego.aptitudes && p.full.ego.aptitudes.REF) || 0;
+              if (!p.gmNotes) p.gmNotes = { wounds:0, stress:0, initiative:null, statusEffects:[], notes:"" };
+              const v = Math.floor(Math.random() * 10) + 1 + Math.floor(ref / 10);
+              p.gmNotes.initiative = v;
+              if (p.id) rolled.push({ characterId: p.id, value: v, rolledAt: new Date().toISOString() });
+            });
           });
-        })
+          if (inTeamRoom) {
+            patchTeamDoc({ initiative: rolled });
+            showToast("Initiative rolled · shared to team room");
+          }
+        }
       }, "🎲 Roll Initiative · All") : null,
+      // v0.10 D: Create / Leave Team Room
+      !inTeamRoom ? h("button", {
+        style:{padding:"8px 14px",background:"#1d8493",color:"#06141a",border:"1px solid #7fd4e2",borderRadius:"2px",fontFamily:"var(--mono)",fontSize:"11px",letterSpacing:"1.5px",fontWeight:700,textTransform:"uppercase",cursor:"pointer",boxShadow:"0 0 8px rgba(127,212,226,0.25)"},
+        onClick: () => createTeamRoom(),
+        title: "Create a shareable team room URL. Everyone who opens it joins the team and sees each other's live sheets."
+      }, "🟢 Create Team Room") : h("button", {
+        style:{padding:"8px 14px",background:"transparent",color:"rgba(255,160,140,0.85)",border:"1px solid rgba(255,160,140,0.4)",borderRadius:"2px",fontFamily:"var(--mono)",fontSize:"11px",letterSpacing:"1.5px",fontWeight:700,textTransform:"uppercase",cursor:"pointer"},
+        onClick: () => { if (confirm("Leave this team room? Other members will still see your last-pushed character until the share expires.")) leaveTeamRoom(); },
+        title: "Stop syncing with this team room. Your local state stays; the team doc unchanged."
+      }, "✕ Leave Team"),
+      // Copy Team URL (when in a room)
+      inTeamRoom ? h("button", {
+        style:{padding:"8px 14px",background:"transparent",color:"#7fd4e2",border:"1px solid rgba(127,212,226,0.4)",borderRadius:"2px",fontFamily:"var(--mono)",fontSize:"11px",letterSpacing:"1.5px",fontWeight:700,textTransform:"uppercase",cursor:"pointer"},
+        onClick: async () => {
+          const teamUrl = location.origin + location.pathname + "?team=" + encodeURIComponent(STATE.team.roomId);
+          try { await navigator.clipboard.writeText(teamUrl); showToast("Team URL copied"); }
+          catch(e) { showToast("Couldn't access clipboard — URL: " + teamUrl); }
+        }
+      }, "📋 Copy Team URL") : null,
       // Load Party shortcut (v0.10: relabel + dropzone copy)
       h("button", {
         style:{padding:"8px 14px",background:"transparent",color:"rgba(220,235,238,0.85)",border:"1px solid rgba(127,212,226,0.4)",borderRadius:"2px",fontFamily:"var(--mono)",fontSize:"11px",letterSpacing:"1.5px",fontWeight:700,textTransform:"uppercase",cursor:"pointer"},
@@ -10326,6 +10736,11 @@ function boot() {
   // v0.7 — handle inbound share URLs after first render
   try { handleShareHash(); } catch(e) { console.warn("share hash handler failed:", e); }
   try { handleLiveParam(); } catch(e) { console.warn("live param handler failed:", e); }
+  try { handleTeamParam(); } catch(e) { console.warn("team param handler failed:", e); }
+  // v0.10 Wave D: if already in a team room from localStorage, resume polling
+  if (STATE.team && STATE.team.roomId) {
+    try { startTeamRoomPolling(); } catch(e) { console.warn("team poll resume failed:", e); }
+  }
 }
 boot();
 </script>

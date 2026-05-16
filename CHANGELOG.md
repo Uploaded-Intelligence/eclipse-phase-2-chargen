@@ -2,6 +2,44 @@
 
 All notable changes to this project. Format follows the spirit of [Keep a Changelog](https://keepachangelog.com/), versioned by milestone.
 
+## [0.10.3] — 2026-05-16 — "Team Rooms · The Link IS the Invitation"
+
+**Wave D of v0.10. The relief lands.** No more "drag-and-drop a JSON file." Click "🟢 Create Team Room", share the URL, and your teammates are in. Each member sees every other member's live sheet, updating every 60 seconds. The team page becomes a shared experience, not a GM dashboard.
+
+### Added
+- **New Vercel endpoint `/api/team/[roomId].js`** — Layer 2 team-doc CRUD. Schema-versioned doc: `{ schemaVersion:1, teamName, members:[characterId], initiative:[{characterId,value,rolledAt}], updatedAt }`. 30-day TTL refreshed on every write. Hard limits: ≤16 members, ≤200-char teamName, all IDs match `ID_PATTERN`. Methods: GET / POST (refuses if room exists, returns 409) / PUT (full replace) / PATCH (set-union members + last-write-wins teamName/initiative).
+- **🟢 Create Team Room button** — generates a UUID-ish roomId, pushes own character to layer 1, POSTs the team doc, sets `STATE.team.roomId`. Opens a confirmation modal with the joinable URL + copy button.
+- **`?team={roomId}` URL handler** — on page load, detected → modal "// TEAM INVITATION · [teamName]" with member count. Join button pushes the player's character to layer 1, PATCHes the doc to add their characterId, sets `STATE.team.roomId`, switches to TEAM mode.
+- **Cost-aware polling** (mitigations from the planning doc):
+  - **Default 60s interval** (not 30s). Roughly halves Vercel KV command cost vs. the original character-only polling.
+  - **`updatedAt` short-circuit**: client only re-fetches a member's char-doc when the team-doc's listed updatedAt has advanced past the cached value. Idle teams cost almost nothing per poll.
+  - **Tab-hidden pause**: polling stops when `document.visibilityState !== "visible"`. Immediate one-shot refetch on tab visible again.
+  - **Drawer pause**: while a teammate's Wave C drawer is open, team-wide polling pauses (you're focused on one teammate, not all of them).
+- **Initiative shared via team doc** — when in a room, "🎲 Roll Initiative · All" rolls d10 + REF/10 for self + every imported member, then PATCHes the doc. All members see the new order on next poll. Outside a room, initiative remains per-entry `gmNotes.initiative` (legacy local).
+- **Team name syncs** — debounced (600ms) PATCH to the team doc on each keystroke. Other members see the new name on next poll.
+- **"🟢 IN ROOM" badge** next to the page title when joined.
+- **"✕ Leave Team" button** clears local roomId + stops polling (other members still see your last-pushed character until KV TTL or someone re-creates the room).
+- **"📋 Copy Team URL"** quick action in the page header for re-inviting.
+
+### Engine
+- New client functions: `createTeamRoom`, `joinTeamRoom`, `handleTeamParam`, `showTeamJoinModal`, `showTeamRoomCreatedModal`, `leaveTeamRoom`, `pollTeamRoomOnce`, `startTeamRoomPolling`, `stopTeamRoomPolling`, `patchTeamDoc`, `debouncedPatchTeamName`, `pushSelfQuietly` (internal push without re-opening the share modal).
+- Boot path now calls `handleTeamParam()` after `handleShareHash()` / `handleLiveParam()`.
+- `STATE.team.roomId` persisted in localStorage; boot resumes polling automatically if set.
+- POST collision handling: 1-in-2^128 chance of UUID collision; retry once with a fresh roomId.
+- All KV mutations refresh TTL (30 days). Active teams won't auto-expire.
+- Polling failures swallowed silently (no toast spam); offline state inferred by the next successful poll. 404 on team-doc fetch (TTL expired) → auto-leave locally with a toast.
+
+### Privacy note (front of CHANGELOG so it's not missed)
+**Joining a team room shares your full character sheet** — narrative, motivations, gear, everything — with all members. The roomId is a high-entropy URL token, not auth. Treat team URLs like session passwords. Only share with people you trust to see your sheet.
+
+### Cost note
+Vercel KV free tier covers ~2 sessions/day at the default 60s polling. Heavy use spills into pay-as-you-go (~$0.014 per 4-hour 5-player session). The plan documented this trade-off; the mitigations (adaptive pause + updatedAt short-circuit) keep it manageable.
+
+### Cross-cutting principle
+**The link IS the invitation.** v0.10 ends with the relief promised in Wave A's framing: visceral team, no executive-function tax. Just a URL. Everyone in.
+
+---
+
 ## [0.10.2] — 2026-05-16 — "Click Any Teammate"
 
 **The togetherness piece.** Wave C of v0.10. The team page used to show summary cards; you'd have to ask each player "what's your INT?" to see their real numbers. Now you tap a teammate's banner and their full Studio sheet slides up — every aptitude, every skill, every wound, every piece of gear. Live. Read-only. Yours to see.
