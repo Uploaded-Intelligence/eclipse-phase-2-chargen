@@ -6,7 +6,7 @@ const vm = require("vm");
 const html = fs.readFileSync(__dirname + "/index.html", "utf8");
 let js = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 js = js.replace(/^boot\(\);$/m, "// boot suppressed");
-js += "\nthis.__exports = Object.defineProperties({}, {STATE:{get:()=>STATE,enumerable:true},RULEBOOK_DATA:{value:RULEBOOK_DATA,enumerable:true},RULEBOOK_REFERENCE:{value:RULEBOOK_REFERENCE,enumerable:true},derived:{value:derived,enumerable:true},newState:{value:newState,enumerable:true},encodeShareUrl:{value:encodeShareUrl,enumerable:true},decodeShareUrl:{value:decodeShareUrl,enumerable:true},stripPortrait:{value:stripPortrait,enumerable:true},importShareSnapshot:{value:importShareSnapshot,enumerable:true},makeCharacterId:{value:makeCharacterId,enumerable:true},migrateV6ToV7:{value:migrateV6ToV7,enumerable:true},migrateToCurrent:{value:migrateToCurrent,enumerable:true},SCHEMA_VERSION:{value:SCHEMA_VERSION,enumerable:true},LZString:{value:LZString,enumerable:true},studioPcFromState:{value:studioPcFromState,enumerable:true},studioHealDamage:{value:studioHealDamage,enumerable:true},studioHealWound:{value:studioHealWound,enumerable:true},studioHealStress:{value:studioHealStress,enumerable:true},studioHealTrauma:{value:studioHealTrauma,enumerable:true},studioSetDamage:{value:studioSetDamage,enumerable:true},studioSetWounds:{value:studioSetWounds,enumerable:true},studioSetStress:{value:studioSetStress,enumerable:true},studioSetTraumas:{value:studioSetTraumas,enumerable:true},characterHasFabber:{value:characterHasFabber,enumerable:true},studioMeshAccess:{value:studioMeshAccess,enumerable:true},studioMeshOpsec:{value:studioMeshOpsec,enumerable:true},studioMeshApps:{value:studioMeshApps,enumerable:true},studioMeshImplants:{value:studioMeshImplants,enumerable:true},buildPartyImportEntry:{value:buildPartyImportEntry,enumerable:true},normalizePartyImportEntries:{value:normalizePartyImportEntries,enumerable:true},importJSON:{value:importJSON,enumerable:true},partyComputeCardData:{value:partyComputeCardData,enumerable:true},buildPartyMemberCard:{value:buildPartyMemberCard,enumerable:true},buildStudioVitalSignsCard:{value:buildStudioVitalSignsCard,enumerable:true},buildStudioDamageBar:{value:buildStudioDamageBar,enumerable:true},buildStudioMindBar:{value:buildStudioMindBar,enumerable:true},buildStudioVitalityBar:{value:buildStudioVitalityBar,enumerable:true},buildStudioPoolMeter:{value:buildStudioPoolMeter,enumerable:true},buildStudioPoolRow:{value:buildStudioPoolRow,enumerable:true},buildStudioPoolGlyph:{value:buildStudioPoolGlyph,enumerable:true},buildStudioFeedBreak:{value:buildStudioFeedBreak,enumerable:true},buildPartyMemberCoverage:{value:buildPartyMemberCoverage,enumerable:true},buildStudioAptitudeStrip:{value:buildStudioAptitudeStrip,enumerable:true},buildStudioReputation:{value:buildStudioReputation,enumerable:true},withStateAs:{value:withStateAs,enumerable:true},_playerOwnedPayload:{value:_playerOwnedPayload,enumerable:true},_isSuspended:{value:_isSuspended,enumerable:true},_setLastInputAt:{value:(t)=>{_lastInputAt=t;},enumerable:true},_getLastInputAt:{value:()=>_lastInputAt,enumerable:true},_setIdleCount:{value:(n)=>{_idleCount=n;},enumerable:true},_getIdleCount:{value:()=>_idleCount,enumerable:true},_setPollIntervalMs:{value:(n)=>{_pollIntervalMs=n;},enumerable:true},_getPollIntervalMs:{value:()=>_pollIntervalMs,enumerable:true},_AFK_THRESHOLD_MS:{value:AFK_THRESHOLD_MS,enumerable:true},_setState:{value:(v)=>{STATE=v;},enumerable:true}});\n";
+js += "\nthis.__exports = Object.defineProperties({}, {STATE:{get:()=>STATE,enumerable:true},RULEBOOK_DATA:{value:RULEBOOK_DATA,enumerable:true},RULEBOOK_REFERENCE:{value:RULEBOOK_REFERENCE,enumerable:true},derived:{value:derived,enumerable:true},newState:{value:newState,enumerable:true},encodeShareUrl:{value:encodeShareUrl,enumerable:true},decodeShareUrl:{value:decodeShareUrl,enumerable:true},stripPortrait:{value:stripPortrait,enumerable:true},importShareSnapshot:{value:importShareSnapshot,enumerable:true},makeCharacterId:{value:makeCharacterId,enumerable:true},migrateV6ToV7:{value:migrateV6ToV7,enumerable:true},migrateToCurrent:{value:migrateToCurrent,enumerable:true},SCHEMA_VERSION:{value:SCHEMA_VERSION,enumerable:true},LZString:{value:LZString,enumerable:true},studioPcFromState:{value:studioPcFromState,enumerable:true},studioHealDamage:{value:studioHealDamage,enumerable:true},studioHealWound:{value:studioHealWound,enumerable:true},studioHealStress:{value:studioHealStress,enumerable:true},studioHealTrauma:{value:studioHealTrauma,enumerable:true},studioSetDamage:{value:studioSetDamage,enumerable:true},studioSetWounds:{value:studioSetWounds,enumerable:true},studioSetStress:{value:studioSetStress,enumerable:true},studioSetTraumas:{value:studioSetTraumas,enumerable:true},characterHasFabber:{value:characterHasFabber,enumerable:true},studioMeshAccess:{value:studioMeshAccess,enumerable:true},studioMeshOpsec:{value:studioMeshOpsec,enumerable:true},studioMeshApps:{value:studioMeshApps,enumerable:true},studioMeshImplants:{value:studioMeshImplants,enumerable:true},buildPartyImportEntry:{value:buildPartyImportEntry,enumerable:true},normalizePartyImportEntries:{value:normalizePartyImportEntries,enumerable:true},importJSON:{value:importJSON,enumerable:true},partyComputeCardData:{value:partyComputeCardData,enumerable:true},buildPartyMemberCard:{value:buildPartyMemberCard,enumerable:true},buildStudioVitalSignsCard:{value:buildStudioVitalSignsCard,enumerable:true},buildStudioDamageBar:{value:buildStudioDamageBar,enumerable:true},buildStudioMindBar:{value:buildStudioMindBar,enumerable:true},buildStudioVitalityBar:{value:buildStudioVitalityBar,enumerable:true},buildStudioPoolMeter:{value:buildStudioPoolMeter,enumerable:true},buildStudioPoolRow:{value:buildStudioPoolRow,enumerable:true},buildStudioPoolGlyph:{value:buildStudioPoolGlyph,enumerable:true},buildStudioFeedBreak:{value:buildStudioFeedBreak,enumerable:true},buildStudioVbarSectionHead:{value:buildStudioVbarSectionHead,enumerable:true},buildPartyMemberCoverage:{value:buildPartyMemberCoverage,enumerable:true},buildStudioAptitudeStrip:{value:buildStudioAptitudeStrip,enumerable:true},buildStudioReputation:{value:buildStudioReputation,enumerable:true},withStateAs:{value:withStateAs,enumerable:true},_playerOwnedPayload:{value:_playerOwnedPayload,enumerable:true},_isSuspended:{value:_isSuspended,enumerable:true},_setLastInputAt:{value:(t)=>{_lastInputAt=t;},enumerable:true},_getLastInputAt:{value:()=>_lastInputAt,enumerable:true},_setIdleCount:{value:(n)=>{_idleCount=n;},enumerable:true},_getIdleCount:{value:()=>_idleCount,enumerable:true},_setPollIntervalMs:{value:(n)=>{_pollIntervalMs=n;},enumerable:true},_getPollIntervalMs:{value:()=>_pollIntervalMs,enumerable:true},_AFK_THRESHOLD_MS:{value:AFK_THRESHOLD_MS,enumerable:true},_setState:{value:(v)=>{STATE=v;},enumerable:true}});\n";
 
 const sandbox = {
   console,
@@ -709,7 +709,7 @@ console.log("\n=== v0.10.2 — studioPcFromState produces a renderable pc from a
 console.log("\n=== v0.10.4 — toolVersion bumped to 0.10.4 ===");
 {
   const fresh = exp.newState();
-  assert("newState().meta.toolVersion is 0.10.9", fresh.meta.toolVersion === "0.10.9");
+  assert("newState().meta.toolVersion is 0.10.10", fresh.meta.toolVersion === "0.10.10");
 }
 
 console.log("\n=== v0.10.4 — hash-skip: same player-owned state → identical hash ===");
@@ -1245,40 +1245,50 @@ console.log("\n=== v0.10.8 — full pool meter renders without throwing ===");
 // tier) replacing the v0.10.5 text-only tiles. (c) FeedBreak labeled
 // divider between damage and mind bars (ported from Claude Design).
 
-console.log("\n=== v0.10.9 — FeedBreak helper exists with destructured opts signature ===");
+console.log("\n=== v0.10.10 — VbarSectionHead helper exposed (replaces v0.10.9 FeedBreak for HP↔STRESS) ===");
 {
-  assert("buildStudioFeedBreak is exposed",
-    typeof exp.buildStudioFeedBreak === "function");
-  // The existing FeedBreak (line ~8942) takes destructured { label, accent }
-  // opts and was already in the codebase for the dossier off-feed marker.
-  // v0.10.9 reuses it for HP↔STRESS rather than adding a parallel helper.
+  assert("buildStudioVbarSectionHead is exposed",
+    typeof exp.buildStudioVbarSectionHead === "function");
   let threw = null, result = null;
-  try { result = exp.buildStudioFeedBreak({ label: "// MIND", accent: "#6b9eff" }); }
+  try { result = exp.buildStudioVbarSectionHead({ label: "MORPH", kicker: "body · form", accent: "#3a9c64" }); }
   catch (e) { threw = e; }
-  assert("buildStudioFeedBreak renders without throwing (destructured opts)",
+  assert("buildStudioVbarSectionHead renders without throwing",
     threw === null, threw ? (threw.message || String(threw)) : "");
-  assert("buildStudioFeedBreak returns a DOM-like node",
+  assert("buildStudioVbarSectionHead returns a DOM-like node",
     !!result);
-  // Must use literal hex throughout (var()+suffix would silently break the
-  // gradient — see v0.10.7).
-  const src = exp.buildStudioFeedBreak.toString();
-  assert("buildStudioFeedBreak source has no var(--…) refs (alpha-concat would break)",
-    src.indexOf("var(--") === -1);
-  // Default accent fallback uses literal hex (current pattern: `const accentColor = accent || "#XXXXXX"`)
-  assert("buildStudioFeedBreak default accent is a literal hex fallback",
-    /accent\s*\|\|\s*"#[0-9a-fA-F]{6}"/.test(src));
+  const src = exp.buildStudioVbarSectionHead.toString();
+  // The bug class is specifically var() refs followed by alpha-suffix strings
+  // (would tokenise to HASH + IDENT and break the gradient). Bare var() refs
+  // as sole color values (e.g. `color: "var(--st-ink-mute)"`) are fine.
+  const varSuffix = /var\(--[a-z0-9-]+\)(cc|55|ee|aa|bb|dd|ff|00|10|33|40|66|80)/;
+  assert("VbarSectionHead source has no `var(--…)<alpha-suffix>` concat patterns",
+    !varSuffix.test(src), "matched: " + (src.match(varSuffix) || []).join(","));
+  // Has the visual primitives: a label span at a substantial font size + accent underline.
+  assert("VbarSectionHead has a borderBottom for accent underline",
+    /borderBottom/.test(src));
+  assert("VbarSectionHead label uses a large font (≥16px)",
+    /fontSize:\s*"(1[6-9]|[2-9][0-9])px"/.test(src));
 }
 
-console.log("\n=== v0.10.9 — buildStudioVitalSignsCard uses FeedBreak for HP↔STRESS divider ===");
+console.log("\n=== v0.10.10 — buildStudioVitalSignsCard uses MORPH + EGO section headers ===");
 {
   const vSrc = exp.buildStudioVitalSignsCard.toString();
-  assert("buildStudioVitalSignsCard now references buildStudioFeedBreak",
-    vSrc.indexOf("buildStudioFeedBreak") !== -1);
-  // The call site uses the destructured opts form with a MIND label.
-  assert("FeedBreak is called with a MIND label (destructured opts form)",
-    /buildStudioFeedBreak\(\s*\{\s*label:\s*["'][\s/]*MIND/.test(vSrc));
-  assert("FeedBreak gets the mind-bar accent hex (#6b9eff)",
+  assert("VitalSignsCard now calls buildStudioVbarSectionHead",
+    vSrc.indexOf("buildStudioVbarSectionHead") !== -1);
+  assert("VitalSignsCard has a MORPH section header (EP2 vocab — body side)",
+    /label:\s*["']MORPH["']/.test(vSrc));
+  assert("VitalSignsCard has an EGO section header (EP2 vocab — mind side, NOT 'MIND')",
+    /label:\s*["']EGO["']/.test(vSrc));
+  assert("VitalSignsCard no longer uses the v0.10.9 FeedBreak for HP↔STRESS",
+    vSrc.indexOf('buildStudioFeedBreak({ label: "// MIND"') === -1);
+  // The two section accents echo their respective bar tones
+  assert("MORPH header uses the damage-bar green accent (#3a9c64)",
+    vSrc.indexOf("#3a9c64") !== -1);
+  assert("EGO header uses the mind-bar blue accent (#6b9eff)",
     vSrc.indexOf("#6b9eff") !== -1);
+  // Section banner kicker should also use EP2 vocab now
+  assert("VitalSignsCard kicker says 'morph · ego' (EP2 vocab), not 'body · mind'",
+    /morph\s*·\s*ego/.test(vSrc));
 }
 
 console.log("\n=== v0.10.9 — warning banners are always rendered (height reserved) ===");

@@ -4083,7 +4083,7 @@ function makeCharacterId() {
 }
 
 const newState = () => ({
-  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.10.9", mode:"chargen" },
+  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.10.10", mode:"chargen" },
   // v0.10: team-room metadata. Roomless local play has all nulls + empty teamName.
   // teamName persists locally even before joining a room (set it once, it sticks).
   team:{ roomId:null, teamName:"", lastPolledAt:null },
@@ -7054,6 +7054,37 @@ function buildStudioVitalityBar({ label, doneLabel, deadLabel, value, ticks, dow
 /* ── DamageBar — HP specialization + Armor chip + auto-warnings ──
    v0.10.5: opts.readOnly forwards to vitalityBar (hides ± controls);
    banner copy no longer says "Tick a wound" — auto-tick already happens. */
+/* ── VbarSectionHead — major sub-section label for Vital Signs ──
+   v0.10.10: replaces the v0.10.9 FeedBreak between damage and stress bars.
+   The FeedBreak was sized for a quiet "channel switch" marker (dossier
+   off-feed) — too small for what's actually a major Eclipse Phase system
+   boundary. Now used as TWO parallel headers: MORPH above the damage bar
+   (body · form · durability) and EGO above the stress bar (self · mind ·
+   lucidity), echoing the EP2-canonical vocabulary the user is teaching
+   themselves as a newbie GM. Visual: bold uppercase label in the section's
+   accent colour, optional italic kicker, accent underline. */
+function buildStudioVbarSectionHead({ label, kicker, accent }) {
+  accent = accent || "#4fd4e0";
+  return h("div", { class: "studio-vbar-sectionhead", style: {
+    display: "flex", alignItems: "baseline", gap: "12px", flexWrap: "wrap",
+    padding: "10px 0 6px",
+    borderBottom: "1.5px solid " + accent + "55",
+    marginBottom: "10px"
+  } },
+    h("span", { class: "studio-vbar-sectionhead-label", style: {
+      fontSize: "18px", fontWeight: 800, letterSpacing: "3px",
+      color: accent,
+      fontFamily: '"Share Tech Mono", ui-monospace, monospace',
+      textTransform: "uppercase"
+    } }, label),
+    kicker ? h("span", { class: "studio-vbar-sectionhead-kicker", style: {
+      fontSize: "11px", color: "var(--st-ink-mute)",
+      fontStyle: "italic", letterSpacing: "0.4px",
+      flex: 1
+    } }, kicker) : null
+  );
+}
+
 function buildStudioDamageBar(pc, opts) {
   opts = opts || {};
   const dt = pc.damageTaken || 0;
@@ -8659,19 +8690,25 @@ function buildStudioVitalSignsCard(pc, opts) {
   opts = opts || {};
   const ro = !!opts.readOnly;
   const vitalsOnly = !!opts.vitalsOnly;
-  const kicker = vitalsOnly ? "body · mind · pools" : "body · mind · pools · recharge · healing";
+  // v0.10.10: kicker uses EP2-canonical vocabulary (morph · ego), not
+  // body · mind. EGO = the persistent self that gets re-sleeved; MORPH =
+  // the current physical form. Teaches the rule through correct vocabulary.
+  const kicker = vitalsOnly ? "morph · ego · pools" : "morph · ego · pools · recharge · healing";
   return buildStudioSection({ key:"vitals", title:"Vital Signs", color:"var(--st-teal)", icon:"vitals", kicker },
-    buildStudioDamageBar(pc, { readOnly: ro }),
-    // v0.10.9: replaced the indistinguishable 1px-dashed separator with the
-    // existing Claude Design FeedBreak (line ~8942) — corner brackets +
-    // gradient lines + a "// MIND" pill — so the body→mind boundary is
-    // visually announced, not just implied. Other dashed dividers in this
-    // panel stay as-is; they're sub-section breaks (pools, recharge,
-    // stats), not the major HP↔STRESS boundary. The mind-bar's blue
-    // accent (#6b9eff) echoes through the bracket/gradient/pill so the
-    // colour itself signals "this is the stress side."
+    // v0.10.10: MORPH section header — major sub-system label, sized for
+    // an actual EP2 system boundary (not the v0.10.9 FeedBreak which was
+    // dossier-off-feed scale). Green accent echoes the damage bar's tone.
     h("div", null,
-      buildStudioFeedBreak({ label: "// MIND", accent: "#6b9eff" }),
+      buildStudioVbarSectionHead({ label: "MORPH", kicker: "body · form · durability", accent: "#3a9c64" }),
+      buildStudioDamageBar(pc, { readOnly: ro })
+    ),
+    // v0.10.10: EGO section header — parallel to MORPH. EP2's persistent
+    // self side (what gets re-sleeved across morphs). Blue accent echoes
+    // the mind bar's tone. Replaces the v0.10.9 small FeedBreak which the
+    // user (correctly) called "too small and out of place" for this
+    // boundary's actual importance.
+    h("div", null,
+      buildStudioVbarSectionHead({ label: "EGO", kicker: "self · mind · lucidity", accent: "#6b9eff" }),
       buildStudioMindBar(pc, { readOnly: ro })
     ),
     h("div", { style:{marginTop:"14px"} }, buildStudioPoolRow(pc, { readOnly: ro })),
@@ -8681,7 +8718,7 @@ function buildStudioVitalSignsCard(pc, opts) {
     // v0.8 — Healing mini-section. The explicit body+mind heal buttons EP2 rules say
     // are needed but the UI never exposed. Closes the wound-vs-damage divergence loop.
     vitalsOnly ? null : h("div", { style:{paddingTop:"10px",marginTop:"10px",borderTop:"1px dashed var(--st-line)"} },
-      h("div", { style:{fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontSize:"10px",letterSpacing:"1.6px",color:"var(--st-teal-deep)",fontWeight:800,textTransform:"uppercase",marginBottom:"8px"} }, "▾ HEALING · BODY · MIND"),
+      h("div", { style:{fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontSize:"10px",letterSpacing:"1.6px",color:"var(--st-teal-deep)",fontWeight:800,textTransform:"uppercase",marginBottom:"8px"} }, "▾ HEALING · MORPH · EGO"),
       buildStudioHealing(pc)
     ),
     h("div", { style:{paddingTop:"8px",marginTop:"8px",borderTop:"1px dashed var(--st-line)",display:"grid",gridTemplateColumns:"repeat(4, 1fr)",gap:"6px"} },
