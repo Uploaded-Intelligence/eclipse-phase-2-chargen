@@ -2,6 +2,32 @@
 
 All notable changes to this project. Format follows the spirit of [Keep a Changelog](https://keepachangelog.com/), versioned by milestone.
 
+## [0.10.1] — 2026-05-16 — "Auto-Derive from PC Sheets"
+
+**The trust shift.** Wave B of v0.10. The GM no longer tracks teammates' wounds/stress with +/- buttons — those values now come straight from each player's live sheet. Manual GM tracking was always a tax on executive function; this removes the tax.
+
+### Changed
+- **VITAL STATUS block replaces GM TRACKING block** on each teammate card. Reads `entry.full.play.woundsTaken / stress / traumasTaken` directly. No +/- buttons. Three rows:
+  - **Wounds**: current / max (where max = `floor(DUR/WT)`). Amber at half, red at max.
+  - **Stress**: current / max (where max = lucidity = `WIL × 2`). Amber at half, orange at max.
+  - **Traumas**: current / max (where max = trauma threshold = `floor(LUC/5)`). Amber at half, amber at max.
+- **Initiative stays manual** (number input + Roll button). Becomes shared in Wave D when team rooms ship.
+- **Notes textarea relabeled** to "// personal notes — local only, not shared". Renamed in spirit from "GM notes" — there is no GM mode anymore. The field is still local-only (not synced to team doc).
+- **Inline VITALS block** on imported cards is now suppressed (the new VITAL STATUS block supersedes it). Self card still shows the inline VITALS line.
+- **Legacy fallback**: if `entry.full.play.woundsTaken` is missing (very old file-import with no play substate), the row falls back to `gmNotes.wounds/stress` and the block header reads "LEGACY (no live play data)".
+
+### Engine
+- `partyComputeCardData` now returns `maxWounds`, `lucidity`, `traumaThreshold` — the read-only ratio denominators for the new VITAL STATUS block.
+
+### Tests
+- Live-state read paths verified for present and missing play data.
+- Test count target: 591 → ~601
+
+### Cross-cutting principle
+**The player's sheet is the source of truth for the player's state.** GM-side overrides ("they took 2 wounds but the player hasn't ticked them yet") are removed by design. If they need to land, they land on the player's sheet — which everyone sees update. One source. No reconciliation.
+
+---
+
 ## [0.10.0] — 2026-05-16 — "The Team is Visible"
 
 **Vocabulary shift: "Party" → "Team" throughout user-facing copy.** Mili-scifi over fantasy. Code identifiers (`partyImports`, `buildPartyMemberCard`) stay legacy for diff hygiene; user-facing text uses Team. This is Wave A of v0.10 "The Team" — three more waves coming.

@@ -572,6 +572,96 @@ console.log("\n=== v0.10.0 — partyComputeCardData surfaces play.woundsTaken / 
   assert("partyComputeCardData defaults woundsTaken to 0", data2.woundsTaken === 0);
 }
 
+console.log("\n=== v0.10.1 — partyComputeCardData surfaces lucidity / traumaThreshold / maxWounds ===");
+{
+  exp._setState(exp.newState());
+  exp.STATE.ego.name = "Tactical Player";
+  // Standard aptitudes for known math
+  exp.STATE.ego.aptitudes = { COG:15, INT:15, REF:15, SOM:15, SAV:15, WIL:20 };
+  const data = exp.partyComputeCardData(exp.STATE);
+  // lucidity = WIL × 2 = 40
+  assert("partyComputeCardData surfaces lucidity (WIL×2)", data.lucidity === 40);
+  // traumaThreshold = LUC / 5 = 8
+  assert("partyComputeCardData surfaces traumaThreshold (LUC/5)", data.traumaThreshold === 8);
+  // No morph chosen → maxWounds = 0
+  assert("partyComputeCardData maxWounds is 0 when no morph", data.maxWounds === 0);
+}
+
+console.log("\n=== v0.10.1 — VITAL STATUS auto-derive reads from entry.full.play ===");
+{
+  // Build a complete fake entry with play data
+  const entry = {
+    id: "vital-test",
+    source: "live",
+    gmNotes: { wounds:0, stress:0, initiative:null, statusEffects:[], notes:"" },
+    lastSyncedAt: new Date().toISOString(),
+    syncUrl: null,
+    full: {
+      meta: { schemaVersion: 7 },
+      ego: { name: "Hurt", aptitudes: { COG:15,INT:15,REF:15,SOM:15,SAV:15,WIL:10 } },
+      play: { woundsTaken: 2, stress: 12, traumasTaken: 1 }
+    }
+  };
+  const play = entry.full.play;
+  // Replicate the Wave B read-path:
+  const woundsCur = (typeof play.woundsTaken === "number") ? play.woundsTaken : (entry.gmNotes.wounds || 0);
+  const stressCur = (typeof play.stress === "number") ? play.stress : (entry.gmNotes.stress || 0);
+  const traumasCur = (typeof play.traumasTaken === "number") ? play.traumasTaken : 0;
+  assert("VITAL STATUS reads woundsTaken from play (not gmNotes)", woundsCur === 2);
+  assert("VITAL STATUS reads stress from play (not gmNotes)", stressCur === 12);
+  assert("VITAL STATUS reads traumasTaken from play", traumasCur === 1);
+  // hasLivePlay flag
+  const hasLivePlay = (entry.full && entry.full.play && typeof entry.full.play.woundsTaken === "number");
+  assert("hasLivePlay true when entry.full.play.woundsTaken is a number", hasLivePlay === true);
+}
+
+console.log("\n=== v0.10.1 — VITAL STATUS falls back to gmNotes for legacy entries (no play.woundsTaken) ===");
+{
+  const legacyEntry = {
+    id: "legacy-test",
+    source: "file",
+    gmNotes: { wounds:3, stress:8, initiative:null, statusEffects:[], notes:"old save" },
+    lastSyncedAt: "2024-01-01T00:00:00.000Z",
+    syncUrl: null,
+    full: {
+      meta: { schemaVersion: 7 },
+      ego: { name: "Legacy", aptitudes: { COG:10,INT:10,REF:10,SOM:10,SAV:10,WIL:10 } }
+      // No .play block at all
+    }
+  };
+  const play = (legacyEntry.full && legacyEntry.full.play) || {};
+  const woundsCur = (typeof play.woundsTaken === "number") ? play.woundsTaken : (legacyEntry.gmNotes.wounds || 0);
+  const stressCur = (typeof play.stress === "number") ? play.stress : (legacyEntry.gmNotes.stress || 0);
+  assert("Legacy entry falls back to gmNotes.wounds", woundsCur === 3);
+  assert("Legacy entry falls back to gmNotes.stress", stressCur === 8);
+  const hasLivePlay = !!(legacyEntry.full && legacyEntry.full.play && typeof legacyEntry.full.play.woundsTaken === "number");
+  assert("hasLivePlay false when no play block present", hasLivePlay === false);
+}
+
+console.log("\n=== v0.10.1 — VITAL STATUS handles partial play (only stress, no woundsTaken) ===");
+{
+  // Realistic case: an export from a tool that wrote stress but not woundsTaken
+  const partialEntry = {
+    id: "partial",
+    source: "file",
+    gmNotes: { wounds:5, stress:0, initiative:null, statusEffects:[], notes:"" },
+    full: { meta:{schemaVersion:7}, ego:{aptitudes:{WIL:10}}, play: { stress: 7 } }
+  };
+  const play = partialEntry.full.play || {};
+  const woundsCur = (typeof play.woundsTaken === "number") ? play.woundsTaken : (partialEntry.gmNotes.wounds || 0);
+  const stressCur = (typeof play.stress === "number") ? play.stress : (partialEntry.gmNotes.stress || 0);
+  // wounds falls back to gmNotes (no woundsTaken in play)
+  assert("Partial-play wounds falls back to gmNotes", woundsCur === 5);
+  // stress reads from play (present)
+  assert("Partial-play stress reads from play (present)", stressCur === 7);
+}
+
+console.log("\n=== v0.10.1 — toolVersion bumped to 0.10.1 ===");
+{
+  const fresh = exp.newState();
+  assert("newState().meta.toolVersion is 0.10.x", /^0\.10\./.test(fresh.meta.toolVersion), "got " + fresh.meta.toolVersion);
+}
+
 console.log("\n=== v0.10.0 — STATE.team.teamName persists through save/load roundtrip ===");
 {
   exp._setState(exp.newState());

@@ -3989,7 +3989,7 @@ function makeCharacterId() {
 }
 
 const newState = () => ({
-  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.10.0", mode:"chargen" },
+  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.10.1", mode:"chargen" },
   // v0.10: team-room metadata. Roomless local play has all nulls + empty teamName.
   // teamName persists locally even before joining a room (set it once, it sticks).
   team:{ roomId:null, teamName:"", lastPolledAt:null },
@@ -7045,6 +7045,8 @@ function partyComputeCardData(stateLike) {
                  .slice(0, 5)
                  .map(b => ({ name: b.field ? b.skill + ":" + b.field : b.skill, value: b.final }))
       : [];
+    const WT = ms && ms.morph ? ms.morph.WT : 0;
+    const DUR = ms && ms.morph ? ms.morph.DUR : 0;
     return {
       name: ego.name || "Unnamed",
       concept: (ego.narrative && ego.narrative.concept) || "",
@@ -7062,8 +7064,12 @@ function partyComputeCardData(stateLike) {
       woundsTaken: (stateLike.play && stateLike.play.woundsTaken) || 0,
       traumasTaken: (stateLike.play && stateLike.play.traumasTaken) || 0,
       stress: (stateLike.play && stateLike.play.stress) || 0,
-      WT: ms && ms.morph ? ms.morph.WT : 0,
-      DUR: ms && ms.morph ? ms.morph.DUR : 0,
+      WT,
+      DUR,
+      // v0.10 B: derived ratios for read-only display on team cards
+      maxWounds: (WT > 0) ? Math.max(1, Math.floor(DUR / WT)) : 0,
+      lucidity: ds.lucidity || 0,
+      traumaThreshold: ds.traumaThreshold || 0,
       isSwarm: ms && ms.morph ? !!ms.morph.swarm : false
     };
   });
@@ -7157,8 +7163,11 @@ function buildPartyMemberCard(stateLike, entry) {
     )
   ));
 
-  // Vitals (current wounds/stress against WT/DUR)
-  if (data.DUR > 0) {
+  // Vitals (current wounds/stress against WT/DUR).
+  // v0.10 B: imported members now show a richer auto-derived VITAL STATUS block
+  // below (with wounds/stress/traumas + thresholds). Keep this inline summary
+  // for the self card only — there's no tracker block on self.
+  if (isSelf && data.DUR > 0) {
     const woundDisplay = data.isSwarm ? (data.wounds + " / " + data.DUR + " DUR (swarm)") : ("wounds: " + Math.floor(data.wounds / (data.WT||1)) + " · raw " + data.wounds + "/" + data.DUR);
     card.appendChild(h("div", {class:"pc-section"},
       h("div", {class:"pc-section-label"}, "▸ VITALS"),
@@ -7166,36 +7175,50 @@ function buildPartyMemberCard(stateLike, entry) {
     ));
   }
 
-  // GM Tracker (only on imported members, not self).
-  // v0.10 A4: `gm` is always a truthy object now (defaulted at top of fn). The
-  // legacy `&& gm` truthy-check was hiding the tracker for any entry whose
-  // gmNotes hadn't been normalized — that was the PUFT-yes / UNNA-no bug.
+  // v0.10 B: VITAL STATUS — auto-derived from teammate's live sheet, no manual GM tracking.
+  // Reads wounds/stress/traumas straight from entry.full.play; falls back to gmNotes only
+  // for legacy file-imports that pre-date the play substate. Initiative stays manual
+  // (becomes shared in Wave D). Notes textarea kept as personal/private annotation.
   if (!isSelf) {
     const idx = STATE.partyImports.indexOf(entry);
-    const tracker = h("div", {class:"gm-tracker"});
-    tracker.appendChild(h("div", {class:"gm-tracker-label"}, "▾ GM TRACKING · LOCAL OVERLAY"));
+    const play = (entry.full && entry.full.play) || {};
+    // Auto-derived current values (live from sheet); fallback to gmNotes for legacy entries.
+    const woundsCur = (typeof play.woundsTaken === "number") ? play.woundsTaken : (gm.wounds || 0);
+    const stressCur = (typeof play.stress === "number") ? play.stress : (gm.stress || 0);
+    const traumasCur = (typeof play.traumasTaken === "number") ? play.traumasTaken : 0;
+    // Thresholds from morph + ego derivation
+    const maxWounds = data.maxWounds || 0;
+    const lucMax = data.lucidity || 0;
+    const traumaMax = data.traumaThreshold || 0;
+    // Did this entry have live play data?
+    const hasLivePlay = !!(entry.full && entry.full.play && typeof entry.full.play.woundsTaken === "number");
 
-    const mkStatRow = (label, key, max) => {
-      const valueEl = h("span", {class:"stat-value"}, String(gm[key]));
-      return h("div", {class:"gm-stat-row"},
+    const tracker = h("div", {class:"gm-tracker"});
+    tracker.appendChild(h("div", {class:"gm-tracker-label"},
+      hasLivePlay ? "▾ VITAL STATUS · LIVE FROM SHEET" : "▾ VITAL STATUS · LEGACY (no live play data)"
+    ));
+
+    // Read-only derived rows. Format: "VALUE / MAX" with a subtitle showing what it means.
+    const mkDerivedRow = (label, cur, max, subtitle, tone) => {
+      const ratioText = max > 0 ? (cur + " / " + max) : String(cur);
+      // Tone: amber when over half, red when at/over max
+      let color = "rgba(220,235,238,0.85)";
+      if (max > 0) {
+        if (cur >= max) color = tone === "wound" ? "#ff7077" : tone === "stress" ? "#ff9d54" : "#ffb84d";
+        else if (cur >= max / 2) color = "rgba(255,180,80,0.85)";
+      }
+      return h("div", {class:"gm-stat-row", style:{alignItems:"baseline"}},
         h("label", null, label),
-        h("div", {class:"stat-controls"},
-          h("button", {onClick:() => dispatch(s => {
-            const newVal = Math.max(0, (s.partyImports[idx].gmNotes[key] || 0) - 1);
-            s.partyImports[idx].gmNotes[key] = newVal;
-          })}, "−"),
-          valueEl,
-          h("button", {onClick:() => dispatch(s => {
-            const newVal = Math.min(max, (s.partyImports[idx].gmNotes[key] || 0) + 1);
-            s.partyImports[idx].gmNotes[key] = newVal;
-          })}, "+")
-        )
+        h("div", {style:{fontFamily:"var(--mono)",fontSize:"14px",fontWeight:700,letterSpacing:"1px",color}}, ratioText),
+        subtitle ? h("span", {style:{fontFamily:"var(--mono)",fontSize:"9.5px",color:"rgba(220,235,238,0.45)",letterSpacing:"1px",textTransform:"uppercase"}}, "// " + subtitle) : null
       );
     };
-    tracker.appendChild(mkStatRow("Wounds", "wounds", 12));
-    tracker.appendChild(mkStatRow("Stress", "stress", 99));
 
-    // Initiative row (number input)
+    tracker.appendChild(mkDerivedRow("Wounds", woundsCur, maxWounds, maxWounds ? "max wounds = DUR/WT" : null, "wound"));
+    tracker.appendChild(mkDerivedRow("Stress", stressCur, lucMax, lucMax ? "stress / lucidity (WIL×2)" : null, "stress"));
+    tracker.appendChild(mkDerivedRow("Traumas", traumasCur, traumaMax, traumaMax ? "trauma threshold = LUC/5" : null, "trauma"));
+
+    // Initiative row (still manual — shared in Wave D)
     const initRow = h("div", {class:"gm-stat-row"},
       h("label", null, "Initiative"),
       h("input", {type:"number", value: gm.initiative !== null ? gm.initiative : "",
@@ -7203,21 +7226,26 @@ function buildPartyMemberCard(stateLike, entry) {
         placeholder:"—",
         onChange:(ev) => dispatch(s => {
           const v = ev.target.value;
+          if (!s.partyImports[idx].gmNotes) s.partyImports[idx].gmNotes = { wounds:0,stress:0,initiative:null,statusEffects:[],notes:"" };
           s.partyImports[idx].gmNotes.initiative = v === "" ? null : Number(v);
         })}),
       h("button", {style:{padding:"3px 8px",background:"transparent",color:"var(--narrative)",border:"1px solid rgba(194,84,26,0.4)",borderRadius:"2px",fontFamily:"var(--mono)",fontSize:"9.5px",letterSpacing:"1px",fontWeight:700,cursor:"pointer",textTransform:"uppercase"},
         onClick:() => dispatch(s => {
           // d10 + REF/10
           const ref = (entry.full && entry.full.ego && entry.full.ego.aptitudes && entry.full.ego.aptitudes.REF) || 0;
+          if (!s.partyImports[idx].gmNotes) s.partyImports[idx].gmNotes = { wounds:0,stress:0,initiative:null,statusEffects:[],notes:"" };
           s.partyImports[idx].gmNotes.initiative = Math.floor(Math.random() * 10) + 1 + Math.floor(ref / 10);
         })}, "Roll")
     );
     tracker.appendChild(initRow);
 
-    // Notes textarea
-    tracker.appendChild(h("textarea", {class:"gm-notes-textarea", placeholder:"GM notes (hidden from player)",
+    // Personal notes textarea — local-only annotation (kept for GM commentary even though the page is for the whole team)
+    tracker.appendChild(h("textarea", {class:"gm-notes-textarea", placeholder:"// personal notes — local only, not shared",
       value: gm.notes || "",
-      onChange:(ev) => dispatch(s => { s.partyImports[idx].gmNotes.notes = ev.target.value; })
+      onInput:(ev) => dispatch(s => {
+        if (!s.partyImports[idx].gmNotes) s.partyImports[idx].gmNotes = { wounds:0,stress:0,initiative:null,statusEffects:[],notes:"" };
+        s.partyImports[idx].gmNotes.notes = ev.target.value;
+      }, { skipRerender: true })
     }));
     card.appendChild(tracker);
   }
