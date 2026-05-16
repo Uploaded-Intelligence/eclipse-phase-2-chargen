@@ -74,6 +74,59 @@ body.play-mode .layout { grid-template-columns: 1fr; }
 body.play-mode .col-mech,
 body.play-mode .preview-mech { position: static; max-height: none; overflow-y: visible; }
 
+/* v0.7 Constellation — Party Page (full-window) hides chargen + Studio entirely.
+   Same pattern as play-mode but with a dedicated grid layout for party cards. */
+body.party-mode .rail,
+body.party-mode .play-mode-banner,
+body.party-mode .layout { display: none; }
+.party-page { max-width: 1500px; margin: 0 auto; padding: 16px 18px 80px; color: var(--fg); font-family: var(--font); }
+.party-page-header { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--accent); }
+.party-page-header h1 { font-size: 22px; letter-spacing: 3px; margin: 0; text-transform: uppercase; color: #fff; font-weight: 900; }
+.party-page-header .sub { font-family: var(--mono); font-size: 11.5px; color: rgba(220,235,238,0.55); letter-spacing: 1.4px; }
+.party-page-coverage { margin-bottom: 18px; padding: 14px 16px; background: linear-gradient(180deg, #0a242c 0%, #07181d 100%); border: 1px solid var(--accent); border-radius: 3px; }
+.party-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 14px; }
+.party-card { position: relative; background: linear-gradient(180deg, #0a242c 0%, #07181d 100%); border: 1px solid var(--border-2); border-top: 2px solid var(--accent); border-radius: 3px; padding: 14px 14px 16px; box-shadow: 0 2px 14px rgba(0,0,0,0.4); display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.party-card--self { border-top: 2px solid var(--good); box-shadow: 0 2px 14px rgba(86,211,100,0.18), 0 0 0 1px rgba(86,211,100,0.3); }
+.party-card--live { border-top: 2px solid var(--narrative); box-shadow: 0 2px 14px rgba(194,84,26,0.2); }
+.party-card .pc-banner { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.party-card .pc-name { font-size: 18px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #fff; line-height: 1.1; }
+.party-card .pc-morph { display: inline-flex; align-items: center; padding: 4px 10px 4px 14px; background: var(--st-green); color: #fff; clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 100%, 0 100%); font-size: 10.5px; font-weight: 800; letter-spacing: 1.8px; text-transform: uppercase; font-family: var(--mono); }
+.party-card .pc-source { display: inline-flex; align-items: center; padding: 3px 8px; font-family: var(--mono); font-size: 9.5px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; border-radius: 2px; border: 1px solid; }
+.party-card .pc-source--file { color: rgba(220,235,238,0.65); border-color: rgba(220,235,238,0.3); }
+.party-card .pc-source--url { color: #7fd4e2; border-color: rgba(127,212,226,0.5); }
+.party-card .pc-source--live { color: var(--good); border-color: var(--good); background: rgba(86,211,100,0.10); animation: party-live-pulse 2s ease-in-out infinite; }
+@keyframes party-live-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(86,211,100,0.4); } 50% { box-shadow: 0 0 0 4px rgba(86,211,100,0); } }
+.party-card .pc-meta { font-size: 11.5px; color: rgba(220,235,238,0.7); }
+.party-card .pc-lifepath { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.6px; color: rgba(220,235,238,0.6); }
+.party-card .pc-section { padding-top: 8px; border-top: 1px dashed rgba(127,212,226,0.18); }
+.party-card .pc-section-label { font-family: var(--mono); font-size: 9.5px; letter-spacing: 1.5px; color: var(--accent-2); font-weight: 800; text-transform: uppercase; margin-bottom: 4px; }
+.party-card .pc-apt-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.party-card .pc-apt { font-family: var(--mono); font-size: 11px; color: rgba(220,235,238,0.85); padding: 2px 6px; background: rgba(0,0,0,0.25); border-radius: 2px; min-width: 38px; text-align: center; }
+.party-card .pc-coverage-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.party-card .pc-cov { padding: 4px 6px; text-align: center; font-family: var(--mono); font-size: 10px; border-radius: 2px; border: 1px solid; letter-spacing: 0.6px; }
+.party-card .pc-cov--high { color: var(--good); border-color: rgba(86,211,100,0.4); background: rgba(86,211,100,0.06); }
+.party-card .pc-cov--mid { color: var(--warn); border-color: rgba(227,179,65,0.4); background: rgba(227,179,65,0.06); }
+.party-card .pc-cov--low { color: var(--bad); border-color: rgba(232,86,98,0.35); background: rgba(232,86,98,0.05); }
+.party-card .gm-tracker { padding: 8px 10px; background: rgba(194,84,26,0.06); border: 1px dashed rgba(194,84,26,0.4); border-radius: 2px; margin-top: 4px; }
+.party-card .gm-tracker-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; color: var(--narrative); font-weight: 800; text-transform: uppercase; margin-bottom: 6px; }
+.party-card .gm-stat-row { display: flex; align-items: center; gap: 10px; font-size: 12px; margin-bottom: 4px; }
+.party-card .gm-stat-row label { flex: 0 0 70px; color: rgba(220,235,238,0.7); font-family: var(--mono); font-size: 10px; letter-spacing: 0.6px; }
+.party-card .gm-stat-row .stat-controls { display: flex; align-items: center; gap: 4px; }
+.party-card .gm-stat-row .stat-controls button { width: 24px; height: 22px; background: rgba(0,0,0,0.3); color: var(--accent-2); border: 1px solid rgba(127,212,226,0.4); border-radius: 2px; font-family: var(--mono); font-weight: 700; cursor: pointer; padding: 0; }
+.party-card .gm-stat-row .stat-controls button:hover { background: rgba(29,132,147,0.2); color: #fff; }
+.party-card .gm-stat-row .stat-value { font-family: var(--mono); min-width: 28px; text-align: center; color: #fff; font-weight: 700; }
+.party-card .gm-notes-textarea { width: 100%; margin-top: 6px; padding: 6px 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(194,84,26,0.3); border-radius: 2px; color: rgba(255,225,200,0.85); font-family: var(--font); font-size: 11.5px; resize: vertical; min-height: 36px; }
+.party-card .pc-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.party-card .pc-actions button { padding: 5px 10px; background: transparent; color: rgba(220,235,238,0.75); border: 1px solid rgba(127,212,226,0.3); border-radius: 2px; font-family: var(--mono); font-size: 10px; letter-spacing: 1.2px; font-weight: 700; text-transform: uppercase; cursor: pointer; }
+.party-card .pc-actions button:hover { color: #fff; border-color: var(--accent); background: rgba(29,132,147,0.15); }
+.party-card .pc-actions button.danger { color: rgba(232,86,98,0.85); border-color: rgba(232,86,98,0.3); }
+.party-card .pc-actions button.danger:hover { color: #fff; background: rgba(232,86,98,0.15); border-color: var(--bad); }
+.party-card .pc-timestamp { font-family: var(--mono); font-size: 10px; color: rgba(220,235,238,0.45); letter-spacing: 0.5px; }
+.party-empty { padding: 60px 24px; text-align: center; color: rgba(220,235,238,0.55); font-family: var(--font); }
+.party-empty h2 { font-size: 18px; letter-spacing: 2px; color: rgba(220,235,238,0.85); margin-bottom: 12px; }
+.party-empty p { max-width: 480px; margin: 0 auto 14px; line-height: 1.5; }
+.party-empty button { padding: 10px 16px; background: var(--accent); color: #06141a; border: 1px solid var(--accent-2); font-family: var(--mono); font-size: 11px; letter-spacing: 1.5px; font-weight: 700; text-transform: uppercase; cursor: pointer; border-radius: 2px; }
+
 /* Rail — chevron-banner step indicators with Studio angled clip-path. */
 .rail { display: flex; gap: 6px; padding: 10px 16px; background: var(--bg-2); border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: thin; }
 .rail button { background: transparent; color: var(--fg-3); border: 1px solid var(--border); border-radius: 0; padding: 5px 18px 5px 12px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; font-family: var(--font); clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 100%, 0 100%); transition: all 0.1s; }
@@ -860,6 +913,28 @@ body.play-mode .studio-sheet { padding: 14px; }
 
 <script>
 "use strict";
+
+/* ================================================================== */
+/* === VENDORED LIBRARIES (MIT) — kept inline for offline-after-load === */
+/* ================================================================== */
+
+/* LZ-string v1.5.0 — Pieroxy — MIT — https://github.com/pieroxy/lz-string
+   Used for compressing character JSON into URL hashes so share-links fit
+   under browser limits (~5KB compressed for typical character without portrait). */
+var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",n="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$",e={};function t(r,o){if(!e[r]){e[r]={};for(var n=0;n<r.length;n++)e[r][r.charAt(n)]=n}return e[r][o]}var i={compressToBase64:function(r){if(null==r)return"";var n=i._compress(r,6,function(r){return o.charAt(r)});switch(n.length%4){default:case 0:return n;case 1:return n+"===";case 2:return n+"==";case 3:return n+"="}},decompressFromBase64:function(r){return null==r?"":""==r?null:i._decompress(r.length,32,function(n){return t(o,r.charAt(n))})},compressToUTF16:function(o){return null==o?"":i._compress(o,15,function(o){return r(o+32)})+" "},decompressFromUTF16:function(r){return null==r?"":""==r?null:i._decompress(r.length,16384,function(o){return r.charCodeAt(o)-32})},compressToUint8Array:function(r){for(var o=i.compress(r),n=new Uint8Array(2*o.length),e=0,t=o.length;e<t;e++){var s=o.charCodeAt(e);n[2*e]=s>>>8,n[2*e+1]=s%256}return n},decompressFromUint8Array:function(o){if(null==o)return i.decompress(o);for(var n=new Array(o.length/2),e=0,t=n.length;e<t;e++)n[e]=256*o[2*e]+o[2*e+1];var s=[];return n.forEach(function(o){s.push(r(o))}),i.decompress(s.join(""))},compressToEncodedURIComponent:function(r){return null==r?"":i._compress(r,6,function(r){return n.charAt(r)})},decompressFromEncodedURIComponent:function(r){return null==r?"":""==r?null:(r=r.replace(/ /g,"+"),i._decompress(r.length,32,function(o){return t(n,r.charAt(o))}))},compress:function(o){return i._compress(o,16,function(o){return r(o)})},_compress:function(r,o,n){if(null==r)return"";var e,t,i,s={},u={},a="",p="",c="",l=2,f=3,h=2,d=[],m=0,v=0;for(i=0;i<r.length;i+=1)if(a=r.charAt(i),Object.prototype.hasOwnProperty.call(s,a)||(s[a]=f++,u[a]=!0),p=c+a,Object.prototype.hasOwnProperty.call(s,p))c=p;else{if(Object.prototype.hasOwnProperty.call(u,c)){if(c.charCodeAt(0)<256){for(e=0;e<h;e++)m<<=1,v==o-1?(v=0,d.push(n(m)),m=0):v++;for(t=c.charCodeAt(0),e=0;e<8;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}else{for(t=1,e=0;e<h;e++)m=m<<1|t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t=0;for(t=c.charCodeAt(0),e=0;e<16;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}0==--l&&(l=Math.pow(2,h),h++),delete u[c]}else for(t=s[c],e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;0==--l&&(l=Math.pow(2,h),h++),s[p]=f++,c=String(a)}if(""!==c){if(Object.prototype.hasOwnProperty.call(u,c)){if(c.charCodeAt(0)<256){for(e=0;e<h;e++)m<<=1,v==o-1?(v=0,d.push(n(m)),m=0):v++;for(t=c.charCodeAt(0),e=0;e<8;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}else{for(t=1,e=0;e<h;e++)m=m<<1|t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t=0;for(t=c.charCodeAt(0),e=0;e<16;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}0==--l&&(l=Math.pow(2,h),h++),delete u[c]}else for(t=s[c],e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;0==--l&&(l=Math.pow(2,h),h++)}for(t=2,e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;for(;;){if(m<<=1,v==o-1){d.push(n(m));break}v++}return d.join("")},decompress:function(r){return null==r?"":""==r?null:i._decompress(r.length,32768,function(o){return r.charCodeAt(o)})},_decompress:function(o,n,e){var t,i,s,u,a,p,c,l=[],f=4,h=4,d=3,m="",v=[],g={val:e(0),position:n,index:1};for(t=0;t<3;t+=1)l[t]=t;for(s=0,a=Math.pow(2,2),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;switch(s){case 0:for(s=0,a=Math.pow(2,8),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;c=r(s);break;case 1:for(s=0,a=Math.pow(2,16),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;c=r(s);break;case 2:return""}for(l[3]=c,i=c,v.push(c);;){if(g.index>o)return"";for(s=0,a=Math.pow(2,d),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;switch(c=s){case 0:for(s=0,a=Math.pow(2,8),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;l[h++]=r(s),c=h-1,f--;break;case 1:for(s=0,a=Math.pow(2,16),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;l[h++]=r(s),c=h-1,f--;break;case 2:return v.join("")}if(0==f&&(f=Math.pow(2,d),d++),l[c])m=l[c];else{if(c!==h)return null;m=i+i.charAt(0)}v.push(m),l[h++]=i+m.charAt(0),i=m,0==--f&&(f=Math.pow(2,d),d++)}}};return i}();
+
+/* qr-creator (jquery-qrcode v0.14.0) — Lars Jung — MIT — https://larsjung.de/jquery-qrcode/
+   Used for rendering share-link URLs as QR codes for at-the-table phone scanning.
+   Wrapped in IIFE so its internal `let G` / `class H` don't pollute our scope.
+   `self.QrCreator.render(opts, target)` is the public API. */
+(function(){
+'use strict';let G=null;class H{}H.render=function(w,B){G(w,B)};(typeof self!=="undefined"?self:globalThis).QrCreator=H;
+(function(w){function B(t,c,a,e){var b={},h=w(a,c);h.u(t);h.J();e=e||0;var r=h.h(),d=h.h()+2*e;b.text=t;b.level=c;b.version=a;b.O=d;b.a=function(b,a){b-=e;a-=e;return 0>b||b>=r||0>a||a>=r?!1:h.a(b,a)};return b}function C(t,c,a,e,b,h,r,d,g,x){function u(b,a,f,c,d,r,g){b?(t.lineTo(a+r,f+g),t.arcTo(a,f,c,d,h)):t.lineTo(a,f)}r?t.moveTo(c+h,a):t.moveTo(c,a);u(d,e,a,e,b,-h,0);u(g,e,b,c,b,0,-h);u(x,c,b,c,a,h,0);u(r,c,a,e,a,0,h)}function z(t,c,a,e,b,h,r,d,g,x){function u(b,a,c,d){t.moveTo(b+c,a);t.lineTo(b,a);t.lineTo(b,a+d);t.arcTo(b,a,b+c,a,h)}r&&u(c,a,h,h);d&&u(e,a,-h,h);g&&u(e,b,-h,-h);x&&u(c,b,h,-h)}function A(t,c){var a=c.fill;if("string"===typeof a)t.fillStyle=a;else{var e=a.type,b=a.colorStops;a=a.position.map((b)=>Math.round(b*c.size));if("linear-gradient"===e)var h=t.createLinearGradient.apply(t,a);else if("radial-gradient"===e)h=t.createRadialGradient.apply(t,a);else throw Error("Unsupported fill");b.forEach(([b,a])=>{h.addColorStop(b,a)});t.fillStyle=h}}function y(t,c){a:{var a=c.text,e=c.v,b=c.N,h=c.K,r=c.P;b=Math.max(1,b||1);for(h=Math.min(40,h||40);b<=h;b+=1)try{var d=B(a,e,b,r);break a}catch(J){}d=void 0}if(!d)return null;a=t.getContext("2d");c.background&&(a.fillStyle=c.background,a.fillRect(c.left,c.top,c.size,c.size));e=d.O;h=c.size/e;a.beginPath();for(r=0;r<e;r+=1)for(b=0;b<e;b+=1){var g=a,x=c.left+b*h,u=c.top+r*h,p=r,q=b,f=d.a,k=x+h,m=u+h,D=p-1,E=p+1,n=q-1,l=q+1,y=Math.floor(Math.min(.5,Math.max(0,c.R))*h),v=f(p,q),I=f(D,n),w=f(D,q);D=f(D,l);var F=f(p,l);l=f(E,l);q=f(E,q);E=f(E,n);p=f(p,n);x=Math.round(x);u=Math.round(u);k=Math.round(k);m=Math.round(m);v?C(g,x,u,k,m,y,!w&&!p,!w&&!F,!q&&!F,!q&&!p):z(g,x,u,k,m,y,w&&p&&I,w&&F&&D,q&&F&&l,q&&p&&E)}A(a,c);a.fill();return t}var v={minVersion:1,maxVersion:40,ecLevel:"L",left:0,top:0,size:200,fill:"#000",background:null,text:"no text",radius:.5,quiet:0};G=function(t,c){var a={};Object.assign(a,v,t);a.N=a.minVersion;a.K=a.maxVersion;a.v=a.ecLevel;a.left=a.left;a.top=a.top;a.size=a.size;a.fill=a.fill;a.background=a.background;a.text=a.text;a.R=a.radius;a.P=a.quiet;if(c instanceof HTMLCanvasElement){if(c.width!==a.size||c.height!==a.size)c.width=a.size,c.height=a.size;c.getContext("2d").clearRect(0,0,c.width,c.height);y(c,a)}else t=document.createElement("canvas"),t.width=a.size,t.height=a.size,a=y(t,a),c.appendChild(a)}})(function(){function w(c){var a=C.s(c);return{S:function(){return 4},b:function(){return a.length},write:function(c){for(var b=0;b<a.length;b+=1)c.put(a[b],8)}}}function B(){var c=[],a=0,e={B:function(){return c},c:function(b){return 1==(c[Math.floor(b/8)]>>>7-b%8&1)},put:function(b,h){for(var a=0;a<h;a+=1)e.m(1==(b>>>h-a-1&1))},f:function(){return a},m:function(b){var h=Math.floor(a/8);c.length<=h&&c.push(0);b&&(c[h]|=128>>>a%8);a+=1}};return e}function C(c,a){function e(b,h){for(var a=-1;7>=a;a+=1)if(!(-1>=b+a||d<=b+a))for(var c=-1;7>=c;c+=1)-1>=h+c||d<=h+c||(r[b+a][h+c]=0<=a&&6>=a&&(0==c||6==c)||0<=c&&6>=c&&(0==a||6==a)||2<=a&&4>=a&&2<=c&&4>=c?!0:!1)}function b(b,a){for(var f=d=4*c+17,k=Array(f),m=0;m<f;m+=1){k[m]=Array(f);for(var p=0;p<f;p+=1)k[m][p]=null}r=k;e(0,0);e(d-7,0);e(0,d-7);f=y.G(c);for(k=0;k<f.length;k+=1)for(m=0;m<f.length;m+=1){p=f[k];var q=f[m];if(null==r[p][q])for(var n=-2;2>=n;n+=1)for(var l=-2;2>=l;l+=1)r[p+n][q+l]=-2==n||2==n||-2==l||2==l||0==n&&0==l}for(f=8;f<d-8;f+=1)null==r[f][6]&&(r[f][6]=0==f%2);for(f=8;f<d-8;f+=1)null==r[6][f]&&(r[6][f]=0==f%2);f=y.w(h<<3|a);for(k=0;15>k;k+=1)m=!b&&1==(f>>k&1),r[6>k?k:8>k?k+1:d-15+k][8]=m,r[8][8>k?d-k-1:9>k?15-k:14-k]=m;r[d-8][8]=!b;if(7<=c){f=y.A(c);for(k=0;18>k;k+=1)m=!b&&1==(f>>k&1),r[Math.floor(k/3)][k%3+d-8-3]=m;for(k=0;18>k;k+=1)m=!b&&1==(f>>k&1),r[k%3+d-8-3][Math.floor(k/3)]=m}if(null==g){b=t.I(c,h);f=B();for(k=0;k<x.length;k+=1)m=x[k],f.put(4,4),f.put(m.b(),y.f(4,c)),m.write(f);for(k=m=0;k<b.length;k+=1)m+=b[k].j;if(f.f()>8*m)throw Error("code length overflow. ("+f.f()+">"+8*m+")");for(f.f()+4<=8*m&&f.put(0,4);0!=f.f()%8;)f.m(!1);for(;!(f.f()>=8*m);){f.put(236,8);if(f.f()>=8*m)break;f.put(17,8)}var u=0;m=k=0;p=Array(b.length);q=Array(b.length);for(n=0;n<b.length;n+=1){var v=b[n].j,w=b[n].o-v;k=Math.max(k,v);m=Math.max(m,w);p[n]=Array(v);for(l=0;l<p[n].length;l+=1)p[n][l]=255&f.B()[l+u];u+=v;l=y.C(w);v=z(p[n],l.b()-1).l(l);q[n]=Array(l.b()-1);for(l=0;l<q[n].length;l+=1)w=l+v.b()-q[n].length,q[n][l]=0<=w?v.c(w):0}for(l=f=0;l<b.length;l+=1)f+=b[l].o;f=Array(f);for(l=u=0;l<k;l+=1)for(n=0;n<b.length;n+=1)l<p[n].length&&(f[u]=p[n][l],u+=1);for(l=0;l<m;l+=1)for(n=0;n<b.length;n+=1)l<q[n].length&&(f[u]=q[n][l],u+=1);g=f}b=g;f=-1;k=d-1;m=7;p=0;a=y.F(a);for(q=d-1;0<q;q-=2)for(6==q&&--q;;){for(n=0;2>n;n+=1)null==r[k][q-n]&&(l=!1,p<b.length&&(l=1==(b[p]>>>m&1)),a(k,q-n)&&(l=!l),r[k][q-n]=l,--m,-1==m&&(p+=1,m=7));k+=f;if(0>k||d<=k){k-=f;f=-f;break}}}var h=A[a],r=null,d=0,g=null,x=[],u={u:function(b){b=w(b);x.push(b);g=null},a:function(b,a){if(0>b||d<=b||0>a||d<=a)throw Error(b+","+a);return r[b][a]},h:function(){return d},J:function(){for(var a=0,h=0,c=0;8>c;c+=1){b(!0,c);var d=y.D(u);if(0==c||a>d)a=d,h=c}b(!1,h)}};return u}function z(c,a){if("undefined"==typeof c.length)throw Error(c.length+"/"+a);var e=function(){for(var b=0;b<c.length&&0==c[b];)b+=1;for(var r=Array(c.length-b+a),d=0;d<c.length-b;d+=1)r[d]=c[d+b];return r}(),b={c:function(b){return e[b]},b:function(){return e.length},multiply:function(a){for(var h=Array(b.b()+a.b()-1),c=0;c<b.b();c+=1)for(var g=0;g<a.b();g+=1)h[c+g]^=v.i(v.g(b.c(c))+v.g(a.c(g)));return z(h,0)},l:function(a){if(0>b.b()-a.b())return b;for(var c=v.g(b.c(0))-v.g(a.c(0)),h=Array(b.b()),g=0;g<b.b();g+=1)h[g]=b.c(g);for(g=0;g<a.b();g+=1)h[g]^=v.i(v.g(a.c(g))+c);return z(h,0).l(a)}};return b}C.s=function(c){for(var a=[],e=0;e<c.length;e++){var b=c.charCodeAt(e);128>b?a.push(b):2048>b?a.push(192|b>>6,128|b&63):55296>b||57344<=b?a.push(224|b>>12,128|b>>6&63,128|b&63):(e++,b=65536+((b&1023)<<10|c.charCodeAt(e)&1023),a.push(240|b>>18,128|b>>12&63,128|b>>6&63,128|b&63))}return a};var A={L:1,M:0,Q:3,H:2},y=function(){function c(b){for(var a=0;0!=b;)a+=1,b>>>=1;return a}var a=[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],e={w:function(b){for(var a=b<<10;0<=c(a)-c(1335);)a^=1335<<c(a)-c(1335);return(b<<10|a)^21522},A:function(b){for(var a=b<<12;0<=c(a)-c(7973);)a^=7973<<c(a)-c(7973);return b<<12|a},G:function(b){return a[b-1]},F:function(b){switch(b){case 0:return function(b,a){return 0==(b+a)%2};case 1:return function(b){return 0==b%2};case 2:return function(b,a){return 0==a%3};case 3:return function(b,a){return 0==(b+a)%3};case 4:return function(b,a){return 0==(Math.floor(b/2)+Math.floor(a/3))%2};case 5:return function(b,a){return 0==b*a%2+b*a%3};case 6:return function(b,a){return 0==(b*a%2+b*a%3)%2};case 7:return function(b,a){return 0==(b*a%3+(b+a)%2)%2};default:throw Error("bad maskPattern:"+b);}},C:function(b){for(var a=z([1],0),c=0;c<b;c+=1)a=a.multiply(z([1,v.i(c)],0));return a},f:function(b,a){if(4!=b||1>a||40<a)throw Error("mode: "+b+"; type: "+a);return 10>a?8:16},D:function(b){for(var a=b.h(),c=0,d=0;d<a;d+=1)for(var g=0;g<a;g+=1){for(var e=0,t=b.a(d,g),p=-1;1>=p;p+=1)if(!(0>d+p||a<=d+p))for(var q=-1;1>=q;q+=1)0>g+q||a<=g+q||(0!=p||0!=q)&&t==b.a(d+p,g+q)&&(e+=1);5<e&&(c+=3+e-5)}for(d=0;d<a-1;d+=1)for(g=0;g<a-1;g+=1)if(e=0,b.a(d,g)&&(e+=1),b.a(d+1,g)&&(e+=1),b.a(d,g+1)&&(e+=1),b.a(d+1,g+1)&&(e+=1),0==e||4==e)c+=3;for(d=0;d<a;d+=1)for(g=0;g<a-6;g+=1)b.a(d,g)&&!b.a(d,g+1)&&b.a(d,g+2)&&b.a(d,g+3)&&b.a(d,g+4)&&!b.a(d,g+5)&&b.a(d,g+6)&&(c+=40);for(g=0;g<a;g+=1)for(d=0;d<a-6;d+=1)b.a(d,g)&&!b.a(d+1,g)&&b.a(d+2,g)&&b.a(d+3,g)&&b.a(d+4,g)&&!b.a(d+5,g)&&b.a(d+6,g)&&(c+=40);for(g=e=0;g<a;g+=1)for(d=0;d<a;d+=1)b.a(d,g)&&(e+=1);return c+=Math.abs(100*e/a/a-50)/5*10}};return e}(),v=function(){for(var c=Array(256),a=Array(256),e=0;8>e;e+=1)c[e]=1<<e;for(e=8;256>e;e+=1)c[e]=c[e-4]^c[e-5]^c[e-6]^c[e-8];for(e=0;255>e;e+=1)a[c[e]]=e;return{g:function(b){if(1>b)throw Error("glog("+b+")");return a[b]},i:function(b){for(;0>b;)b+=255;for(;256<=b;)b-=255;return c[b]}}}(),t=function(){function c(b,c){switch(c){case A.L:return a[4*(b-1)];case A.M:return a[4*(b-1)+1];case A.Q:return a[4*(b-1)+2];case A.H:return a[4*(b-1)+3]}}var a=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12,7,37,13],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]],e={I:function(b,a){var e=c(b,a);if("undefined"==typeof e)throw Error("bad rs block @ typeNumber:"+b+"/errorCorrectLevel:"+a);b=e.length/3;a=[];for(var d=0;d<b;d+=1)for(var g=e[3*d],h=e[3*d+1],t=e[3*d+2],p=0;p<g;p+=1){var q=t,f={};f.o=h;f.j=q;a.push(f)}return a}};return e}();return C}());
+})();
+
+/* ================================================================== */
+/* === END VENDORED LIBRARIES === */
+/* ================================================================== */
 
 const $ = (sel, root) => (root||document).querySelector(sel);
 const $$ = (sel, root) => Array.from((root||document).querySelectorAll(sel));
@@ -3698,12 +3773,31 @@ const IDENTITY_OPTIONS = {
    STATE  —  the single mutable state object
    Schema v2: slot-keyed allocations (see MATH-SPEC.md sections B, D).
    ================================================================= */
-const SCHEMA_VERSION = 6;
+const SCHEMA_VERSION = 7;
+
+/* v7 — UUID helper for stable character identity across re-shares.
+   Prefer crypto.randomUUID where available (Safari 15.4+ / all modern browsers).
+   Fallback: timestamp + random. Good enough for share-link keying — not crypto. */
+function makeCharacterId() {
+  try {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+      return crypto.randomUUID();
+    }
+  } catch(e) { /* fall through */ }
+  return "id-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
+}
+
 const newState = () => ({
-  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.4.0", mode:"chargen" },
+  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.7.0", mode:"chargen" },
   step:1,
   ego:{
     name:"",
+    /* v7 — stable character ID for share-link de-dup and future live-sync.
+       Generated lazily on first share (not eagerly here) so test fixtures don't
+       depend on UUID generation order. Set by pushToLive / encodeShareUrl. */
+    characterId:null,
+    /* v7 — last pushed live URL so player can recopy without re-pushing. */
+    liveShareUrl:null,
     /* v5 Studio additions — separate player-name, short concept tagline,
        muse name, and a narrative-quote string for the Muse Log callout.
        Adapter (studioPcFromState) falls back to derived values when empty. */
@@ -3945,7 +4039,38 @@ function migrateV5ToV6(loaded) {
   return loaded;
 }
 
-/* Compose migrations. Always run in order — v1 saves cascade v1→...→v6. */
+/* v7 — character identity (characterId, liveShareUrl) + party member shape additions
+   (id, source, lastSyncedAt, gmNotes, syncUrl) for the Party Page + GM Command Centre.
+   Additive: existing partyImports get default gmNotes, source="file" (file-imported
+   was the only path before v7), lastSyncedAt = exportedAt or now. characterId on
+   ego is set lazily on first share (not here) so deterministic tests stay green. */
+function migrateV6ToV7(loaded) {
+  if (!loaded) return loaded;
+  if (loaded.ego) {
+    if (!("characterId" in loaded.ego)) loaded.ego.characterId = null;
+    if (!("liveShareUrl" in loaded.ego)) loaded.ego.liveShareUrl = null;
+  }
+  if (Array.isArray(loaded.partyImports)) {
+    loaded.partyImports = loaded.partyImports.map(p => {
+      if (!p || typeof p !== "object") return p;
+      const next = Object.assign({}, p);
+      if (!("id" in next)) next.id = null;
+      if (!("source" in next)) next.source = "file";
+      if (!("lastSyncedAt" in next)) {
+        next.lastSyncedAt = (p.full && p.full.summary && p.full.summary.exportedAt) || new Date().toISOString();
+      }
+      if (!next.gmNotes || typeof next.gmNotes !== "object") {
+        next.gmNotes = { wounds:0, stress:0, initiative:null, statusEffects:[], notes:"" };
+      }
+      if (!("syncUrl" in next)) next.syncUrl = null;
+      return next;
+    });
+  }
+  if (loaded.meta) loaded.meta.schemaVersion = 7;
+  return loaded;
+}
+
+/* Compose migrations. Always run in order — v1 saves cascade v1→...→v7. */
 function migrateToCurrent(loaded) {
   if (!loaded || !loaded.meta) return loaded;
   if (loaded.meta.schemaVersion < 2) loaded = migrateV1ToV2(loaded);
@@ -3953,6 +4078,7 @@ function migrateToCurrent(loaded) {
   if (loaded.meta.schemaVersion < 4) loaded = migrateV3ToV4(loaded);
   if (loaded.meta.schemaVersion < 5) loaded = migrateV4ToV5(loaded);
   if (loaded.meta.schemaVersion < 6) loaded = migrateV5ToV6(loaded);
+  if (loaded.meta.schemaVersion < 7) loaded = migrateV6ToV7(loaded);
   return loaded;
 }
 
@@ -4849,6 +4975,385 @@ function showToast(msg) {
   setTimeout(() => t.remove(), 3000);
 }
 
+/* ================================================================== */
+/* === v0.7 CONSTELLATION — Share infrastructure                  === */
+/* ================================================================== */
+
+/* stripPortrait — clone state with avatarDataUrl removed. Used for compact
+   share-links (portraits are ~30-50KB JPEG; stripping cuts URL by ~85%). */
+function stripPortrait(state) {
+  const copy = JSON.parse(JSON.stringify(state));
+  if (copy.ego && copy.ego.narrative) copy.ego.narrative.avatarDataUrl = null;
+  return copy;
+}
+
+/* encodeShareUrl — STATE → LZ-compressed → base64 URL fragment.
+   Returns the FULL URL the user can copy (location.origin + path + #share=...). */
+function encodeShareUrl(state, opts) {
+  opts = opts || {};
+  const payload = opts.stripPortrait ? stripPortrait(state) : state;
+  const json = JSON.stringify(payload);
+  const compressed = LZString.compressToEncodedURIComponent(json);
+  return location.origin + location.pathname + "#share=" + compressed;
+}
+
+/* decodeShareUrl — parse a URL fragment OR raw payload string, return parsed
+   STATE or null. Accepts either:
+     - "#share=xyz..." (fragment from URL)
+     - "https://...#share=xyz..." (full URL)
+     - "xyz..." (raw payload) */
+function decodeShareUrl(input) {
+  if (!input || typeof input !== "string") return null;
+  let payload = input;
+  const idx = input.indexOf("#share=");
+  if (idx >= 0) payload = input.slice(idx + 7);
+  else if (input.startsWith("share=")) payload = input.slice(6);
+  try {
+    const json = LZString.decompressFromEncodedURIComponent(payload);
+    if (!json) return null;
+    return JSON.parse(json);
+  } catch (e) { return null; }
+}
+
+/* showShareModal — modal with Copy Link / Show QR / Download File +
+   strip-portrait toggle. Imperative (no state flag); appended to body. */
+function showShareModal() {
+  const existing = document.getElementById("share-modal-root");
+  if (existing) existing.remove();
+
+  // Ensure characterId is generated so this share has a stable identity
+  if (!STATE.ego.characterId) {
+    dispatch(s => { s.ego.characterId = makeCharacterId(); });
+  }
+
+  let stripPortraitOn = false;
+  let currentUrl = encodeShareUrl(STATE, {stripPortrait: stripPortraitOn});
+
+  const root = h("div", {id:"share-modal-root", class:"share-modal-root",
+    style:{position:"fixed",inset:0,zIndex:1100,display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}});
+  const backdrop = h("div", {style:{position:"absolute",inset:0,background:"rgba(7,24,29,0.85)",backdropFilter:"blur(4px)"}, onClick:() => root.remove()});
+  root.appendChild(backdrop);
+  const panel = h("div", {style:{position:"relative",background:"linear-gradient(180deg, #0a242c 0%, #07181d 100%)",border:"1px solid var(--accent)",borderRadius:"4px",padding:"24px 22px 18px",maxWidth:"560px",width:"100%",maxHeight:"90vh",overflowY:"auto",boxShadow:"0 8px 40px rgba(0,0,0,0.6)",color:"rgba(220,235,238,0.92)",fontFamily:'"Chakra Petch", system-ui, sans-serif'}});
+
+  // Protruding tab title
+  panel.appendChild(h("div", {style:{position:"absolute",top:"-14px",left:"18px",height:"28px",padding:"0 16px 0 12px",display:"inline-flex",alignItems:"center",background:"var(--accent)",color:"#06141a",border:"1px solid var(--accent)",clipPath:"polygon(0 0, calc(100% - 12px) 0, 100% 100%, 0 100%)",fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontSize:"10.5px",letterSpacing:"2px",fontWeight:800}}, "// SHARE CHARACTER"));
+  panel.appendChild(h("button", {style:{position:"absolute",top:"8px",right:"10px",background:"transparent",border:"none",color:"rgba(220,235,238,0.6)",cursor:"pointer",fontSize:"18px",padding:"4px 8px"},onClick:()=>root.remove(),title:"Close (Esc)"}, "✕"));
+
+  // Header
+  const charName = (STATE.ego.name || "Unnamed");
+  panel.appendChild(h("div", {style:{marginTop:"6px",marginBottom:"6px",fontSize:"18px",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"#fff"}}, charName));
+  panel.appendChild(h("div", {style:{marginBottom:"16px",fontSize:"12px",color:"rgba(220,235,238,0.6)",fontFamily:'"Share Tech Mono", ui-monospace, monospace',letterSpacing:"0.8px"}}, "Share-link compresses your character into a URL. Anyone who clicks can load it. Data stays in the URL — nothing is uploaded to a server for snapshot shares."));
+
+  // URL display + Copy button
+  const urlInput = h("input", {type:"text", readonly:true, value: currentUrl, id:"share-url-input",
+    style:{width:"100%",padding:"8px 10px",background:"rgba(0,0,0,0.3)",border:"1px solid rgba(127,212,226,0.4)",borderRadius:"2px",color:"#7fd4e2",fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontSize:"11px",letterSpacing:"0.3px",marginBottom:"10px"},
+    onClick:(ev)=>ev.target.select()});
+  panel.appendChild(urlInput);
+
+  // Stats line
+  const statsLine = h("div", {style:{fontSize:"11px",color:"rgba(220,235,238,0.55)",fontFamily:'"Share Tech Mono", ui-monospace, monospace',marginBottom:"14px"}}, "");
+  const updateStats = () => {
+    const bytes = currentUrl.length;
+    statsLine.textContent = `// LENGTH: ${(bytes/1024).toFixed(1)}KB · ${bytes <= 8000 ? "fits in most chat apps" : bytes <= 16000 ? "may truncate in SMS / Twitter" : "long URL — use chat app"}`;
+  };
+  updateStats();
+  panel.appendChild(statsLine);
+
+  // Strip portrait toggle
+  const portraitToggle = h("label", {style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"14px",fontSize:"12px",cursor:"pointer",color:"rgba(220,235,238,0.85)"}},
+    h("input", {type:"checkbox", checked:stripPortraitOn,
+      onChange:(ev)=>{
+        stripPortraitOn = ev.target.checked;
+        currentUrl = encodeShareUrl(STATE, {stripPortrait: stripPortraitOn});
+        urlInput.value = currentUrl;
+        updateStats();
+      }}),
+    h("span", null, "Strip portrait (smaller URL, ~85% reduction)")
+  );
+  panel.appendChild(portraitToggle);
+
+  // Action buttons row
+  const btnStyle = {padding:"10px 14px",background:"transparent",color:"#7fd4e2",border:"1px solid #1d8493",borderRadius:"2px",fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontSize:"11px",letterSpacing:"1.5px",fontWeight:700,textTransform:"uppercase",cursor:"pointer",flex:"1 1 auto",minWidth:"120px"};
+  const btnPrimaryStyle = Object.assign({}, btnStyle, {background:"#1d8493",color:"#06141a",boxShadow:"0 0 12px rgba(127,212,226,0.35)"});
+  const actionsRow = h("div", {style:{display:"flex",flexWrap:"wrap",gap:"8px",marginBottom:"10px"}},
+    h("button", {style:btnPrimaryStyle,
+      onClick: async ()=>{
+        try {
+          await navigator.clipboard.writeText(currentUrl);
+          showToast("Share link copied to clipboard");
+        } catch(e) {
+          urlInput.select();
+          document.execCommand("copy");
+          showToast("Copied (fallback)");
+        }
+      }}, "📋 Copy Link"),
+    h("button", {style:btnStyle, onClick:()=>{ root.remove(); showQrModal(currentUrl); }}, "📱 Show QR"),
+    h("button", {style:btnStyle, onClick:()=>{ pushToLive(); }}, "🟢 Push Live"),
+    h("button", {style:btnStyle, onClick:()=>{ exportJSON(); }}, "💾 Download File")
+  );
+  panel.appendChild(actionsRow);
+
+  // Footnote
+  panel.appendChild(h("div", {style:{fontSize:"10.5px",color:"rgba(220,235,238,0.45)",fontFamily:'"Share Tech Mono", ui-monospace, monospace',letterSpacing:"0.5px",marginTop:"6px",lineHeight:1.5}},
+    "// SNAPSHOT (link): zero server storage. Data is the URL. ",
+    h("br"),
+    "// LIVE (push): JSON stored on Vercel KV for 30 days, anonymous UUID = the key. GM polls every 30s."
+  ));
+
+  root.appendChild(panel);
+  document.body.appendChild(root);
+
+  // ESC dismisses
+  const onKey = (ev) => { if (ev.key === "Escape") { root.remove(); document.removeEventListener("keydown", onKey); } };
+  document.addEventListener("keydown", onKey);
+}
+
+/* showQrModal — render the URL as a scannable QR via QrCreator. Portrait is
+   force-stripped if the URL is too long for QR capacity (~2.3KB at ECC M). */
+function showQrModal(url) {
+  const existing = document.getElementById("qr-modal-root");
+  if (existing) existing.remove();
+
+  // QR has hard capacity limits — try with current URL first, fall back to stripped if needed
+  let renderUrl = url;
+  let stripped = false;
+  if (url.length > 2300) {
+    // Probably won't fit — auto-strip portrait
+    const decoded = decodeShareUrl(url);
+    if (decoded) {
+      renderUrl = encodeShareUrl(decoded, {stripPortrait: true});
+      stripped = true;
+    }
+  }
+
+  const root = h("div", {id:"qr-modal-root", style:{position:"fixed",inset:0,zIndex:1100,display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}});
+  const backdrop = h("div", {style:{position:"absolute",inset:0,background:"rgba(7,24,29,0.85)",backdropFilter:"blur(4px)"}, onClick:()=>root.remove()});
+  root.appendChild(backdrop);
+  const panel = h("div", {style:{position:"relative",background:"linear-gradient(180deg, #0a242c 0%, #07181d 100%)",border:"1px solid var(--accent)",borderRadius:"4px",padding:"24px 22px 18px",maxWidth:"420px",width:"100%",boxShadow:"0 8px 40px rgba(0,0,0,0.6)",color:"rgba(220,235,238,0.92)",textAlign:"center"}});
+  panel.appendChild(h("div", {style:{position:"absolute",top:"-14px",left:"18px",height:"28px",padding:"0 16px 0 12px",display:"inline-flex",alignItems:"center",background:"var(--accent)",color:"#06141a",border:"1px solid var(--accent)",clipPath:"polygon(0 0, calc(100% - 12px) 0, 100% 100%, 0 100%)",fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontSize:"10.5px",letterSpacing:"2px",fontWeight:800}}, "// QR CODE"));
+  panel.appendChild(h("button", {style:{position:"absolute",top:"8px",right:"10px",background:"transparent",border:"none",color:"rgba(220,235,238,0.6)",cursor:"pointer",fontSize:"18px",padding:"4px 8px"},onClick:()=>root.remove(),title:"Close (Esc)"}, "✕"));
+
+  // Container for QR canvas
+  const qrContainer = h("div", {style:{display:"flex",justifyContent:"center",margin:"16px 0",padding:"12px",background:"#fff",borderRadius:"3px"}});
+  panel.appendChild(qrContainer);
+
+  try {
+    QrCreator.render({
+      text: renderUrl,
+      radius: 0.0,
+      ecLevel: "M",
+      fill: "#06141a",
+      background: "#fff",
+      size: 320
+    }, qrContainer);
+    panel.appendChild(h("div", {style:{fontSize:"11px",color:"rgba(220,235,238,0.7)",fontFamily:'"Share Tech Mono", ui-monospace, monospace',marginTop:"4px"}}, "// Scan with phone camera to load on another device"));
+    if (stripped) {
+      panel.appendChild(h("div", {style:{fontSize:"10.5px",color:"var(--warn)",fontFamily:'"Share Tech Mono", ui-monospace, monospace',marginTop:"8px"}}, "// PORTRAIT STRIPPED — required for QR capacity"));
+    }
+  } catch (e) {
+    qrContainer.appendChild(h("div", {style:{padding:"40px",color:"var(--bad)",fontFamily:'"Share Tech Mono", ui-monospace, monospace'}}, "URL too large for QR encoding. Use Copy Link instead."));
+  }
+
+  root.appendChild(panel);
+  document.body.appendChild(root);
+  const onKey = (ev) => { if (ev.key === "Escape") { root.remove(); document.removeEventListener("keydown", onKey); } };
+  document.addEventListener("keydown", onKey);
+}
+
+/* showImportPromptModal — when a #share=... or ?live=... URL is opened, prompt
+   the user to add as party member, replace their character, or dismiss. */
+function showImportPromptModal(parsedState, sourceLabel) {
+  const existing = document.getElementById("import-prompt-root");
+  if (existing) existing.remove();
+  const charName = (parsedState && parsedState.ego && parsedState.ego.name) || "Unnamed character";
+
+  const root = h("div", {id:"import-prompt-root", style:{position:"fixed",inset:0,zIndex:1100,display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}});
+  const backdrop = h("div", {style:{position:"absolute",inset:0,background:"rgba(7,24,29,0.85)",backdropFilter:"blur(4px)"}, onClick:()=>root.remove()});
+  root.appendChild(backdrop);
+  const panel = h("div", {style:{position:"relative",background:"linear-gradient(180deg, #0a242c 0%, #07181d 100%)",border:"1px solid var(--accent)",borderRadius:"4px",padding:"24px 22px 18px",maxWidth:"480px",width:"100%",boxShadow:"0 8px 40px rgba(0,0,0,0.6)",color:"rgba(220,235,238,0.92)",fontFamily:'"Chakra Petch", system-ui, sans-serif',textAlign:"center"}});
+  panel.appendChild(h("div", {style:{position:"absolute",top:"-14px",left:"18px",height:"28px",padding:"0 16px 0 12px",display:"inline-flex",alignItems:"center",background:"#c2541a",color:"#06141a",border:"1px solid #c2541a",clipPath:"polygon(0 0, calc(100% - 12px) 0, 100% 100%, 0 100%)",fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontSize:"10.5px",letterSpacing:"2px",fontWeight:800}}, "// INCOMING " + (sourceLabel || "SHARE")));
+
+  panel.appendChild(h("div", {style:{fontSize:"22px",fontWeight:800,letterSpacing:"2px",textTransform:"uppercase",color:"#fff",margin:"4px 0 6px"}}, charName));
+  panel.appendChild(h("div", {style:{fontSize:"13px",color:"rgba(220,235,238,0.75)",marginBottom:"20px"}}, "wants to join your party. How would you like to load this character?"));
+
+  const btnStyle = {padding:"12px 14px",background:"transparent",color:"#7fd4e2",border:"1px solid #1d8493",borderRadius:"2px",fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontSize:"11.5px",letterSpacing:"1.5px",fontWeight:700,textTransform:"uppercase",cursor:"pointer",width:"100%",marginBottom:"8px"};
+  const btnPrimaryStyle = Object.assign({}, btnStyle, {background:"#1d8493",color:"#06141a",boxShadow:"0 0 12px rgba(127,212,226,0.35)"});
+
+  panel.appendChild(h("button", {style:btnPrimaryStyle, onClick:()=>{
+    root.remove();
+    importShareSnapshot(parsedState, true, sourceLabel);
+  }}, "▸ Add to Party"));
+
+  panel.appendChild(h("button", {style:btnStyle, onClick:()=>{
+    if (!confirm("Replace your current character with " + charName + "? Your unsaved work will be lost.")) return;
+    root.remove();
+    importShareSnapshot(parsedState, false, sourceLabel);
+  }}, "↺ Replace My Character"));
+
+  panel.appendChild(h("button", {style:Object.assign({},btnStyle,{borderColor:"rgba(220,235,238,0.3)",color:"rgba(220,235,238,0.6)"}), onClick:()=>root.remove()}, "✕ Dismiss"));
+
+  root.appendChild(panel);
+  document.body.appendChild(root);
+  const onKey = (ev) => { if (ev.key === "Escape") { root.remove(); document.removeEventListener("keydown", onKey); } };
+  document.addEventListener("keydown", onKey);
+}
+
+/* importShareSnapshot — apply a parsed state as party member or self.
+   Reuses migrateToCurrent + the same shape as importJSON's two paths. */
+function importShareSnapshot(parsedState, asPartyMember, sourceLabel) {
+  try {
+    let loaded = migrateToCurrent(parsedState);
+    if (loaded.meta.schemaVersion !== SCHEMA_VERSION) {
+      alert("This share is from a newer tool version. Cannot import.");
+      return;
+    }
+    if (asPartyMember) {
+      const incomingId = loaded.ego && loaded.ego.characterId;
+      const existingIdx = incomingId ? STATE.partyImports.findIndex(p => p.id === incomingId) : -1;
+      const summary = loaded.summary || {};
+      const entry = {
+        id: incomingId || null,
+        name: summary.name || (loaded.ego && loaded.ego.name) || "Unnamed",
+        concept: summary.concept || (loaded.ego && loaded.ego.narrative && loaded.ego.narrative.concept) || "",
+        lifepath: summary.lifepath || "",
+        coverage: summary.coverage || { combat:0, face:0, hacker:0, sci:0 },
+        source: (sourceLabel || "URL").toLowerCase().includes("live") ? "live" : (sourceLabel || "url").toLowerCase(),
+        lastSyncedAt: new Date().toISOString(),
+        gmNotes: { wounds:0, stress:0, initiative:null, statusEffects:[], notes:"" },
+        syncUrl: null,
+        full: loaded
+      };
+      dispatch(s => {
+        if (existingIdx >= 0) {
+          // Preserve gmNotes from existing entry; replace .full
+          entry.gmNotes = s.partyImports[existingIdx].gmNotes;
+          entry.syncUrl = s.partyImports[existingIdx].syncUrl;
+          s.partyImports[existingIdx] = entry;
+        } else {
+          s.partyImports.push(entry);
+        }
+      });
+      showToast((existingIdx >= 0 ? "Updated " : "Added ") + entry.name);
+    } else {
+      const fresh = newState();
+      Object.assign(fresh, loaded);
+      fresh.ego = Object.assign(newState().ego, loaded.ego || {});
+      fresh.ego.narrative = Object.assign(newState().ego.narrative, (loaded.ego && loaded.ego.narrative) || {});
+      fresh.ego.cp = Object.assign(newState().ego.cp, (loaded.ego && loaded.ego.cp) || {});
+      fresh.ego.slotAllocations = (loaded.ego && loaded.ego.slotAllocations) || {};
+      fresh.ego.customSlots = (loaded.ego && loaded.ego.customSlots) || [];
+      fresh.ego.customSlotCounter = (loaded.ego && loaded.ego.customSlotCounter) || 0;
+      delete fresh.summary;
+      STATE = fresh;
+      scheduleSave(); rerender();
+      showToast("Imported: " + (STATE.ego.name || "Unnamed"));
+    }
+  } catch (e) { alert("Import failed: " + e.message); }
+}
+
+/* handleShareHash — runs once on page load. If URL has #share=..., decode and
+   show the import prompt. Hash is cleared after handling. */
+function handleShareHash() {
+  const hash = location.hash || "";
+  if (!hash.includes("share=")) return;
+  const parsed = decodeShareUrl(hash);
+  if (!parsed) {
+    showToast("Share link malformed or corrupted");
+    history.replaceState(null, "", location.pathname);
+    return;
+  }
+  // Clear hash so refresh doesn't re-prompt
+  history.replaceState(null, "", location.pathname);
+  showImportPromptModal(parsed, "URL");
+}
+
+/* pushToLive — Wave 4 stub. Real implementation calls /api/share/[id] POST.
+   For now, shows a placeholder toast so the share modal button is non-broken. */
+async function pushToLive() {
+  if (!STATE.ego.characterId) {
+    dispatch(s => { s.ego.characterId = makeCharacterId(); });
+  }
+  try {
+    const id = STATE.ego.characterId;
+    const payload = JSON.stringify({
+      data: LZString.compressToEncodedURIComponent(JSON.stringify(STATE)),
+      name: STATE.ego.name || "Unnamed",
+      updatedAt: new Date().toISOString()
+    });
+    const resp = await fetch("/api/share/" + encodeURIComponent(id), {
+      method: "POST",
+      headers: {"content-type":"application/json"},
+      body: payload
+    });
+    if (!resp.ok) {
+      const text = await resp.text();
+      showToast("Live push failed (" + resp.status + ") — try Copy Link instead");
+      return;
+    }
+    const liveUrl = location.origin + location.pathname + "?live=" + encodeURIComponent(id);
+    dispatch(s => { s.ego.liveShareUrl = liveUrl; });
+    showToast("Pushed live. GMs polling this URL will see updates within 30s.");
+    // Re-open share modal so user can copy the live URL
+    setTimeout(() => {
+      const existing = document.getElementById("share-modal-root");
+      if (existing) existing.remove();
+      // Show the live URL specifically
+      const root = h("div", {id:"share-modal-root", style:{position:"fixed",inset:0,zIndex:1100,display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}});
+      const backdrop = h("div", {style:{position:"absolute",inset:0,background:"rgba(7,24,29,0.85)",backdropFilter:"blur(4px)"}, onClick:()=>root.remove()});
+      root.appendChild(backdrop);
+      const panel = h("div", {style:{position:"relative",background:"linear-gradient(180deg, #0a242c 0%, #07181d 100%)",border:"1px solid var(--good)",borderRadius:"4px",padding:"24px 22px 18px",maxWidth:"520px",width:"100%",color:"rgba(220,235,238,0.92)",boxShadow:"0 8px 40px rgba(0,0,0,0.6)"}});
+      panel.appendChild(h("div", {style:{position:"absolute",top:"-14px",left:"18px",height:"28px",padding:"0 16px 0 12px",display:"inline-flex",alignItems:"center",background:"var(--good)",color:"#06141a",border:"1px solid var(--good)",clipPath:"polygon(0 0, calc(100% - 12px) 0, 100% 100%, 0 100%)",fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontSize:"10.5px",letterSpacing:"2px",fontWeight:800}}, "// LIVE PUSH ACTIVE"));
+      panel.appendChild(h("button", {style:{position:"absolute",top:"8px",right:"10px",background:"transparent",border:"none",color:"rgba(220,235,238,0.6)",cursor:"pointer",fontSize:"18px",padding:"4px 8px"},onClick:()=>root.remove(),title:"Close (Esc)"}, "✕"));
+      panel.appendChild(h("div", {style:{marginTop:"6px",marginBottom:"14px",fontSize:"13px",color:"rgba(220,235,238,0.85)"}}, "Send this URL to your GM. They open it once → it auto-imports → their Party Page polls for updates every 30 seconds."));
+      const liveInput = h("input", {type:"text", readonly:true, value: liveUrl,
+        style:{width:"100%",padding:"8px 10px",background:"rgba(0,0,0,0.3)",border:"1px solid var(--good)",borderRadius:"2px",color:"#7eb",fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontSize:"11.5px",marginBottom:"12px"},
+        onClick:(ev)=>ev.target.select()});
+      panel.appendChild(liveInput);
+      const btnStyle = {padding:"10px 14px",background:"#1d8493",color:"#06141a",border:"1px solid #7fd4e2",borderRadius:"2px",fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontSize:"11px",letterSpacing:"1.5px",fontWeight:700,textTransform:"uppercase",cursor:"pointer",width:"100%"};
+      panel.appendChild(h("button", {style:btnStyle, onClick: async () => {
+        try { await navigator.clipboard.writeText(liveUrl); showToast("Live URL copied"); }
+        catch(e) { liveInput.select(); document.execCommand("copy"); showToast("Copied (fallback)"); }
+      }}, "📋 Copy Live URL"));
+      panel.appendChild(h("div", {style:{fontSize:"11px",color:"rgba(220,235,238,0.55)",fontFamily:'"Share Tech Mono", ui-monospace, monospace',marginTop:"12px",lineHeight:1.5}}, "// Tap 'Push Live' again any time to update. // URL TTL: 30 days. // Stop sharing: clear with DELETE in v0.8."));
+      root.appendChild(panel);
+      document.body.appendChild(root);
+    }, 200);
+  } catch (e) {
+    showToast("Live push failed: " + e.message);
+  }
+}
+
+/* handleLiveParam — runs once on page load. If URL has ?live=<id>, fetch the
+   character from the backend and show import prompt. */
+async function handleLiveParam() {
+  const params = new URLSearchParams(location.search);
+  const liveId = params.get("live");
+  if (!liveId) return;
+  // Clear the param so refresh doesn't re-prompt
+  history.replaceState(null, "", location.pathname);
+  try {
+    const resp = await fetch("/api/share/" + encodeURIComponent(liveId));
+    if (!resp.ok) {
+      showToast("Live link not found or expired");
+      return;
+    }
+    const remote = await resp.json();
+    if (!remote || !remote.data) {
+      showToast("Live link malformed");
+      return;
+    }
+    const json = LZString.decompressFromEncodedURIComponent(remote.data);
+    const parsed = json ? JSON.parse(json) : null;
+    if (!parsed) {
+      showToast("Live link could not be decoded");
+      return;
+    }
+    showImportPromptModal(parsed, "LIVE");
+  } catch (e) {
+    showToast("Live fetch failed: " + e.message);
+  }
+}
+
 /* Combat 101 — collapsible book-grounded combat explainer for play mode.
    Sources content from RULEBOOK_REFERENCE.combat (extracted by subagent). */
 function buildCombat101Panel() {
@@ -4962,6 +5467,13 @@ function rerender() {
   if (!app) return;
   app.innerHTML = "";
   document.body.classList.toggle("play-mode", STATE.meta.mode === "play");
+  document.body.classList.toggle("party-mode", STATE.meta.mode === "party");
+  // v0.7 — start/stop live polling on mode transitions
+  if (STATE.meta.mode === "party") {
+    try { startPartyPolling(); } catch(e) { /* polling helpers defined below */ }
+  } else {
+    try { stopPartyPolling(); } catch(e) { /* idempotent */ }
+  }
   app.appendChild(buildChrome());
   if (STATE.meta.mode === "play") {
     app.appendChild(h("div", {class:"play-mode-banner"},
@@ -4969,8 +5481,12 @@ function rerender() {
       h("a", {href:"#", onClick: (ev) => { ev.preventDefault(); dispatch(s => { s.meta.mode = "chargen"; }); }}, "Chargen"),
       " to edit lifepath, aptitudes, or skills. Use the sheet's pool / wound / stress counters to track session state."));
   }
-  app.appendChild(buildStepRail());
-  app.appendChild(buildLayout());
+  if (STATE.meta.mode === "party") {
+    app.appendChild(buildPartyPage());
+  } else {
+    app.appendChild(buildStepRail());
+    app.appendChild(buildLayout());
+  }
   app.appendChild(h("footer", {class:"foot"}, "Eclipse Phase 2 chargen — v" + STATE.meta.toolVersion + " · liberatory affordances first · localStorage auto-save"));
   if (STATE.meta.lexiconOpen) app.appendChild(buildLexiconOverlay());
 }
@@ -4997,12 +5513,16 @@ function buildChrome() {
       h("button", {class:"mode" + (STATE.meta.mode === "chargen" ? " active" : ""),
         onClick: () => dispatch(s => { s.meta.mode = "chargen"; })}, "Chargen"),
       h("button", {class:"mode" + (STATE.meta.mode === "play" ? " active" : ""),
-        onClick: () => dispatch(s => { s.meta.mode = "play"; })}, "Play")
+        onClick: () => dispatch(s => { s.meta.mode = "play"; })}, "Play"),
+      h("button", {class:"mode" + (STATE.meta.mode === "party" ? " active" : ""),
+        onClick: () => dispatch(s => { s.meta.mode = "party"; }),
+        title: "Party Page · GM Command Centre — all imported members + live tracking"
+      }, "Party")
     ),
     h("div", {class:"actions"},
       h("button", {class:"icon lex-btn",
         onClick: () => dispatch(s => { s.meta.lexiconOpen = !s.meta.lexiconOpen; })}, "Lexicon"),
-      h("button", {class:"icon", onClick: () => exportJSON()}, "Export JSON"),
+      h("button", {class:"icon", onClick: () => showShareModal(), title:"Share via link, QR, live push, or file"}, "Share"),
       h("button", {class:"icon", onClick: () => triggerImport(false)}, "Import"),
       h("button", {class:"icon", onClick: () => triggerImport(true)}, "Load Party"),
       h("button", {class:"icon", onClick: () => { if (confirm("Discard this character and start over?")) { STATE = newState(); scheduleSave(); rerender(); } }}, "New")
@@ -5784,6 +6304,376 @@ function buildStudioPartyCoverage(pc) {
     }, "// Load Party (chrome bar) to import allies and union their coverage. Or train missing skills in chargen Step 6."));
   }
   return wrap;
+}
+
+/* ================================================================== */
+/* === v0.7 CONSTELLATION — Party Page + GM Command Centre        === */
+/* ================================================================== */
+
+/* Helper: temporarily swap global STATE so existing derived.*() functions
+   compute against a different state (e.g. an imported party member's full).
+   Synchronous; restores STATE on return. */
+function withStateAs(stateOverride, fn) {
+  const original = STATE;
+  STATE = stateOverride;
+  try { return fn(); } finally { STATE = original; }
+}
+
+/* Helper: format an ISO timestamp as a relative "X seconds ago" string. */
+function partyRelativeTime(isoStr) {
+  if (!isoStr) return "—";
+  const t = Date.parse(isoStr);
+  if (isNaN(t)) return "—";
+  const diff = Math.max(0, Date.now() - t);
+  const s = Math.floor(diff / 1000);
+  if (s < 60) return s + "s ago";
+  if (s < 3600) return Math.floor(s / 60) + "m ago";
+  if (s < 86400) return Math.floor(s / 3600) + "h ago";
+  return Math.floor(s / 86400) + "d ago";
+}
+
+/* Helper: compute card data for a member. For self, pass STATE. For an import,
+   pass entry.full. Returns a normalized object the card renderer consumes. */
+function partyComputeCardData(stateLike) {
+  return withStateAs(stateLike, () => {
+    const ego = stateLike.ego || {};
+    const ds = derived.derivedStats();
+    const ms = derived.morphStats();
+    const fs = derived.finalSkills();
+    const cov = derived.partyCoverage().self;
+    const bgName = ego.background ? (RULEBOOK_DATA.backgrounds[ego.background] && RULEBOOK_DATA.backgrounds[ego.background].name) : "";
+    const careerName = ego.career ? (RULEBOOK_DATA.careers[ego.career] && RULEBOOK_DATA.careers[ego.career].name) : "";
+    const interestName = ego.interest ? (RULEBOOK_DATA.interests[ego.interest] && RULEBOOK_DATA.interests[ego.interest].name) : "";
+    const factionName = (ego.faction && !ego.factionless) ? (RULEBOOK_DATA.factions[ego.faction] && RULEBOOK_DATA.factions[ego.faction].name) : (ego.factionless ? "Factionless" : "");
+    const lifepath = [bgName, careerName, interestName].filter(Boolean).join(" / ");
+    const topSkills = (fs && Array.isArray(fs.skills))
+      ? fs.skills.filter(b => !b.deferred && b.final > 0)
+                 .sort((a,b) => b.final - a.final)
+                 .slice(0, 5)
+                 .map(b => ({ name: b.field ? b.skill + ":" + b.field : b.skill, value: b.final }))
+      : [];
+    return {
+      name: ego.name || "Unnamed",
+      concept: (ego.narrative && ego.narrative.concept) || "",
+      lifepath,
+      faction: factionName,
+      morph: ms && ms.morph ? { name: ms.morph.name, type: ms.morph.type } : null,
+      aptitudes: ds.apt,
+      topSkills,
+      coverage: cov,
+      reputation: ego.rep || {},
+      wounds: (stateLike.play && stateLike.play.wounds) || 0,
+      stress: (stateLike.play && stateLike.play.stress) || 0,
+      WT: ms && ms.morph ? ms.morph.WT : 0,
+      DUR: ms && ms.morph ? ms.morph.DUR : 0,
+      isSwarm: ms && ms.morph ? !!ms.morph.swarm : false
+    };
+  });
+}
+
+/* buildPartyMemberCard — renders one card. For self, entry = null and stateLike = STATE.
+   For imports, entry = STATE.partyImports[i] and stateLike = entry.full. */
+function buildPartyMemberCard(stateLike, entry) {
+  const isSelf = !entry;
+  const data = partyComputeCardData(stateLike);
+  const source = entry ? entry.source : "self";
+  const gm = entry ? entry.gmNotes : null;
+
+  const cls = "party-card" + (isSelf ? " party-card--self" : "") + (source === "live" ? " party-card--live" : "");
+  const card = h("div", {class: cls});
+
+  // Banner: name + morph + source badge
+  const banner = h("div", {class:"pc-banner"});
+  banner.appendChild(h("div", {style:{flex:"1 1 auto",minWidth:0}},
+    h("div", {class:"pc-name"}, data.name),
+    data.concept ? h("div", {class:"pc-lifepath"}, "// " + data.concept.toUpperCase()) : null
+  ));
+  if (data.morph) banner.appendChild(h("div", {class:"pc-morph"}, data.morph.name));
+  card.appendChild(banner);
+
+  // Source + timestamp strip
+  const srcMap = {file:"FILE", url:"LINK", qr:"QR", live:"LIVE", self:"YOU"};
+  const sourceClass = "pc-source pc-source--" + (isSelf ? "self" : source);
+  card.appendChild(h("div", {style:{display:"flex",gap:"8px",alignItems:"center",flexWrap:"wrap",marginTop:"-2px"}},
+    h("span", {class: isSelf ? "pc-source pc-source--file" : sourceClass}, "// " + (srcMap[source] || source.toUpperCase())),
+    !isSelf && entry.lastSyncedAt ? h("span", {class:"pc-timestamp"}, "updated " + partyRelativeTime(entry.lastSyncedAt)) : null
+  ));
+
+  // Lifepath
+  if (data.lifepath || data.faction) {
+    card.appendChild(h("div", {class:"pc-meta"},
+      data.lifepath ? data.lifepath : "",
+      data.lifepath && data.faction ? " · " : "",
+      data.faction ? data.faction : ""
+    ));
+  }
+
+  // Aptitudes
+  const aptKeys = ["COG","INT","REF","SAV","SOM","WIL"];
+  card.appendChild(h("div", {class:"pc-section"},
+    h("div", {class:"pc-section-label"}, "▸ APTITUDES"),
+    h("div", {class:"pc-apt-row"},
+      ...aptKeys.map(k => h("div", {class:"pc-apt"}, k + " " + ((data.aptitudes && data.aptitudes[k]) || 0)))
+    )
+  ));
+
+  // Top skills
+  if (data.topSkills.length > 0) {
+    card.appendChild(h("div", {class:"pc-section"},
+      h("div", {class:"pc-section-label"}, "▸ TOP SKILLS"),
+      h("div", {style:{fontFamily:"var(--mono)",fontSize:"11.5px",color:"rgba(220,235,238,0.85)",lineHeight:1.55}},
+        data.topSkills.map(s => s.name + " " + s.value).join("  ·  ")
+      )
+    ));
+  }
+
+  // 4-zone coverage
+  const tierClass = (v) => v >= 60 ? "pc-cov pc-cov--high" : v >= 40 ? "pc-cov pc-cov--mid" : "pc-cov pc-cov--low";
+  card.appendChild(h("div", {class:"pc-section"},
+    h("div", {class:"pc-section-label"}, "▸ ZONE COVERAGE"),
+    h("div", {class:"pc-coverage-row"},
+      h("div", {class: tierClass(data.coverage.combat)}, "CBT " + data.coverage.combat),
+      h("div", {class: tierClass(data.coverage.face)}, "FACE " + data.coverage.face),
+      h("div", {class: tierClass(data.coverage.hacker)}, "HACK " + data.coverage.hacker),
+      h("div", {class: tierClass(data.coverage.sci)}, "SCI " + data.coverage.sci)
+    )
+  ));
+
+  // Vitals (current wounds/stress against WT/DUR)
+  if (data.DUR > 0) {
+    const woundDisplay = data.isSwarm ? (data.wounds + " / " + data.DUR + " DUR (swarm)") : ("wounds: " + Math.floor(data.wounds / (data.WT||1)) + " · raw " + data.wounds + "/" + data.DUR);
+    card.appendChild(h("div", {class:"pc-section"},
+      h("div", {class:"pc-section-label"}, "▸ VITALS"),
+      h("div", {style:{fontFamily:"var(--mono)",fontSize:"11px",color:"rgba(220,235,238,0.75)"}}, woundDisplay)
+    ));
+  }
+
+  // GM Tracker (only on imported members, not self)
+  if (!isSelf && gm) {
+    const idx = STATE.partyImports.indexOf(entry);
+    const tracker = h("div", {class:"gm-tracker"});
+    tracker.appendChild(h("div", {class:"gm-tracker-label"}, "▾ GM TRACKING · LOCAL OVERLAY"));
+
+    const mkStatRow = (label, key, max) => {
+      const valueEl = h("span", {class:"stat-value"}, String(gm[key]));
+      return h("div", {class:"gm-stat-row"},
+        h("label", null, label),
+        h("div", {class:"stat-controls"},
+          h("button", {onClick:() => dispatch(s => {
+            const newVal = Math.max(0, (s.partyImports[idx].gmNotes[key] || 0) - 1);
+            s.partyImports[idx].gmNotes[key] = newVal;
+          })}, "−"),
+          valueEl,
+          h("button", {onClick:() => dispatch(s => {
+            const newVal = Math.min(max, (s.partyImports[idx].gmNotes[key] || 0) + 1);
+            s.partyImports[idx].gmNotes[key] = newVal;
+          })}, "+")
+        )
+      );
+    };
+    tracker.appendChild(mkStatRow("Wounds", "wounds", 12));
+    tracker.appendChild(mkStatRow("Stress", "stress", 99));
+
+    // Initiative row (number input)
+    const initRow = h("div", {class:"gm-stat-row"},
+      h("label", null, "Initiative"),
+      h("input", {type:"number", value: gm.initiative !== null ? gm.initiative : "",
+        style:{width:"70px",padding:"3px 6px",background:"rgba(0,0,0,0.3)",color:"#fff",border:"1px solid rgba(127,212,226,0.4)",borderRadius:"2px",fontFamily:"var(--mono)",fontSize:"11px"},
+        placeholder:"—",
+        onChange:(ev) => dispatch(s => {
+          const v = ev.target.value;
+          s.partyImports[idx].gmNotes.initiative = v === "" ? null : Number(v);
+        })}),
+      h("button", {style:{padding:"3px 8px",background:"transparent",color:"var(--narrative)",border:"1px solid rgba(194,84,26,0.4)",borderRadius:"2px",fontFamily:"var(--mono)",fontSize:"9.5px",letterSpacing:"1px",fontWeight:700,cursor:"pointer",textTransform:"uppercase"},
+        onClick:() => dispatch(s => {
+          // d10 + REF/10
+          const ref = (entry.full && entry.full.ego && entry.full.ego.aptitudes && entry.full.ego.aptitudes.REF) || 0;
+          s.partyImports[idx].gmNotes.initiative = Math.floor(Math.random() * 10) + 1 + Math.floor(ref / 10);
+        })}, "Roll")
+    );
+    tracker.appendChild(initRow);
+
+    // Notes textarea
+    tracker.appendChild(h("textarea", {class:"gm-notes-textarea", placeholder:"GM notes (hidden from player)",
+      value: gm.notes || "",
+      onChange:(ev) => dispatch(s => { s.partyImports[idx].gmNotes.notes = ev.target.value; })
+    }));
+    card.appendChild(tracker);
+  }
+
+  // Per-card actions
+  const actions = h("div", {class:"pc-actions"});
+  if (!isSelf) {
+    if (source === "live" && entry.id) {
+      actions.appendChild(h("button", {
+        title:"Force refresh from /api/share — bypasses 30s poll",
+        onClick: async () => {
+          try {
+            const resp = await fetch("/api/share/" + encodeURIComponent(entry.id));
+            if (!resp.ok) { showToast("Refresh failed: " + resp.status); return; }
+            const remote = await resp.json();
+            const json = LZString.decompressFromEncodedURIComponent(remote.data || "");
+            const parsed = json ? JSON.parse(json) : null;
+            if (!parsed) { showToast("Decode failed"); return; }
+            dispatch(s => {
+              const i = s.partyImports.findIndex(p => p === entry || p.id === entry.id);
+              if (i >= 0) {
+                s.partyImports[i].full = parsed;
+                s.partyImports[i].lastSyncedAt = remote.updatedAt || new Date().toISOString();
+              }
+            });
+            showToast("Refreshed " + entry.name);
+          } catch(e) { showToast("Refresh error: " + e.message); }
+        }
+      }, "↻ Refresh"));
+    }
+    actions.appendChild(h("button", {class:"danger",
+      onClick: () => {
+        if (!confirm("Remove " + entry.name + " from party?")) return;
+        dispatch(s => {
+          const i = s.partyImports.findIndex(p => p === entry || p.id === entry.id);
+          if (i >= 0) s.partyImports.splice(i, 1);
+        });
+        showToast("Removed " + entry.name);
+      }
+    }, "✕ Remove"));
+  } else {
+    actions.appendChild(h("button", {
+      title:"Open share modal",
+      onClick: () => showShareModal()
+    }, "↗ Share"));
+  }
+  if (actions.children.length > 0) card.appendChild(actions);
+
+  return card;
+}
+
+/* buildPartyPage — the full party-page layout (header + coverage radar + grid). */
+function buildPartyPage() {
+  const page = h("div", {class:"party-page"});
+
+  // Header
+  const partyCount = (STATE.partyImports || []).length;
+  const liveCount = (STATE.partyImports || []).filter(p => p.source === "live").length;
+  const polling = !!_partyPollAbort;
+  const header = h("div", {class:"party-page-header"},
+    h("div", null,
+      h("h1", null, "Party · Command Centre"),
+      h("div", {class:"sub"}, "// " + partyCount + " imported member" + (partyCount === 1 ? "" : "s") + (liveCount > 0 ? " · " + liveCount + " 🟢 live" : "") + (polling && liveCount > 0 ? " · polling every 30s" : ""))
+    ),
+    h("div", {style:{display:"flex",gap:"8px",flexWrap:"wrap"}},
+      // Roll Initiative for all
+      partyCount > 0 ? h("button", {
+        style:{padding:"8px 14px",background:"transparent",color:"#7fd4e2",border:"1px solid var(--accent)",borderRadius:"2px",fontFamily:"var(--mono)",fontSize:"11px",letterSpacing:"1.5px",fontWeight:700,textTransform:"uppercase",cursor:"pointer"},
+        onClick: () => dispatch(s => {
+          s.partyImports.forEach(p => {
+            const ref = (p.full && p.full.ego && p.full.ego.aptitudes && p.full.ego.aptitudes.REF) || 0;
+            p.gmNotes.initiative = Math.floor(Math.random() * 10) + 1 + Math.floor(ref / 10);
+          });
+        })
+      }, "🎲 Roll Initiative · All") : null,
+      // Load Party shortcut
+      h("button", {
+        style:{padding:"8px 14px",background:"transparent",color:"rgba(220,235,238,0.85)",border:"1px solid rgba(127,212,226,0.4)",borderRadius:"2px",fontFamily:"var(--mono)",fontSize:"11px",letterSpacing:"1.5px",fontWeight:700,textTransform:"uppercase",cursor:"pointer"},
+        onClick: () => triggerImport(true)
+      }, "+ Add Member (file)")
+    )
+  );
+  page.appendChild(header);
+
+  // 4-zone party-coverage radar (reuses buildStudioPartyCoverage with self adapter)
+  const studioPc = studioPcFromState();
+  const coverageBlock = h("div", {class:"party-page-coverage"},
+    h("div", {style:{fontFamily:"var(--mono)",fontSize:"11px",letterSpacing:"1.5px",fontWeight:800,color:"var(--accent-2)",textTransform:"uppercase",marginBottom:"8px"}}, "▸ Party · 4-Zone Coverage"),
+    buildStudioPartyCoverage(studioPc)
+  );
+  page.appendChild(coverageBlock);
+
+  // Empty state
+  if (partyCount === 0) {
+    const empty = h("div", {class:"party-empty"},
+      h("h2", null, "No party members imported yet."),
+      h("p", null, "Share your character via the Share button above, then send the link to your players. When they share back, their characters appear here. The GM Command Centre tracks vitals + initiative for each."),
+      h("button", {onClick: () => showShareModal()}, "↗ Share Your Character")
+    );
+    page.appendChild(empty);
+    // Still render self card at the end
+  }
+
+  // Grid: self first, then members (sorted by initiative if any have it set, else insertion order)
+  const grid = h("div", {class:"party-grid"});
+  // Self card
+  grid.appendChild(buildPartyMemberCard(STATE, null));
+
+  // Member cards — initiative-sorted: members with initiative descend, then unrolled at end
+  const members = (STATE.partyImports || []).slice();
+  members.sort((a, b) => {
+    const ai = (a.gmNotes && a.gmNotes.initiative);
+    const bi = (b.gmNotes && b.gmNotes.initiative);
+    if (ai == null && bi == null) return 0;
+    if (ai == null) return 1;
+    if (bi == null) return -1;
+    return bi - ai;
+  });
+  members.forEach(m => {
+    if (m && m.full) grid.appendChild(buildPartyMemberCard(m.full, m));
+  });
+  page.appendChild(grid);
+
+  return page;
+}
+
+/* ── Live polling — runs while in Party mode. Polls every 30s; aborts when
+   user leaves Party mode. Updates partyImports[i].full when remote data
+   has a newer updatedAt timestamp. */
+let _partyPollAbort = null;
+let _partyPollInterval = null;
+function startPartyPolling() {
+  if (_partyPollAbort) return; // already running
+  _partyPollAbort = new AbortController();
+  const tick = async () => {
+    if (!_partyPollAbort) return;
+    const liveMembers = (STATE.partyImports || []).filter(p => p.source === "live" && p.id);
+    if (liveMembers.length === 0) return;
+    for (const member of liveMembers) {
+      if (!_partyPollAbort) return;
+      try {
+        const resp = await fetch("/api/share/" + encodeURIComponent(member.id), { signal: _partyPollAbort.signal });
+        if (!resp.ok) continue;
+        const remote = await resp.json();
+        if (!remote || !remote.updatedAt) continue;
+        if (remote.updatedAt === member.lastSyncedAt) continue; // no change
+        const json = LZString.decompressFromEncodedURIComponent(remote.data || "");
+        const parsed = json ? JSON.parse(json) : null;
+        if (!parsed) continue;
+        dispatch(s => {
+          const i = s.partyImports.findIndex(p => p === member || p.id === member.id);
+          if (i >= 0) {
+            // Preserve gmNotes — only replace .full and metadata
+            s.partyImports[i].full = parsed;
+            s.partyImports[i].lastSyncedAt = remote.updatedAt;
+          }
+        });
+        showToast("🔄 " + (member.name || "Member") + " updated");
+      } catch(e) {
+        if (e.name === "AbortError") return;
+        // network blip — try next tick
+      }
+    }
+  };
+  // Immediate first poll, then every 30s
+  tick();
+  _partyPollInterval = setInterval(tick, 30000);
+}
+function stopPartyPolling() {
+  if (_partyPollAbort) {
+    _partyPollAbort.abort();
+    _partyPollAbort = null;
+  }
+  if (_partyPollInterval) {
+    clearInterval(_partyPollInterval);
+    _partyPollInterval = null;
+  }
 }
 
 function buildStudioReputation(pc) {
@@ -8350,6 +9240,9 @@ function boot() {
   rerender();
   setupTooltips();
   window.addEventListener("resize", debounce(() => rerender(), 200));
+  // v0.7 — handle inbound share URLs after first render
+  try { handleShareHash(); } catch(e) { console.warn("share hash handler failed:", e); }
+  try { handleLiveParam(); } catch(e) { console.warn("live param handler failed:", e); }
 }
 boot();
 </script>

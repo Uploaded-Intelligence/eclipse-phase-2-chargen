@@ -5,7 +5,7 @@ const vm = require("vm");
 const html = fs.readFileSync(__dirname + "/index.html", "utf8");
 let js = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 js = js.replace(/^boot\(\);$/m, "// boot suppressed");
-js += "\nthis.__exports = { STATE, RULEBOOK_DATA, RULEBOOK_REFERENCE, derived, newState, migrateV1ToV2, migrateV2ToV3, migrateV3ToV4, migrateV4ToV5, migrateV5ToV6, migrateToCurrent, SCHEMA_VERSION, TIP_NAME_OVERRIDES, titleizeKey, deriveTipName, _setState: (v)=>{STATE=v;} };\n";
+js += "\nthis.__exports = { STATE, RULEBOOK_DATA, RULEBOOK_REFERENCE, derived, newState, migrateV1ToV2, migrateV2ToV3, migrateV3ToV4, migrateV4ToV5, migrateV5ToV6, migrateV6ToV7, migrateToCurrent, SCHEMA_VERSION, TIP_NAME_OVERRIDES, titleizeKey, deriveTipName, makeCharacterId, _setState: (v)=>{STATE=v;} };\n";
 
 const sandbox = {
   console,
@@ -24,11 +24,13 @@ let pass = 0, fail = 0;
 const assert = (label, cond, extra) => { if (cond) { console.log("  ✓", label); pass++; } else { console.log("  ✗", label, extra||""); fail++; } };
 
 console.log("\n=== SCHEMA_VERSION constant ===");
-assert("SCHEMA_VERSION === 6", exp.SCHEMA_VERSION === 6, "got " + exp.SCHEMA_VERSION);
+assert("SCHEMA_VERSION === 7", exp.SCHEMA_VERSION === 7, "got " + exp.SCHEMA_VERSION);
 
 console.log("\n=== newState() shape ===");
 const s = exp.newState();
-assert("meta.schemaVersion === 6", s.meta.schemaVersion === 6);
+assert("meta.schemaVersion === 7", s.meta.schemaVersion === 7);
+assert("ego.characterId === null (lazy generation on first share)", s.ego.characterId === null);
+assert("ego.liveShareUrl === null", s.ego.liveShareUrl === null);
 assert("meta.mode === 'chargen' (default)", s.meta.mode === "chargen");
 assert("play exists", !!s.play);
 assert("play.pools has all 4 pools (null = full)", ["Insight","Moxie","Vigor","Flex"].every(p => s.play.pools[p] === null));
@@ -56,7 +58,7 @@ const v1 = { meta:{schemaVersion:1}, ego:{
   narrative:{concept:"",backstoryAnswers:{},identity:{morphRelationship:null,resleeveStance:null,fallStory:"",factionNuance:null,taboo:"",memoryGapsOrForks:""},quirks:{mannerism:"",catchphrase:"",style:""},connections:[],avatarDataUrl:null}
 }, morph:{chosen:null,mpBudgetBase:6,traits:[],extraGearNotes:"",flexFromMP:0}, partyImports:[] };
 const migrated = exp.migrateToCurrent(JSON.parse(JSON.stringify(v1)));
-assert("v1->v6 reaches schemaVersion 6 via full chain", migrated.meta.schemaVersion === 6);
+assert("v1->v7 reaches schemaVersion 7 via full chain", migrated.meta.schemaVersion === 7);
 assert("v1->v5 has slotAllocations", !!migrated.ego.slotAllocations);
 assert("v1->v5 has no skillAllocations (gone)", !migrated.ego.skillAllocations);
 assert("v1->v5 has play state", !!migrated.play && migrated.play.wounds === 0);
@@ -64,8 +66,8 @@ assert("v1->v5 has meta.mode", migrated.meta.mode === "chargen");
 
 console.log("\n=== v5 schema: existing v4 fields preserved ===");
 const v4Fresh = exp.newState();
-assert("SCHEMA_VERSION === 6", exp.SCHEMA_VERSION === 6, "got " + exp.SCHEMA_VERSION);
-assert("newState().meta.schemaVersion === 6", v4Fresh.meta.schemaVersion === 6);
+assert("SCHEMA_VERSION === 7", exp.SCHEMA_VERSION === 7, "got " + exp.SCHEMA_VERSION);
+assert("newState().meta.schemaVersion === 7", v4Fresh.meta.schemaVersion === 7);
 assert("play.turn has {complex:false,quick:false,move:false}",
   v4Fresh.play.turn
   && v4Fresh.play.turn.complex === false
@@ -125,7 +127,7 @@ const v1full = { meta:{schemaVersion:1}, ego:{
   narrative:{concept:"",backstoryAnswers:{},identity:{morphRelationship:null,resleeveStance:null,fallStory:"",factionNuance:null,taboo:"",memoryGapsOrForks:""},quirks:{mannerism:"",catchphrase:"",style:""},connections:[],avatarDataUrl:null}
 }, morph:{chosen:null,mpBudgetBase:6,traits:[],extraGearNotes:"",flexFromMP:0}, partyImports:[] };
 const v1tov5 = exp.migrateToCurrent(JSON.parse(JSON.stringify(v1full)));
-assert("v1->v6 reaches schemaVersion 6", v1tov5.meta.schemaVersion === 6);
+assert("v1->v7 reaches schemaVersion 7", v1tov5.meta.schemaVersion === 7);
 assert("v1->v5 has v4 play.turn", !!v1tov5.play.turn);
 assert("v1->v5 has v4 play.combat", !!v1tov5.play.combat);
 assert("v1->v5 has v4 play.consumables", !!v1tov5.play.consumables);
@@ -205,7 +207,7 @@ assert("idempotent: backstory preserved", v6twice.ego.narrative.backstory.starts
 console.log("\n=== migrateToCurrent: v1 chains through v6 (lore fields present) ===");
 const v1lore = JSON.parse(JSON.stringify(v1full));
 const v1tov6 = exp.migrateToCurrent(v1lore);
-assert("v1->v6 reaches schemaVersion 6 via migrateToCurrent", v1tov6.meta.schemaVersion === 6);
+assert("v1->v7 reaches schemaVersion 7 via migrateToCurrent", v1tov6.meta.schemaVersion === 7);
 assert("v1->v6 has ego.narrative.teamBrief (empty string)", v1tov6.ego.narrative.teamBrief === "");
 assert("v1->v6 has ego.narrative.backstory (empty string)", v1tov6.ego.narrative.backstory === "");
 

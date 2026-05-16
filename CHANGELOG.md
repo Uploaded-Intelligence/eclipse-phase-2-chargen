@@ -2,6 +2,53 @@
 
 All notable changes to this project. Format follows the spirit of [Keep a Changelog](https://keepachangelog.com/), versioned by milestone.
 
+## [0.7] — 2026-05-16 — "Constellation"
+
+The party becomes visible. Sharing becomes one click. The GM gets a Command Centre.
+
+### Added — Sharing (four mechanisms, each for a different context)
+- **URL share link** (`#share=<lz-base64>`). Vendored LZ-string compresses the entire character into a URL fragment. Typical: ~4KB without portrait, ~10-15KB with. Click button → URL on clipboard → paste in Discord/anywhere → recipient clicks → app prompts "Sara wants to join your party: [Add to Party] [Replace] [Dismiss]".
+- **QR code modal**. Vendored qr-creator renders the share-link URL as a scannable QR for at-table phone scanning. Auto-strips portrait if URL exceeds QR capacity (~2.3KB at ECC M).
+- **Push Live** (Vercel KV backend). Player clicks "Push Live Update" → state stored on Vercel KV under anonymous UUID, 30-day TTL → returns `?live=<id>` URL. GM opens URL once, then their Party Page polls every 30s for updates. Unidirectional: player → GM. Manual push (intentional, low-quota).
+- **File export/import** (preserved). Original Export/Import/Load Party file flow remains for archival + offline use.
+- **Auto-import flow**. On page load, if URL has `#share=` or `?live=`, app shows the import-prompt modal automatically.
+
+### Added — Party Page · GM Command Centre
+- **New `Party` mode** in chrome bar (Chargen / Play / Party). Hides chargen + Studio sheet (v0.5.1 full-window pattern); shows party-page grid.
+- **Member cards** for self + each `STATE.partyImports[i]`: name, morph badge, source pill (`FILE`/`LINK`/`QR`/`LIVE`/`YOU`), concept, lifepath, aptitudes, top 5 skills, 4-zone coverage badges, vitals (wounds/stress), "updated 23s ago" timestamps. Self card distinguished by green border; live members get pulsing 🟢 LIVE badge.
+- **4-zone party-coverage radar** at the top (reuses `buildStudioPartyCoverage`).
+- **GM Tracking overlay** per imported member: inline +/- wound and stress controls, initiative input + per-card "Roll" button (d10 + REF), GM-private notes textarea. Edits write to `STATE.partyImports[i].gmNotes` — never pushed back to the player. Initiative-sorted view: cards reorder by current initiative.
+- **Per-card actions**: `↻ Refresh` (force-poll for live members), `↗ Share` (self), `✕ Remove`.
+- **Header actions**: 🎲 Roll Initiative · All, + Add Member (file).
+- **Empty state**: friendly prompt with "↗ Share Your Character" button to bootstrap a session.
+
+### Added — Schema v7 (additive, forward-compatible for full live-sync)
+- `STATE.ego.characterId` — UUID generated on first share. Stable identity across re-shares enables identity-based de-dup (re-importing same character updates `.full`, preserves `gmNotes`).
+- `STATE.ego.liveShareUrl` — last pushed `?live=` URL so player can recopy without re-pushing.
+- `STATE.partyImports[i]` gains: `id` (matches source character's `characterId`), `source` (`file`/`url`/`qr`/`live`), `lastSyncedAt` (ISO timestamp), `gmNotes` (wounds/stress/initiative/statusEffects/notes — GM-local overlay), `syncUrl` (for live polling).
+- `migrateV6ToV7` chained into `migrateToCurrent`. All v6 saves auto-upgrade. Idempotent.
+
+### Added — Live-sync backend
+- **`api/share/[id].js`** — Vercel serverless function. GET/POST/DELETE on Vercel KV with 30-day TTL, 200KB payload ceiling, ID pattern validation `/^[a-zA-Z0-9_-]{8,64}$/`, anonymous (no auth — the UUID is the access token, same trust model as URL share). CORS-enabled.
+- **`package.json`** — declares `@vercel/kv` dependency. Vercel autoinstalls during build.
+- **Live polling client** — `startPartyPolling()` runs while in Party mode, polls each live member's URL every 30s, updates `.full` if `updatedAt` changed. Aborts cleanly on mode-switch (saves quota, saves mobile battery). Toast on each update.
+- **One-time user action required to enable**: Vercel dashboard → Storage → Create KV → bind to project. ~2 minutes. Until then, "Push Live" button shows toast "Live push failed — try Copy Link instead" and gracefully degrades. Snapshot/QR/file all work independently.
+
+### Added — Tests
+- `test-share-party.js` — 47 new assertions covering: schema v7 fields, LZ-string compression round-trip, encodeShareUrl/decodeShareUrl round-trip, stripPortrait integrity, makeCharacterId uniqueness, migrateV6ToV7 (partyImports get gmNotes shape), **identity-based de-dup preserves gmNotes** (the key party-page invariant — GM marks wounds, player re-shares, wounds survive), source-field flow, URL size budgets.
+- `test-play-state.js` updated for SCHEMA_VERSION === 7, added v6→v7 migration + makeCharacterId assertions.
+
+### Total counts
+- **45 morphs** (unchanged from v0.6)
+- **406 test assertions** (was 359) — `test-share-party.js` adds 47, `test-play-state.js` adds 2
+- **Total `index.html` size**: ~625KB (vendored libs ~17KB; Party Page + GM Centre + share infra ~25KB)
+
+### Privacy posture (be honest with users)
+- **Copy Link share** = URL contains all data; nothing stored on server.
+- **Push Live share** = JSON stored anonymously on Vercel KV, accessible to anyone with the URL, auto-deleted after 30 days.
+- Players choose per-share. Snapshot stays default for sensitive backstories.
+- Live URLs: "treat like a session password — share only with party + GM".
+
 ## [0.6] — 2026-05-16 — "Bodies & Becoming"
 
 ### Added
