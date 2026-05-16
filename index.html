@@ -4035,7 +4035,7 @@ function makeCharacterId() {
 }
 
 const newState = () => ({
-  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.10.6", mode:"chargen" },
+  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.10.7", mode:"chargen" },
   // v0.10: team-room metadata. Roomless local play has all nulls + empty teamName.
   // teamName persists locally even before joining a room (set it once, it sticks).
   team:{ roomId:null, teamName:"", lastPolledAt:null },
@@ -6836,10 +6836,19 @@ function buildStudioVitalityBar({ label, doneLabel, deadLabel, value, ticks, dow
   const pct = Math.min(100, (value / Math.max(1, dead)) * 100);
   const downPct = (down / Math.max(1, dead)) * 100;
   const isDown = value >= down;
-  const tone = isDown ? "var(--st-red)" : (value >= down * 0.6 ? "var(--st-amber)" : accent);
+  // v0.10.7: tone must be a literal hex (not a `var(--st-X)` ref) because it's
+  // concatenated with alpha suffixes ("cc", "55", "ee") below. CSS Custom
+  // Properties Level 1 specifies var() substitution at the token level — the
+  // substituted #RRGGBB token does NOT merge with an adjacent suffix string
+  // into a single 8-digit hex. The token stream becomes `HASH IDENT`, which is
+  // invalid as a color-stop, so the whole gradient is dropped. Was the cause
+  // of two months of "HP visualisation broken" complaints — the damage bar's
+  // fill never rendered. Mind bar always worked because it passes a literal
+  // hex `#6b9eff` as accent.
+  const tone = isDown ? "#c0392b" : (value >= down * 0.6 ? "#c97b25" : accent);
 
   const fillBg = isDown
-    ? "linear-gradient(90deg, var(--st-amber)cc 0%, var(--st-amber)cc " + ((down/Math.max(1,value))*100) + "%, var(--st-red) " + (((down/Math.max(1,value))*100) + 1) + "%, var(--st-red)ee 100%)"
+    ? "linear-gradient(90deg, #c97b25cc 0%, #c97b25cc " + ((down/Math.max(1,value))*100) + "%, #c0392b " + (((down/Math.max(1,value))*100) + 1) + "%, #c0392bee 100%)"
     : "linear-gradient(90deg, " + tone + "cc, " + tone + ")";
 
   const wrap = h("div", { class: "studio-vbar" + (readOnly ? " studio-readonly" : ""), "data-tip": dataTip || null });
@@ -6944,7 +6953,10 @@ function buildStudioDamageBar(pc, opts) {
     tickLabel: "WOUNDS", tickTaken: wt, down: dur, dead: dr || 1,
     setValue: (v) => studioSetDamage(v),
     setTicks: (v) => studioSetWounds(v),
-    accent: "var(--st-green)", dyingAccent: "var(--st-rose)",
+    // v0.10.7: literal hex (not var() refs) so `tone + "cc"` in buildStudioVitalityBar
+    // produces a valid 8-digit hex. var()-with-suffix was the root cause of the
+    // never-rendering green fill on the damage bar across the entire app.
+    accent: "#3a9c64", dyingAccent: "#c0395a",
     extra: armorChip,
     dataTip: "derivedStats.DUR",
     readOnly: !!opts.readOnly

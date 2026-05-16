@@ -709,7 +709,7 @@ console.log("\n=== v0.10.2 — studioPcFromState produces a renderable pc from a
 console.log("\n=== v0.10.4 — toolVersion bumped to 0.10.4 ===");
 {
   const fresh = exp.newState();
-  assert("newState().meta.toolVersion is 0.10.6", fresh.meta.toolVersion === "0.10.6");
+  assert("newState().meta.toolVersion is 0.10.7", fresh.meta.toolVersion === "0.10.7");
 }
 
 console.log("\n=== v0.10.4 — hash-skip: same player-owned state → identical hash ===");
@@ -1087,6 +1087,69 @@ console.log("\n=== v0.10.6 — aptitude tile readOnly suppresses studioRollAptit
   // When readOnly, tile tag should switch to a non-button element
   assert("readOnly path uses a non-button tag for the tile",
     /tileTag\s*=\s*readOnly/.test(src) || /readOnly\s*\?\s*['"]div['"]/.test(src));
+}
+
+// v0.10.7 — The green-bar bug. `tone + "cc"` for the damage bar produced
+// `var(--st-green)cc` — a HASH token + IDENT token after CSS variable
+// substitution, not a valid 8-digit hex. The gradient was always invalid,
+// so the damage bar's fill never rendered (on either studio sheet or team
+// card). Mind bar passed literal hex so it worked. Fix: literal hex in both
+// `tone` computation and the isDown gradient, and in DamageBar's accents.
+
+console.log("\n=== v0.10.7 — damage gradient uses literal hex (the green-bar root cause) ===");
+{
+  const dSrc = exp.buildStudioDamageBar.toString();
+  const vSrc = exp.buildStudioVitalityBar.toString();
+
+  // The original bug: passing CSS variable refs as accent values that get
+  // string-concatenated with alpha suffixes ("cc", "55", "ee"). Source-check
+  // that the damage bar no longer passes var() refs as accent/dyingAccent.
+  assert("buildStudioDamageBar no longer passes var(--st-green) as accent",
+    dSrc.indexOf('"var(--st-green)"') === -1);
+  assert("buildStudioDamageBar no longer passes var(--st-rose) as dyingAccent",
+    dSrc.indexOf('"var(--st-rose)"') === -1);
+  assert("buildStudioDamageBar accent is literal hex #3a9c64",
+    dSrc.indexOf("#3a9c64") !== -1);
+  assert("buildStudioDamageBar dyingAccent is literal hex #c0395a",
+    dSrc.indexOf("#c0395a") !== -1);
+
+  // VitalityBar must NOT have any var()-with-alpha-suffix patterns. Bare
+  // var() refs used as sole color values (e.g. `color: "var(--st-red)"`) are
+  // fine — the bug is ONLY when string-concatenation appends a suffix like
+  // "cc"/"55"/"ee" producing an invalid HASH+IDENT token stream.
+  const varSuffix = /var\(--[a-z0-9-]+\)(cc|55|ee|aa|bb|dd|ff)/;
+  assert("buildStudioVitalityBar source has no `var(--…)<suffix>` concat patterns",
+    !varSuffix.test(vSrc), "matched: " + (vSrc.match(varSuffix) || []).join(","));
+  assert("buildStudioVitalityBar uses literal hex #c0392b (red, isDown tone)",
+    vSrc.indexOf("#c0392b") !== -1);
+  assert("buildStudioVitalityBar uses literal hex #c97b25 (amber, mid-zone tone)",
+    vSrc.indexOf("#c97b25") !== -1);
+
+  // The isDown gradient string. It must NOT contain "var(--" anywhere.
+  // (The plain `var(--st-red)` stop without suffix would actually work, but
+  // we replaced everything for consistency — and to prevent future concat
+  // additions from silently breaking.)
+  const gradientMatch = vSrc.match(/linear-gradient\(90deg, [^)]*0%[^)]*100%\)/);
+  if (gradientMatch) {
+    assert("isDown gradient contains no var(--…) references",
+      gradientMatch[0].indexOf("var(--") === -1, "gradient: " + gradientMatch[0].slice(0, 200));
+  }
+}
+
+console.log("\n=== v0.10.7 — regression: damage bar still renders for non-zero damage ===");
+{
+  exp._setState(exp.newState());
+  exp.STATE.morph.chosen = "exalt";
+  exp.STATE.play.wounds = 12;
+  exp.STATE.play.woundsTaken = 2;
+  let threw = null;
+  let result = null;
+  try { result = exp.buildStudioDamageBar(exp.studioPcFromState()); }
+  catch (e) { threw = e; }
+  assert("buildStudioDamageBar(pc) with damage=12 doesn't throw",
+    threw === null, threw ? (threw.message || String(threw)) : "");
+  assert("buildStudioDamageBar returns a DOM-like node",
+    !!result, "result=" + result);
 }
 
 console.log("\n=========================================");

@@ -2,6 +2,34 @@
 
 All notable changes to this project. Format follows the spirit of [Keep a Changelog](https://keepachangelog.com/), versioned by milestone.
 
+## [0.10.7] — 2026-05-17 — "The Green Bar Was Never Rendering"
+
+**A one-character class of bug — `cc` suffixed onto a `var()` — silently invalidating the damage bar's gradient for months.** The user kept reporting "HP visualisation is broken"; we kept fixing downstream symptoms (the wound count, the team-card embed, the section reorder). The actual bug was always in the gradient string itself, identical on studio and team surfaces, only visible by direct pixel inspection.
+
+### Fixed
+- **Damage bar's green fill now renders.** Was never rendering in any prior version. `buildStudioVitalityBar` and `buildStudioDamageBar` now use literal hex (`#3a9c64`, `#c97b25`, `#c0392b`, `#c0395a`) for any color value that gets concatenated with an alpha suffix string (`"cc"`, `"55"`, `"ee"`). Previously these were `var(--st-green)`, `var(--st-amber)`, `var(--st-red)` — and `"var(--st-green)" + "cc"` produces `"var(--st-green)cc"`, which after CSS variable substitution becomes the token stream `#3a9c64 cc` (two adjacent tokens: HASH + IDENT, not a merged 8-digit hex). Per CSS Custom Properties Level 1, var() substitution happens at the token level; substituted tokens do not merge with adjacent literal tokens. `linear-gradient` expects color-stops of the form `<color> <length-percentage>?` — `cc` is neither. The whole gradient is invalid; the browser drops the declaration; the fill never paints.
+
+### Why the mind/stress bar always worked
+- `buildStudioMindBar` passes `accent: "#6b9eff"` — a literal hex. JS concatenation happens before the browser ever parses CSS, so `"#6b9eff" + "cc"` produces `"#6b9effcc"`, a valid 8-digit hex with alpha. Renders fine. The mind bar's blue fill has always been visible.
+- The damage bar's `accent: "var(--st-green)"` is the one-character difference that broke it.
+
+### Why this took multiple releases to find
+- v0.10.4 "Quiet Sync" focused on cost mechanisms, not pixel inspection.
+- v0.10.5 "Live Vitals on the Team Card" added the panel to the team card. Verification confirmed *structural* presence (segments rendered, wound tick markers passed) but never compared *fill colour* against the studio sheet — both surfaces were equally broken, so cross-surface comparison wouldn't have caught it.
+- v0.10.6 "Aligned Team Card" reordered + flipped + embedded the panel — same structural-only verification.
+- The user reported "HP visualisation broken" at the start of session, but the diagnosis kept landing on the *adjacent* symptoms (text-only vitals, wound-count divergence, section misalignment). The user finally pinned it as "No visual green bar displayed" in v0.10.6, and the root cause traced cleanly to one line of CSS variable concatenation semantics.
+
+### What did NOT change
+- **No data-model change.** `studioSetDamage`'s one-way wound ratchet (`Math.max(current, auto)`) stays — that's EP2-rules-correct. Damage and wounds heal at different rates (damage naturally, wounds at 1/week with medical care). The "Heal wound" button in the Healing section is the proper path for decrementing a wound (it atomically reduces wound count + WT damage). The UI was teaching the rule correctly all along; the missing green fill was the only thing making it look broken.
+- **No `color-mix()` migration.** Could be cleaner but introduces browser-support questions; literal hex is universally safe.
+- **No CSS custom property restructure.** The `--st-*` variables stay; they work fine wherever they're used *without* alpha-suffix concatenation (border colors, plain text colors, etc.).
+
+### Tests
+- 11 new source-check assertions in `test-share-party.js` confirm no `var(--st-X)` ref is passed where it would be alpha-concatenated, and that literal hex equivalents are present in the post-fix code paths.
+- Regression smoke check that `buildStudioDamageBar(pc)` still renders for non-zero damage.
+
+---
+
 ## [0.10.6] — 2026-05-17 — "Aligned Team Card"
 
 **Vitals up top, rich panels everywhere there were text rows, derived (×3) front and centre, tooltips for free.** Four discrete polish requests from live play, all on the team card, all reusing studio-sheet visuals — collapsed into one wave because they share infrastructure.
