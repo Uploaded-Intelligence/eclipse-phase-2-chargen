@@ -3987,7 +3987,7 @@ function makeCharacterId() {
 }
 
 const newState = () => ({
-  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.9.1", mode:"chargen" },
+  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.9.2", mode:"chargen" },
   step:1,
   ego:{
     name:"",
@@ -4269,7 +4269,58 @@ function migrateV6ToV7(loaded) {
   return loaded;
 }
 
-/* Compose migrations. Always run in order — v1 saves cascade v1→...→v7. */
+/* v0.9.2 — normalizePartyImportEntries: enforce v7 shape on every partyImports[i]
+   regardless of how the entry was created. Runs unconditionally at the end of
+   migrateToCurrent so any partial entry (legacy save, hand-edited JSON, bug)
+   gets healed on load. Same field-backfill rules as migrateV6ToV7's partyImports
+   step, plus gmNotes shape-patching for partial gmNotes objects. */
+function normalizePartyImportEntries(loaded) {
+  if (!loaded || !Array.isArray(loaded.partyImports)) return loaded;
+  loaded.partyImports = loaded.partyImports.map(p => {
+    if (!p || typeof p !== "object") return p;
+    const next = Object.assign({}, p);
+    if (!("id" in next)) next.id = null;
+    if (!("source" in next) || typeof next.source !== "string") next.source = "file";
+    if (!("lastSyncedAt" in next)) next.lastSyncedAt = new Date().toISOString();
+    if (!next.gmNotes || typeof next.gmNotes !== "object") {
+      next.gmNotes = { wounds:0, stress:0, initiative:null, statusEffects:[], notes:"" };
+    } else {
+      next.gmNotes = Object.assign(
+        { wounds:0, stress:0, initiative:null, statusEffects:[], notes:"" },
+        next.gmNotes
+      );
+    }
+    if (!("syncUrl" in next)) next.syncUrl = null;
+    return next;
+  });
+  return loaded;
+}
+
+/* v0.9.2 — buildPartyImportEntry: single source of truth for partyImports entry
+   shape. Used by both importJSON (file) and importShareSnapshot (URL/QR/live).
+   Produces a v7-complete entry; callers can overwrite individual fields
+   (e.g. existing gmNotes on upsert) after the call. */
+function buildPartyImportEntry(loaded, sourceLabel) {
+  const summary = (loaded && loaded.summary) || {};
+  const src = String(sourceLabel || "file").toLowerCase();
+  return {
+    id: (loaded && loaded.ego && loaded.ego.characterId) || null,
+    name: summary.name || (loaded && loaded.ego && loaded.ego.name) || "Unnamed",
+    concept: summary.concept || (loaded && loaded.ego && loaded.ego.narrative && loaded.ego.narrative.concept) || "",
+    lifepath: summary.lifepath || "",
+    coverage: summary.coverage || { combat:0, face:0, hacker:0, sci:0 },
+    source: src.includes("live") ? "live" : src,
+    lastSyncedAt: summary.exportedAt || new Date().toISOString(),
+    gmNotes: { wounds:0, stress:0, initiative:null, statusEffects:[], notes:"" },
+    syncUrl: null,
+    full: loaded
+  };
+}
+
+/* Compose migrations. Always run in order — v1 saves cascade v1→...→v7.
+   v0.9.2: normalizePartyImportEntries runs unconditionally at the end so
+   any path that calls migrateToCurrent benefits (loadFromLocalStorage,
+   importJSON, importShareSnapshot). */
 function migrateToCurrent(loaded) {
   if (!loaded || !loaded.meta) return loaded;
   if (loaded.meta.schemaVersion < 2) loaded = migrateV1ToV2(loaded);
@@ -4278,6 +4329,10 @@ function migrateToCurrent(loaded) {
   if (loaded.meta.schemaVersion < 5) loaded = migrateV4ToV5(loaded);
   if (loaded.meta.schemaVersion < 6) loaded = migrateV5ToV6(loaded);
   if (loaded.meta.schemaVersion < 7) loaded = migrateV6ToV7(loaded);
+  loaded = normalizePartyImportEntries(loaded);
+  // v0.9.2: keep toolVersion in sync with newState() default on every load,
+  // so footer doesn't show stale "v0.7.0" forever for legacy localStorage saves.
+  if (loaded.meta) loaded.meta.toolVersion = newState().meta.toolVersion;
   return loaded;
 }
 
@@ -5140,17 +5195,24 @@ function importJSON(text, asPartyMember) {
       return;
     }
     if (asPartyMember) {
-      // Add to partyImports
-      const summary = loaded.summary || {};
-      STATE.partyImports.push({
-        name: summary.name || loaded.ego.name || "Unnamed",
-        concept: summary.concept || (loaded.ego.narrative && loaded.ego.narrative.concept) || "",
-        lifepath: summary.lifepath || "",
-        coverage: summary.coverage || { combat:0, face:0, hacker:0, sci:0 },
-        full: loaded
-      });
+      // v0.9.2: build a v7-complete entry via shared helper so file-imports
+      // get id/source/lastSyncedAt/gmNotes/syncUrl just like URL-share imports do.
+      const entry = buildPartyImportEntry(loaded, "file");
+      // Upsert if a partyImports entry with the same characterId already exists.
+      const existingIdx = entry.id ? STATE.partyImports.findIndex(p => p.id === entry.id) : -1;
+      if (existingIdx >= 0) {
+        const existingGm = STATE.partyImports[existingIdx].gmNotes || {};
+        entry.gmNotes = Object.assign(
+          { wounds:0, stress:0, initiative:null, statusEffects:[], notes:"" },
+          existingGm
+        );
+        entry.syncUrl = STATE.partyImports[existingIdx].syncUrl;
+        STATE.partyImports[existingIdx] = entry;
+      } else {
+        STATE.partyImports.push(entry);
+      }
       scheduleSave(); rerender();
-      showToast("Added " + (summary.name || "party member") + " to party imports");
+      showToast((existingIdx >= 0 ? "Updated " : "Added ") + entry.name + " (from file)");
     } else {
       const fresh = newState();
       Object.assign(fresh, loaded);
@@ -5427,21 +5489,12 @@ function importShareSnapshot(parsedState, asPartyMember, sourceLabel) {
       return;
     }
     if (asPartyMember) {
-      const incomingId = loaded.ego && loaded.ego.characterId;
-      const existingIdx = incomingId ? STATE.partyImports.findIndex(p => p.id === incomingId) : -1;
-      const summary = loaded.summary || {};
-      const entry = {
-        id: incomingId || null,
-        name: summary.name || (loaded.ego && loaded.ego.name) || "Unnamed",
-        concept: summary.concept || (loaded.ego && loaded.ego.narrative && loaded.ego.narrative.concept) || "",
-        lifepath: summary.lifepath || "",
-        coverage: summary.coverage || { combat:0, face:0, hacker:0, sci:0 },
-        source: (sourceLabel || "URL").toLowerCase().includes("live") ? "live" : (sourceLabel || "url").toLowerCase(),
-        lastSyncedAt: new Date().toISOString(),
-        gmNotes: { wounds:0, stress:0, initiative:null, statusEffects:[], notes:"" },
-        syncUrl: null,
-        full: loaded
-      };
+      // v0.9.2: use shared helper so URL-share and file-import entries are identical in shape.
+      const entry = buildPartyImportEntry(loaded, sourceLabel || "URL");
+      // Force lastSyncedAt to "now" for URL/live imports (helper falls back to summary.exportedAt;
+      // for inbound shares we want the moment we received them, not when the GM exported).
+      entry.lastSyncedAt = new Date().toISOString();
+      const existingIdx = entry.id ? STATE.partyImports.findIndex(p => p.id === entry.id) : -1;
       dispatch(s => {
         if (existingIdx >= 0) {
           // Preserve gmNotes from existing entry; replace .full.
@@ -7001,8 +7054,10 @@ function partyComputeCardData(stateLike) {
 function buildPartyMemberCard(stateLike, entry) {
   const isSelf = !entry;
   const data = partyComputeCardData(stateLike);
-  const source = entry ? entry.source : "self";
-  const gm = entry ? entry.gmNotes : null;
+  // v0.9.2: tolerate entries missing the v7 .source/.gmNotes fields (e.g. legacy
+  // saves whose live state predates normalizePartyImportEntries firing).
+  const source = isSelf ? "self" : (typeof entry.source === "string" ? entry.source : "file");
+  const gm = (entry && entry.gmNotes) || null;
 
   const cls = "party-card" + (isSelf ? " party-card--self" : "") + (source === "live" ? " party-card--live" : "");
   const card = h("div", {class: cls});
@@ -7020,7 +7075,7 @@ function buildPartyMemberCard(stateLike, entry) {
   const srcMap = {file:"FILE", url:"LINK", qr:"QR", live:"LIVE", self:"YOU"};
   const sourceClass = "pc-source pc-source--" + (isSelf ? "self" : source);
   card.appendChild(h("div", {style:{display:"flex",gap:"8px",alignItems:"center",flexWrap:"wrap",marginTop:"-2px"}},
-    h("span", {class: isSelf ? "pc-source pc-source--file" : sourceClass}, "// " + (srcMap[source] || source.toUpperCase())),
+    h("span", {class: isSelf ? "pc-source pc-source--file" : sourceClass}, "// " + (srcMap[source] || (typeof source === "string" ? source.toUpperCase() : "FILE"))),
     !isSelf && entry.lastSyncedAt ? h("span", {class:"pc-timestamp"}, "updated " + partyRelativeTime(entry.lastSyncedAt)) : null
   ));
 

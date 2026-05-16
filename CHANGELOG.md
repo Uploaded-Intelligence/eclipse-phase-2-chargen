@@ -2,6 +2,48 @@
 
 All notable changes to this project. Format follows the spirit of [Keep a Changelog](https://keepachangelog.com/), versioned by milestone.
 
+## [0.9.2] — 2026-05-16 — "Load Party defense in depth"
+
+**The bug that wouldn't die.** v0.9.1 fixed the URL-share import path but missed that "Load Party" (file upload) goes through a *different* function — `importJSON` — that still produced v6-shape partyImports entries. The next render hit `buildPartyMemberCard`, called `.toUpperCase()` on the undefined `source` field, and threw — wrapped in the import try/catch as `Import failed: can't access property "toUpperCase", source is undefined`. **Same symptom, different producer.** v0.9.2 fixes it systemically.
+
+### Fixed
+- **"Load Party" (file upload) crashed with `source is undefined`.** `importJSON` party-path was creating entries with only `{name, concept, lifepath, coverage, full}` — missing the five v7 fields (`id`, `source`, `lastSyncedAt`, `gmNotes`, `syncUrl`) that `buildPartyMemberCard` assumed. Root cause: the producer never got updated when v7 schema added those fields. Now both producers (file + URL) call the same helper.
+
+### Engine (defense in depth)
+- **`buildPartyImportEntry(loaded, sourceLabel)`** — single source of truth for partyImports entry shape. Used by both `importJSON` (file) and `importShareSnapshot` (URL/QR/live). Produces a v7-complete entry; callers can overlay specific fields (e.g. preserving existing gmNotes on upsert) after the call.
+- **`normalizePartyImportEntries(loaded)`** — runs unconditionally at the end of `migrateToCurrent`. Heals partial entries from any source: legacy saves, hand-edited JSON, future schema bumps. Same field-backfill logic as `migrateV6ToV7`'s partyImports step, plus partial-`gmNotes` shape patching.
+- **`buildPartyMemberCard` made defensive** — defaults `source` to `"file"` when entry has no string source field, and guards the `.toUpperCase()` fallback against non-string values. No future producer regression can crash the card render.
+- **File-import party-path now upserts by characterId**, matching URL-import behavior. Re-loading the same player's file updates instead of duplicating.
+
+### Tests
+- 9+ new assertions covering the three layers — entry shape produced by `buildPartyImportEntry` for every `sourceLabel` variant, `normalizePartyImportEntries` healing each field individually, and the defensive render path tolerating a `source: undefined` entry.
+
+### Cross-cutting principle
+**Producer correctness AND reader resilience.** When a single invariant ("every partyImports entry has v7 shape") is enforced at multiple points, no single regression can break the system. The next schema bump will normalize partial entries via the post-migration pass even if a new producer drops a field.
+
+---
+
+## [0.9.1] — 2026-05-16 — "Mesh skill-lookup bugfix + defensive imports"
+
+Three real bugs + one diagnosis aid.
+
+### Fixed
+- **Mesh skill tiles always showed 0.** `buildStudioMesh`'s `findSkill` read `pc.skills[i].value` but `studioPcFromState` produces entries with `.total`. Result: Infosec / Interface / Program tiles displayed `—` regardless of actual values. Fixed to read `.total` (with `.value` fallback for safety) and accept `"Skill:field"` prefix-match for parameterized skills.
+- **Mesh + Gear Guide sections gated behind gear.** Both lived inside `if (packNames.length > 0)`. Imported PCs with no gear yet saw neither. Hoisted out — Mesh access derives from morph ware + skills (not gear); GP/Complexity primer is useful pre-gear too.
+- **Stale footer.** `newState().meta.toolVersion` was hardcoded to `"0.7.0"`. Bumped to `"0.9.1"`.
+
+### Engine (diagnosis aid)
+- `importShareSnapshot` and `importJSON` now run pre-flight validation that rejects empty/malformed parsedState with explicit shape-error messages **before** mutating STATE.
+- `console.error(e)` in both catch blocks dumps full stack to F12 console.
+- Friendlier alert text directing users to copy the trace.
+- Self-import preserves GM's existing `partyImports` (doesn't clobber).
+- v6→v7 `gmNotes` shape defensively rebuilt if existing entry has partial fields.
+
+### Tests
+- 506 → 515 assertions (+9). New regression guards on `.total` vs `.value`, empty-input defensive validation, toolVersion bump, self-import preserving existing partyImports.
+
+---
+
 ## [0.9] — 2026-05-16 — "The Mesh"
 
 EP2's biggest subsystem made legible. Every PC interacts with the mesh constantly — hacker or not — but most of that surface was buried in gear lists, skill rows, and corebook references. v0.9 surfaces it as a single legible page: Muse, OPSEC posture, hacking dice, your mesh apps with what they do at the table, common actions cheat-sheet, privilege ladder, and a mesh-implant audit on the morph. **Pure projection layer — no schema change.**

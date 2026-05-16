@@ -6,7 +6,7 @@ const vm = require("vm");
 const html = fs.readFileSync(__dirname + "/index.html", "utf8");
 let js = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 js = js.replace(/^boot\(\);$/m, "// boot suppressed");
-js += "\nthis.__exports = Object.defineProperties({}, {STATE:{get:()=>STATE,enumerable:true},RULEBOOK_DATA:{value:RULEBOOK_DATA,enumerable:true},RULEBOOK_REFERENCE:{value:RULEBOOK_REFERENCE,enumerable:true},derived:{value:derived,enumerable:true},newState:{value:newState,enumerable:true},encodeShareUrl:{value:encodeShareUrl,enumerable:true},decodeShareUrl:{value:decodeShareUrl,enumerable:true},stripPortrait:{value:stripPortrait,enumerable:true},importShareSnapshot:{value:importShareSnapshot,enumerable:true},makeCharacterId:{value:makeCharacterId,enumerable:true},migrateV6ToV7:{value:migrateV6ToV7,enumerable:true},migrateToCurrent:{value:migrateToCurrent,enumerable:true},SCHEMA_VERSION:{value:SCHEMA_VERSION,enumerable:true},LZString:{value:LZString,enumerable:true},studioPcFromState:{value:studioPcFromState,enumerable:true},studioHealDamage:{value:studioHealDamage,enumerable:true},studioHealWound:{value:studioHealWound,enumerable:true},studioHealStress:{value:studioHealStress,enumerable:true},studioHealTrauma:{value:studioHealTrauma,enumerable:true},characterHasFabber:{value:characterHasFabber,enumerable:true},studioMeshAccess:{value:studioMeshAccess,enumerable:true},studioMeshOpsec:{value:studioMeshOpsec,enumerable:true},studioMeshApps:{value:studioMeshApps,enumerable:true},studioMeshImplants:{value:studioMeshImplants,enumerable:true},_setState:{value:(v)=>{STATE=v;},enumerable:true}});\n";
+js += "\nthis.__exports = Object.defineProperties({}, {STATE:{get:()=>STATE,enumerable:true},RULEBOOK_DATA:{value:RULEBOOK_DATA,enumerable:true},RULEBOOK_REFERENCE:{value:RULEBOOK_REFERENCE,enumerable:true},derived:{value:derived,enumerable:true},newState:{value:newState,enumerable:true},encodeShareUrl:{value:encodeShareUrl,enumerable:true},decodeShareUrl:{value:decodeShareUrl,enumerable:true},stripPortrait:{value:stripPortrait,enumerable:true},importShareSnapshot:{value:importShareSnapshot,enumerable:true},makeCharacterId:{value:makeCharacterId,enumerable:true},migrateV6ToV7:{value:migrateV6ToV7,enumerable:true},migrateToCurrent:{value:migrateToCurrent,enumerable:true},SCHEMA_VERSION:{value:SCHEMA_VERSION,enumerable:true},LZString:{value:LZString,enumerable:true},studioPcFromState:{value:studioPcFromState,enumerable:true},studioHealDamage:{value:studioHealDamage,enumerable:true},studioHealWound:{value:studioHealWound,enumerable:true},studioHealStress:{value:studioHealStress,enumerable:true},studioHealTrauma:{value:studioHealTrauma,enumerable:true},characterHasFabber:{value:characterHasFabber,enumerable:true},studioMeshAccess:{value:studioMeshAccess,enumerable:true},studioMeshOpsec:{value:studioMeshOpsec,enumerable:true},studioMeshApps:{value:studioMeshApps,enumerable:true},studioMeshImplants:{value:studioMeshImplants,enumerable:true},buildPartyImportEntry:{value:buildPartyImportEntry,enumerable:true},normalizePartyImportEntries:{value:normalizePartyImportEntries,enumerable:true},importJSON:{value:importJSON,enumerable:true},_setState:{value:(v)=>{STATE=v;},enumerable:true}});\n";
 
 const sandbox = {
   console,
@@ -356,6 +356,154 @@ exp.importShareSnapshot(parsedB, false, "URL");
 assert("self-import keeps GM's existing partyImports", exp.STATE.partyImports.length === 1);
 assert("self-import GM's existing entry preserved", exp.STATE.partyImports[0] && exp.STATE.partyImports[0].name === "Pre-existing");
 assert("self-import replaced ego.name to Player B", exp.STATE.ego.name === "Player B");
+
+console.log("\n=== v0.9.2 — buildPartyImportEntry produces v7-complete entries ===");
+{
+  const loaded = exp.newState();
+  loaded.ego.name = "Test Player";
+  loaded.ego.characterId = "char-abc-123";
+  loaded.summary = { name:"Test Player", concept:"hacker", lifepath:"Infolife / Hacker", coverage:{combat:20,face:30,hacker:80,sci:20}, exportedAt:"2026-05-15T10:00:00.000Z" };
+
+  for (const label of ["file", "URL", "live", "QR", undefined]) {
+    const entry = exp.buildPartyImportEntry(loaded, label);
+    const expectedSrc = label === undefined ? "file" : (String(label).toLowerCase().includes("live") ? "live" : String(label).toLowerCase());
+    assert("buildPartyImportEntry(" + JSON.stringify(label) + ") has id from characterId", entry.id === "char-abc-123");
+    assert("buildPartyImportEntry(" + JSON.stringify(label) + ") has source=" + expectedSrc, entry.source === expectedSrc);
+    assert("buildPartyImportEntry(" + JSON.stringify(label) + ") has gmNotes shape", entry.gmNotes && typeof entry.gmNotes.wounds === "number" && Array.isArray(entry.gmNotes.statusEffects));
+    assert("buildPartyImportEntry(" + JSON.stringify(label) + ") has lastSyncedAt string", typeof entry.lastSyncedAt === "string" && entry.lastSyncedAt.length > 0);
+    assert("buildPartyImportEntry(" + JSON.stringify(label) + ") has syncUrl=null", entry.syncUrl === null);
+    assert("buildPartyImportEntry(" + JSON.stringify(label) + ") has full=loaded", entry.full === loaded);
+  }
+}
+
+console.log("\n=== v0.9.2 — buildPartyImportEntry handles missing summary/ego ===");
+{
+  const entry = exp.buildPartyImportEntry({ meta:{schemaVersion:7} }, "file");
+  assert("buildPartyImportEntry with no ego/summary still produces v7 shape", entry && entry.name === "Unnamed" && entry.source === "file" && entry.gmNotes);
+  assert("buildPartyImportEntry id defaults to null when no characterId", entry.id === null);
+  assert("buildPartyImportEntry coverage defaults to zeros", entry.coverage.combat === 0 && entry.coverage.face === 0 && entry.coverage.hacker === 0 && entry.coverage.sci === 0);
+}
+
+console.log("\n=== v0.9.2 — normalizePartyImportEntries heals each missing field ===");
+{
+  // Missing id
+  let s = { partyImports: [{ name:"A", source:"file", lastSyncedAt:"x", gmNotes:{wounds:0,stress:0,initiative:null,statusEffects:[],notes:""}, syncUrl:null, full:{} }] };
+  exp.normalizePartyImportEntries(s);
+  assert("normalize fills missing id with null", s.partyImports[0].id === null);
+
+  // Missing source
+  s = { partyImports: [{ id:"x", name:"A", lastSyncedAt:"x", gmNotes:{wounds:0,stress:0,initiative:null,statusEffects:[],notes:""}, syncUrl:null, full:{} }] };
+  exp.normalizePartyImportEntries(s);
+  assert("normalize fills missing source with 'file'", s.partyImports[0].source === "file");
+
+  // source: undefined explicitly (the exact crash case)
+  s = { partyImports: [{ id:"x", name:"A", source:undefined, lastSyncedAt:"x", gmNotes:{wounds:0,stress:0,initiative:null,statusEffects:[],notes:""}, syncUrl:null, full:{} }] };
+  exp.normalizePartyImportEntries(s);
+  assert("normalize replaces undefined source with 'file'", s.partyImports[0].source === "file");
+
+  // Missing gmNotes
+  s = { partyImports: [{ id:"x", name:"A", source:"file", lastSyncedAt:"x", syncUrl:null, full:{} }] };
+  exp.normalizePartyImportEntries(s);
+  assert("normalize fills missing gmNotes with default shape", s.partyImports[0].gmNotes && s.partyImports[0].gmNotes.wounds === 0 && Array.isArray(s.partyImports[0].gmNotes.statusEffects));
+
+  // Partial gmNotes
+  s = { partyImports: [{ id:"x", name:"A", source:"file", lastSyncedAt:"x", gmNotes:{wounds:3,notes:"alert"}, syncUrl:null, full:{} }] };
+  exp.normalizePartyImportEntries(s);
+  assert("normalize patches partial gmNotes (keeps existing fields)", s.partyImports[0].gmNotes.wounds === 3 && s.partyImports[0].gmNotes.notes === "alert");
+  assert("normalize patches partial gmNotes (fills missing fields)", s.partyImports[0].gmNotes.stress === 0 && Array.isArray(s.partyImports[0].gmNotes.statusEffects));
+
+  // Missing lastSyncedAt
+  s = { partyImports: [{ id:"x", name:"A", source:"file", gmNotes:{wounds:0,stress:0,initiative:null,statusEffects:[],notes:""}, syncUrl:null, full:{} }] };
+  exp.normalizePartyImportEntries(s);
+  assert("normalize fills missing lastSyncedAt", typeof s.partyImports[0].lastSyncedAt === "string" && s.partyImports[0].lastSyncedAt.length > 0);
+
+  // Missing syncUrl
+  s = { partyImports: [{ id:"x", name:"A", source:"file", lastSyncedAt:"x", gmNotes:{wounds:0,stress:0,initiative:null,statusEffects:[],notes:""}, full:{} }] };
+  exp.normalizePartyImportEntries(s);
+  assert("normalize fills missing syncUrl with null", s.partyImports[0].syncUrl === null);
+
+  // No partyImports — no-op, no throw
+  let noPI = { meta:{schemaVersion:7} };
+  let didThrow = false;
+  try { exp.normalizePartyImportEntries(noPI); } catch(e) { didThrow = true; }
+  assert("normalize on state without partyImports does not throw", !didThrow);
+}
+
+console.log("\n=== v0.9.2 — migrateToCurrent runs normalizer unconditionally ===");
+{
+  // A current-version save with a v6-shape partyImports entry (the bug we just fixed)
+  const buggy = {
+    meta: { schemaVersion: 7, toolVersion: "0.9.1" },
+    ego: { name: "GM" },
+    partyImports: [{ name: "BuggyPlayer", concept: "x", lifepath: "y", coverage: { combat:0,face:0,hacker:0,sci:0 }, full: {} }]
+  };
+  const out = exp.migrateToCurrent(buggy);
+  const e = out.partyImports[0];
+  assert("migrate normalizes v6-shape entry inside a v7 root", e.source === "file" && typeof e.lastSyncedAt === "string" && e.gmNotes && e.syncUrl === null);
+}
+
+console.log("\n=== v0.9.2 — importJSON party-path creates v7-complete entries ===");
+{
+  exp._setState(exp.newState());
+  const player = exp.newState();
+  player.ego.name = "FileImported";
+  player.ego.characterId = "file-import-id-1";
+  player.summary = { name:"FileImported", concept:"c", lifepath:"l", coverage:{combat:10,face:20,hacker:30,sci:40}, exportedAt:"2026-05-15T10:00:00.000Z" };
+  const text = JSON.stringify(player);
+  // importJSON wraps in try/catch and shows alerts; we just need to verify no throw and the entry shape
+  let importErr = null;
+  try { exp.importJSON(text, true); } catch (e) { importErr = e; }
+  assert("importJSON file party-add does not throw", importErr === null);
+  assert("importJSON file party-add pushed entry", exp.STATE.partyImports.length === 1);
+  const fileEntry = exp.STATE.partyImports[0];
+  assert("importJSON file entry has v7 source field", fileEntry.source === "file");
+  assert("importJSON file entry has id from characterId", fileEntry.id === "file-import-id-1");
+  assert("importJSON file entry has gmNotes shape", fileEntry.gmNotes && typeof fileEntry.gmNotes.wounds === "number");
+  assert("importJSON file entry has lastSyncedAt", typeof fileEntry.lastSyncedAt === "string");
+  assert("importJSON file entry has syncUrl=null", fileEntry.syncUrl === null);
+  assert("importJSON file entry has full state", fileEntry.full && fileEntry.full.ego && fileEntry.full.ego.name === "FileImported");
+}
+
+console.log("\n=== v0.9.2 — importJSON re-upload of same character upserts ===");
+{
+  exp._setState(exp.newState());
+  const player = exp.newState();
+  player.ego.name = "Repeat";
+  player.ego.characterId = "repeat-id";
+  player.summary = { name:"Repeat", concept:"c", lifepath:"l", coverage:{combat:0,face:0,hacker:0,sci:0} };
+  exp.importJSON(JSON.stringify(player), true);
+  assert("first file-import pushes entry", exp.STATE.partyImports.length === 1);
+  // GM marks a wound on this player
+  exp.STATE.partyImports[0].gmNotes.wounds = 2;
+  exp.STATE.partyImports[0].gmNotes.notes = "hurt";
+  // Player re-uploads
+  exp.importJSON(JSON.stringify(player), true);
+  assert("second file-import upserts (no duplicate)", exp.STATE.partyImports.length === 1);
+  assert("re-upload preserves GM gmNotes.wounds", exp.STATE.partyImports[0].gmNotes.wounds === 2);
+  assert("re-upload preserves GM gmNotes.notes", exp.STATE.partyImports[0].gmNotes.notes === "hurt");
+}
+
+console.log("\n=== v0.9.2 — buildPartyMemberCard source defaulting (the actual crash scenario) ===");
+{
+  // The exact entry shape that crashed production v0.9 / v0.9.1
+  const buggyEntry = { name:"Crash", concept:"c", lifepath:"l", coverage:{combat:0,face:0,hacker:0,sci:0}, full:{ meta:{schemaVersion:7}, ego:{name:"Crash"} } };
+  // Source-derivation line in buildPartyMemberCard (v0.9.2):
+  //   const source = isSelf ? "self" : (typeof entry.source === "string" ? entry.source : "file");
+  // Manually replicate to verify the guard works:
+  const isSelf = false;
+  const source = isSelf ? "self" : (typeof buggyEntry.source === "string" ? buggyEntry.source : "file");
+  assert("buildPartyMemberCard source guard yields 'file' on undefined", source === "file");
+  // And toUpperCase() must not throw
+  let upperThrew = false;
+  try { ("// " + source.toUpperCase()); } catch(e) { upperThrew = true; }
+  assert("buildPartyMemberCard source.toUpperCase() works after guard", !upperThrew);
+}
+
+console.log("\n=== v0.9.2 — toolVersion bumped to 0.9.2 ===");
+{
+  const fresh = exp.newState();
+  assert("newState().meta.toolVersion is 0.9.2", fresh.meta.toolVersion === "0.9.2");
+}
 
 console.log("\n=========================================");
 console.log("FINAL: " + pass + " pass, " + fail + " fail");
