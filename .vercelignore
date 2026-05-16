@@ -1,2 +1,17 @@
-*
-!index.html
+# v0.7 — exclude local-only artifacts. Vercel deploys everything else.
+.git
+.vercel
+data/raw/
+.claude-design/
+screenshots/
+test-*.js
+*.test.js
+EclipsePhase2_corebook.pdf
+*.pdf
+MATH-SPEC.md
+extract.py
+.gitignore
+.cp-images/
+README.md
+LICENSE
+CHANGELOG.md
