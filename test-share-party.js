@@ -709,7 +709,7 @@ console.log("\n=== v0.10.2 — studioPcFromState produces a renderable pc from a
 console.log("\n=== v0.10.4 — toolVersion bumped to 0.10.4 ===");
 {
   const fresh = exp.newState();
-  assert("newState().meta.toolVersion is 0.11.0", fresh.meta.toolVersion === "0.11.0");
+  assert("newState().meta.toolVersion is 0.11.1", fresh.meta.toolVersion === "0.11.1");
 }
 
 console.log("\n=== v0.10.4 — hash-skip: same player-owned state → identical hash ===");
@@ -1690,11 +1690,31 @@ console.log("\n=== v0.11 — Wire-in to right rail ===");
     html.indexOf('"Nanofab · Armaments"') !== -1);
 }
 
-console.log("\n=== v0.11 — toolVersion bumped to 0.11.0 ===");
+console.log("\n=== v0.11.1 — Class-tone left border applies (no shorthand override) ===");
+{
+  // v0.11.0 regression: borderLeft was set BEFORE border shorthand in the
+  // style object, so the shorthand overrode the per-class tone. Every card
+  // rendered with the same teal border instead of red/blue/purple/etc.
+  // Fix: border shorthand must come BEFORE borderLeft in the style object.
+  const cardSrc = exp.buildStudioArmamentCard.toString();
+  const borderIdx = cardSrc.indexOf('border:"1px solid rgba(127,212,226,0.22)"');
+  const borderLeftToneIdx = cardSrc.indexOf('borderLeft:"4px solid " + tone');
+  assert("Card style includes per-class borderLeft using tone variable",
+    borderLeftToneIdx !== -1);
+  assert("Card style sets `border:` shorthand BEFORE `borderLeft:` so the per-class tone wins",
+    borderIdx !== -1 && borderLeftToneIdx > borderIdx,
+    "border at " + borderIdx + ", borderLeft at " + borderLeftToneIdx);
+  const tones = exp.ARMAMENT_CLASS_TONES || {};
+  const uniqueTones = new Set(Object.values(tones));
+  assert("ARMAMENT_CLASS_TONES has at least 11 distinct hex values",
+    uniqueTones.size >= 11, "got " + uniqueTones.size);
+}
+
+console.log("\n=== v0.11 — toolVersion bumped to 0.11.1 ===");
 {
   const fresh = exp.newState();
-  assert("newState().meta.toolVersion is 0.11.0",
-    fresh.meta.toolVersion === "0.11.0");
+  assert("newState().meta.toolVersion is 0.11.1",
+    fresh.meta.toolVersion === "0.11.1");
 }
 
 console.log("\n=========================================");

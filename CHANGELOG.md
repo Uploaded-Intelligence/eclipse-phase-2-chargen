@@ -2,6 +2,18 @@
 
 All notable changes to this project. Format follows the spirit of [Keep a Changelog](https://keepachangelog.com/), versioned by milestone.
 
+## [0.11.1] — 2026-05-17 — "Class-tone hotfix"
+
+Visual verifier caught one CSS bug after v0.11.0 shipped: all 73 armament cards rendered with the same teal-cyan left border instead of the intended per-class tones (Kinetic red, Beam blue, Spray cyan, Seeker purple, Melee amber, Implant green, Grenade orange, Missile deep-purple, Explosive dark-orange, Mine slate, Ammo grey-blue, Mod deep-teal).
+
+**Root cause.** In the inline style object, `borderLeft: "4px solid " + tone` was set BEFORE `border: "1px solid rgba(127,212,226,0.22)"`. In CSS, the shorthand `border` resets all four sides — so the shorthand wiped out the per-class color. A trailing `borderLeftWidth: "4px"` re-asserted the width but couldn't re-assert the color.
+
+**Fix.** Reordered the style object so `border:` comes first and `borderLeft:` follows. JS object property order = CSS declaration order = which value wins. Now each class's card gets its intended tone visible on the 4px left border.
+
+**Captured as a test** — `=== v0.11.1 — Class-tone left border applies (no shorthand override) ===` asserts the source contains `borderLeft:"4px solid " + tone` AND that this declaration appears after `border:"1px solid rgba(127,212,226,0.22)"`. Also asserts `ARMAMENT_CLASS_TONES` has ≥11 distinct hex values. This will catch any future re-introduction of the same bug class.
+
+Adjacent to [[feedback_css-var-alpha-concat]] (v0.10.7's CSS-token bug class): both are "CSS authoring quirks that don't surface in tests because the JSON parses and the style object is well-formed — only browser rendering reveals the override." That's exactly why the [[visual-verification-gate]] rule exists.
+
 ## [0.11.0] — 2026-05-17 — "Nanofab · Armaments Codex"
 
 User's escalation in three beats: *"add the Freeze gun and the vortex gun"* → *"i want a whole 'armoury menu' with all the weapons, so players have 'stuff to look forwards to'. It's literally game dev. else we're stuck with Firewall issued pistols"* → *"what about missiles, grenades, etc etc? It should be a comprehensively robust ARMAMENTS/Nanofab-weapons-menu."*
