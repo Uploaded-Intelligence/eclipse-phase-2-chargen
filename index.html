@@ -110,7 +110,9 @@ body.party-mode .layout { display: none; }
 .party-card .pc-source--url { color: #7fd4e2; border-color: rgba(127,212,226,0.5); }
 .party-card .pc-source--live { color: var(--good); border-color: var(--good); background: rgba(86,211,100,0.10); animation: party-live-pulse 2s ease-in-out infinite; }
 @keyframes party-live-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(86,211,100,0.4); } 50% { box-shadow: 0 0 0 4px rgba(86,211,100,0); } }
-.party-card .pc-meta { font-size: 11.5px; color: rgba(220,235,238,0.7); }
+/* v0.10.6: min-height stabilises the lifepath row so empty lifepath strings
+   don't collapse the row and misalign the vitals bar across cards. */
+.party-card .pc-meta { font-size: 11.5px; color: rgba(220,235,238,0.7); min-height: 18px; }
 .party-card .pc-lifepath { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.6px; color: rgba(220,235,238,0.6); }
 .party-card .pc-section { padding-top: 8px; border-top: 1px dashed rgba(127,212,226,0.18); }
 .party-card .pc-section-label { font-family: var(--mono); font-size: 9.5px; letter-spacing: 1.5px; color: var(--accent-2); font-weight: 800; text-transform: uppercase; margin-bottom: 4px; }
@@ -4033,7 +4035,7 @@ function makeCharacterId() {
 }
 
 const newState = () => ({
-  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.10.5", mode:"chargen" },
+  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.10.6", mode:"chargen" },
   // v0.10: team-room metadata. Roomless local play has all nulls + empty teamName.
   // teamName persists locally even before joining a room (set it once, it sticks).
   team:{ roomId:null, teamName:"", lastPolledAt:null },
@@ -7819,44 +7821,11 @@ function buildPartyMemberCard(stateLike, entry) {
     ));
   }
 
-  // Aptitudes
-  const aptKeys = ["COG","INT","REF","SAV","SOM","WIL"];
-  card.appendChild(h("div", {class:"pc-section"},
-    h("div", {class:"pc-section-label"}, "▸ APTITUDES"),
-    h("div", {class:"pc-apt-row"},
-      ...aptKeys.map(k => h("div", {class:"pc-apt"}, k + " " + ((data.aptitudes && data.aptitudes[k]) || 0)))
-    )
-  ));
-
-  // Top skills
-  if (data.topSkills.length > 0) {
-    card.appendChild(h("div", {class:"pc-section"},
-      h("div", {class:"pc-section-label"}, "▸ TOP SKILLS"),
-      h("div", {style:{fontFamily:"var(--mono)",fontSize:"11.5px",color:"rgba(220,235,238,0.85)",lineHeight:1.55}},
-        data.topSkills.map(s => s.name + " " + s.value).join("  ·  ")
-      )
-    ));
-  }
-
-  // 4-zone coverage
-  const tierClass = (v) => v >= 60 ? "pc-cov pc-cov--high" : v >= 40 ? "pc-cov pc-cov--mid" : "pc-cov pc-cov--low";
-  card.appendChild(h("div", {class:"pc-section"},
-    h("div", {class:"pc-section-label"}, "▸ ZONE COVERAGE"),
-    h("div", {class:"pc-coverage-row"},
-      h("div", {class: tierClass(data.coverage.combat)}, "CBT " + data.coverage.combat),
-      h("div", {class: tierClass(data.coverage.face)}, "FACE " + data.coverage.face),
-      h("div", {class: tierClass(data.coverage.hacker)}, "HACK " + data.coverage.hacker),
-      h("div", {class: tierClass(data.coverage.sci)}, "SCI " + data.coverage.sci)
-    )
-  ));
-
-  // v0.10.5: LIVE VITALS PANEL — the rich segmented-bar studio-sheet panel
-  // (damage + stress + pools + threshold markers + warnings) dropped inline
-  // on every team card. YOU is mutable (it's your STATE); FILE imports are
-  // read-only (controls would only mutate the local snapshot, not push back).
-  // Replaces the v0.10 thin VITALS one-liner (YOU) + VITAL STATUS tracker (FILE).
-  // Sync correction: studioPcFromState() reads STATE.play.woundsTaken directly,
-  // so the team-card wound count now matches the studio sheet (was using a
+  // v0.10.6: VITALS up top so the team's HP/STRESS row aligns laterally across
+  // cards. Everything variable (top skills, lifepath specifics) flows below.
+  // v0.10.5: YOU is mutable (it's your STATE); FILE imports are read-only.
+  // Sync correction (v0.10.5): studioPcFromState() reads STATE.play.woundsTaken
+  // directly, so the wound count matches the studio sheet (was using a
   // recompute-from-raw-damage formula that ignored the latched override).
   if (isSelf || (entry && entry.full)) {
     const vitalsWrap = h("div", { class:"studio-sheet pc-vitals-embed" });
@@ -7868,6 +7837,63 @@ function buildPartyMemberCard(stateLike, entry) {
     if (isSelf) renderVitals();
     else withStateAs(entry.full, renderVitals);
     card.appendChild(vitalsWrap);
+  }
+
+  // v0.10.6: APTITUDES — replaced the text-only "COG 20  INT 15 …" line with
+  // the rich studio Aptitudes & Derived strip (three colour-coded family
+  // boxes feeding INSIGHT/VIGOR/MOXIE, derived ×3 shown as the dominant
+  // number, raw aptitude shown as a small secondary chip). Read-only on the
+  // team card — clicks-to-roll stay on the studio sheet. Tooltips fire via
+  // the existing data-tip delegation; no new code needed.
+  if (isSelf || (entry && entry.full)) {
+    const aptWrap = h("div", { class:"studio-sheet pc-aptitudes-embed" });
+    const renderApt = () => {
+      const pc = studioPcFromState();
+      if (!pc || !pc.aptitudes) return;
+      aptWrap.appendChild(buildStudioAptitudeStrip(pc, { readOnly: true }));
+    };
+    if (isSelf) renderApt();
+    else withStateAs(entry.full, renderApt);
+    card.appendChild(aptWrap);
+  }
+
+  // 4-zone coverage — kept as-is (fixed-structure grid, sits cleanly between
+  // the rich panels and the variable-length top-skills text).
+  const tierClass = (v) => v >= 60 ? "pc-cov pc-cov--high" : v >= 40 ? "pc-cov pc-cov--mid" : "pc-cov pc-cov--low";
+  card.appendChild(h("div", {class:"pc-section"},
+    h("div", {class:"pc-section-label"}, "▸ ZONE COVERAGE"),
+    h("div", {class:"pc-coverage-row"},
+      h("div", {class: tierClass(data.coverage.combat)}, "CBT " + data.coverage.combat),
+      h("div", {class: tierClass(data.coverage.face)}, "FACE " + data.coverage.face),
+      h("div", {class: tierClass(data.coverage.hacker)}, "HACK " + data.coverage.hacker),
+      h("div", {class: tierClass(data.coverage.sci)}, "SCI " + data.coverage.sci)
+    )
+  ));
+
+  // Top skills — variable-length text; lives below the fixed-structure rows.
+  if (data.topSkills.length > 0) {
+    card.appendChild(h("div", {class:"pc-section"},
+      h("div", {class:"pc-section-label"}, "▸ TOP SKILLS"),
+      h("div", {style:{fontFamily:"var(--mono)",fontSize:"11.5px",color:"rgba(220,235,238,0.85)",lineHeight:1.55}},
+        data.topSkills.map(s => s.name + " " + s.value).join("  ·  ")
+      )
+    ));
+  }
+
+  // v0.10.6: REPUTATION — embed the studio rep panel (progress bars + favor
+  // tickboxes per network) on team cards. The panel handles its own "No
+  // reputation yet" empty state, so characters without rep entries degrade
+  // gracefully. Tooltips (rep.i-rep etc.) fire via the existing delegation.
+  if (isSelf || (entry && entry.full)) {
+    const repWrap = h("div", { class:"studio-sheet pc-rep-embed" });
+    const renderRep = () => {
+      const pc = studioPcFromState();
+      if (!pc || !pc.reputation) return;
+      repWrap.appendChild(buildStudioReputation(pc));
+    };
+    if (isSelf) renderRep();
+    else withStateAs(entry.full, renderRep);
+    card.appendChild(repWrap);
   }
 
   // v0.10.5: TEAM TOOLS — initiative + personal notes for imported members.
@@ -8248,8 +8274,14 @@ function buildStudioReputation(pc) {
   return grid;
 }
 
-/* ── AptitudeStrip — 3 family columns (Insight / Vigor / Moxie) ── */
-function buildStudioAptitudeStrip(pc) {
+/* ── AptitudeStrip — 3 family columns (Insight / Vigor / Moxie) ──
+   v0.10.6: derived (×3) is now the dominant number — "roll under Aptitude×3" is
+   what's actually used in play, so the eye should land on it first. Raw aptitude
+   stays as a secondary chip. opts.readOnly renders the tile as a non-clickable
+   div (used by the team-card embed; the studio sheet still clicks-to-roll). */
+function buildStudioAptitudeStrip(pc, opts) {
+  opts = opts || {};
+  const readOnly = !!opts.readOnly;
   const families = [
     { key:"insight", label:"INSIGHT", tone:"var(--st-insight)", apts:["COG","INT"] },
     { key:"vigor",   label:"VIGOR",   tone:"var(--st-vigor)",   apts:["REF","SOM"] },
@@ -8268,16 +8300,23 @@ function buildStudioAptitudeStrip(pc) {
     fam.apts.forEach(k => {
       const meta = EP2.APTITUDES[k];
       const base = pc.aptitudes[k] || 0;
-      inner.appendChild(h("button", {
-        title: "Roll " + meta.full + " check (target " + (base * 3) + ")",
-        style:{background:"var(--st-paper)",border:"1px solid var(--st-line)",borderLeft:"4px solid "+meta.tone,borderRadius:"2px",padding:"5px 6px 6px",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"flex-start",fontFamily:"inherit"},
-        "data-tip": "aptitudes." + k,
-        onClick: () => studioRollAptitude(k, 0)
-      },
+      const derived = base * 3;
+      const tileTag = readOnly ? "div" : "button";
+      const tileProps = {
+        title: readOnly
+          ? meta.full + " " + base + " · roll under " + derived
+          : "Roll " + meta.full + " check (target " + derived + ")",
+        style:{background:"var(--st-paper)",border:"1px solid var(--st-line)",borderLeft:"4px solid "+meta.tone,borderRadius:"2px",padding:"5px 6px 6px",cursor: readOnly ? "default" : "pointer",display:"flex",flexDirection:"column",alignItems:"flex-start",fontFamily:"inherit"},
+        "data-tip": "aptitudes." + k
+      };
+      if (!readOnly) tileProps.onClick = () => studioRollAptitude(k, 0);
+      inner.appendChild(h(tileTag, tileProps,
         h("span", { style:{fontSize:"10px",fontWeight:800,color:meta.tone,letterSpacing:"1.2px"} }, k),
-        h("span", { style:{display:"flex",alignItems:"baseline",gap:"3px",marginTop:"1px",fontFamily:'"Share Tech Mono", ui-monospace, monospace'} },
-          h("span", { style:{fontSize:"17px",fontWeight:800,color:"var(--st-ink)",lineHeight:1,fontVariantNumeric:"tabular-nums"} }, String(base)),
-          h("span", { style:{fontSize:"11px",color:"var(--st-ink-mute)",fontVariantNumeric:"tabular-nums"} }, String(base * 3))
+        h("span", { style:{display:"flex",alignItems:"baseline",gap:"4px",marginTop:"1px",fontFamily:'"Share Tech Mono", ui-monospace, monospace'} },
+          // Derived (×3) — the play-priority value: roll under this. v0.10.6 made it dominant.
+          h("span", { style:{fontSize:"17px",fontWeight:800,color:"var(--st-ink)",lineHeight:1,fontVariantNumeric:"tabular-nums"} }, String(derived)),
+          // Raw aptitude — kept as secondary, smaller, muted.
+          h("span", { style:{fontSize:"10px",fontWeight:700,color:"var(--st-ink-mute)",fontVariantNumeric:"tabular-nums",letterSpacing:"0.4px"} }, "(" + base + ")")
         )
       ));
     });

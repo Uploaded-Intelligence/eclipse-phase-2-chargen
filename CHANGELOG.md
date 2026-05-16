@@ -2,6 +2,38 @@
 
 All notable changes to this project. Format follows the spirit of [Keep a Changelog](https://keepachangelog.com/), versioned by milestone.
 
+## [0.10.6] — 2026-05-17 — "Aligned Team Card"
+
+**Vitals up top, rich panels everywhere there were text rows, derived (×3) front and centre, tooltips for free.** Four discrete polish requests from live play, all on the team card, all reusing studio-sheet visuals — collapsed into one wave because they share infrastructure.
+
+### Changed
+- **Team card section order reflows so VITALS comes immediately after the lifepath line.** Previously the HP/STRESS bars sat below APTITUDES + TOP SKILLS + ZONE COVERAGE, so each card's bars were at a different Y-coordinate (variable content above them shifted them down by different amounts per character). The user wanted to scan horizontally — "where is everyone's HP at right now?" — without their eyes jumping up and down. Vitals now opens the data section; everything variable flows beneath.
+- **Aptitudes tile shows derived (Aptitude × 3) as the dominant number, with the raw aptitude as a small `(20)` chip.** "Roll under your Aptitude × 3" is what's actually rolled at the table, so the eye should land on it first. Raw 17px → 11px; derived 11px → 17px. Affects studio sheet too (same panel).
+- `.pc-meta` (lifepath row) now has `min-height: 18px` — keeps empty-lifepath cards the same height as filled ones so the vitals row aligns.
+
+### Added
+- **`buildStudioAptitudeStrip` embed on team cards.** Three colour-coded family boxes (INSIGHT teal · VIGOR red · MOXIE purple), each with two aptitudes, derived ×3 dominant + raw chip. Replaces the text-only `COG 20  INT 15  REF 15 …` row.
+- **`buildStudioReputation` embed on team cards.** Progress bars per rep network + FAVORS tickboxes. Handles empty rep gracefully ("No reputation yet.").
+- **`opts.readOnly` on `buildStudioAptitudeStrip`** — tile renders as a non-clickable `div` instead of a `<button>` with the `studioRollAptitude` handler. Team-card embeds use it (the team card is for at-a-glance reading; rolling stays on the studio sheet). Studio sheet keeps full interaction by default.
+
+### Free win
+- **Tooltips on team cards.** The studio panels already plaster `data-tip="aptitudes.COG"` / `data-tip="rep.i-rep"` etc. on every tile, and the global `setupTooltips()` listener (line 10861) delegates from `document`. Embedding the panels makes hover-to-learn work on teammates' cards without writing any new tooltip code. Hover an aptitude tile → "COG · Cognition. …". Hover a rep row → "i-rep · The Eye …".
+
+### Why it matters
+*"i want everything to be aligned — the HP and STRESS especially. Else its hard to read laterally."*
+*"Why not use our good visuals for aptitudes? (And reputation)? The text only UI for the team UI is so hard to see."*
+*"i want the 'derived' aptitude to be the bigger number, since the 'roll under your Aptitude x 3' is whats actually used in game."*
+*"i want team UI to have 'tooltip hover too', if its not too costly. This makes it easy to hover and learn about your teammates at a glance."*
+
+The team page is the live-play surface. v0.10.5 added the bars; v0.10.6 sharpens them: scannable, rich, play-priority, hover-to-learn. The user shouldn't have to switch back to the studio sheet to read someone's stats — the team card should be the answer at the table.
+
+### What did NOT change
+- No data-model change. Aptitudes + rep already live in `STATE.ego`; the embeds project through `studioPcFromState()` / `withStateAs` (the same channel v0.10.5 introduced).
+- No new tooltip entries. The existing `RULEBOOK_REFERENCE.aptitudes.*` / `rep.networks.*` cover every tile.
+- No subgrid. The vitals-at-top reorder is enough for the user's "*especially* HP and STRESS" priority. Revisit if cross-card alignment still feels rough.
+
+---
+
 ## [0.10.5] — 2026-05-17 — "Live Vitals on the Team Card"
 
 **Bars where there was text, one source of truth where there were two.** The team page in v0.10.4 was shipping live data but rendering it as flat numerical readouts (`wounds: 1 · raw 12/55`). The rich segmented HP bar, threshold markers, armor chip, and pool tiles existed in the studio sheet but never reached the team-card surface. Worse, the YOU card's wound count used a parallel projection (`Math.floor(data.wounds / data.WT)`) that ignored the one-way ratchet `STATE.play.woundsTaken` maintained by `studioSetDamage` — so after a damage-then-heal sequence, studio and team card disagreed about the same character at the same moment.

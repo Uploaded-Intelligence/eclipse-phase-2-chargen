@@ -6,7 +6,7 @@ const vm = require("vm");
 const html = fs.readFileSync(__dirname + "/index.html", "utf8");
 let js = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 js = js.replace(/^boot\(\);$/m, "// boot suppressed");
-js += "\nthis.__exports = Object.defineProperties({}, {STATE:{get:()=>STATE,enumerable:true},RULEBOOK_DATA:{value:RULEBOOK_DATA,enumerable:true},RULEBOOK_REFERENCE:{value:RULEBOOK_REFERENCE,enumerable:true},derived:{value:derived,enumerable:true},newState:{value:newState,enumerable:true},encodeShareUrl:{value:encodeShareUrl,enumerable:true},decodeShareUrl:{value:decodeShareUrl,enumerable:true},stripPortrait:{value:stripPortrait,enumerable:true},importShareSnapshot:{value:importShareSnapshot,enumerable:true},makeCharacterId:{value:makeCharacterId,enumerable:true},migrateV6ToV7:{value:migrateV6ToV7,enumerable:true},migrateToCurrent:{value:migrateToCurrent,enumerable:true},SCHEMA_VERSION:{value:SCHEMA_VERSION,enumerable:true},LZString:{value:LZString,enumerable:true},studioPcFromState:{value:studioPcFromState,enumerable:true},studioHealDamage:{value:studioHealDamage,enumerable:true},studioHealWound:{value:studioHealWound,enumerable:true},studioHealStress:{value:studioHealStress,enumerable:true},studioHealTrauma:{value:studioHealTrauma,enumerable:true},studioSetDamage:{value:studioSetDamage,enumerable:true},studioSetWounds:{value:studioSetWounds,enumerable:true},studioSetStress:{value:studioSetStress,enumerable:true},studioSetTraumas:{value:studioSetTraumas,enumerable:true},characterHasFabber:{value:characterHasFabber,enumerable:true},studioMeshAccess:{value:studioMeshAccess,enumerable:true},studioMeshOpsec:{value:studioMeshOpsec,enumerable:true},studioMeshApps:{value:studioMeshApps,enumerable:true},studioMeshImplants:{value:studioMeshImplants,enumerable:true},buildPartyImportEntry:{value:buildPartyImportEntry,enumerable:true},normalizePartyImportEntries:{value:normalizePartyImportEntries,enumerable:true},importJSON:{value:importJSON,enumerable:true},partyComputeCardData:{value:partyComputeCardData,enumerable:true},buildPartyMemberCard:{value:buildPartyMemberCard,enumerable:true},buildStudioVitalSignsCard:{value:buildStudioVitalSignsCard,enumerable:true},buildStudioDamageBar:{value:buildStudioDamageBar,enumerable:true},buildStudioMindBar:{value:buildStudioMindBar,enumerable:true},buildStudioVitalityBar:{value:buildStudioVitalityBar,enumerable:true},buildStudioPoolMeter:{value:buildStudioPoolMeter,enumerable:true},buildStudioPoolRow:{value:buildStudioPoolRow,enumerable:true},withStateAs:{value:withStateAs,enumerable:true},_playerOwnedPayload:{value:_playerOwnedPayload,enumerable:true},_isSuspended:{value:_isSuspended,enumerable:true},_setLastInputAt:{value:(t)=>{_lastInputAt=t;},enumerable:true},_getLastInputAt:{value:()=>_lastInputAt,enumerable:true},_setIdleCount:{value:(n)=>{_idleCount=n;},enumerable:true},_getIdleCount:{value:()=>_idleCount,enumerable:true},_setPollIntervalMs:{value:(n)=>{_pollIntervalMs=n;},enumerable:true},_getPollIntervalMs:{value:()=>_pollIntervalMs,enumerable:true},_AFK_THRESHOLD_MS:{value:AFK_THRESHOLD_MS,enumerable:true},_setState:{value:(v)=>{STATE=v;},enumerable:true}});\n";
+js += "\nthis.__exports = Object.defineProperties({}, {STATE:{get:()=>STATE,enumerable:true},RULEBOOK_DATA:{value:RULEBOOK_DATA,enumerable:true},RULEBOOK_REFERENCE:{value:RULEBOOK_REFERENCE,enumerable:true},derived:{value:derived,enumerable:true},newState:{value:newState,enumerable:true},encodeShareUrl:{value:encodeShareUrl,enumerable:true},decodeShareUrl:{value:decodeShareUrl,enumerable:true},stripPortrait:{value:stripPortrait,enumerable:true},importShareSnapshot:{value:importShareSnapshot,enumerable:true},makeCharacterId:{value:makeCharacterId,enumerable:true},migrateV6ToV7:{value:migrateV6ToV7,enumerable:true},migrateToCurrent:{value:migrateToCurrent,enumerable:true},SCHEMA_VERSION:{value:SCHEMA_VERSION,enumerable:true},LZString:{value:LZString,enumerable:true},studioPcFromState:{value:studioPcFromState,enumerable:true},studioHealDamage:{value:studioHealDamage,enumerable:true},studioHealWound:{value:studioHealWound,enumerable:true},studioHealStress:{value:studioHealStress,enumerable:true},studioHealTrauma:{value:studioHealTrauma,enumerable:true},studioSetDamage:{value:studioSetDamage,enumerable:true},studioSetWounds:{value:studioSetWounds,enumerable:true},studioSetStress:{value:studioSetStress,enumerable:true},studioSetTraumas:{value:studioSetTraumas,enumerable:true},characterHasFabber:{value:characterHasFabber,enumerable:true},studioMeshAccess:{value:studioMeshAccess,enumerable:true},studioMeshOpsec:{value:studioMeshOpsec,enumerable:true},studioMeshApps:{value:studioMeshApps,enumerable:true},studioMeshImplants:{value:studioMeshImplants,enumerable:true},buildPartyImportEntry:{value:buildPartyImportEntry,enumerable:true},normalizePartyImportEntries:{value:normalizePartyImportEntries,enumerable:true},importJSON:{value:importJSON,enumerable:true},partyComputeCardData:{value:partyComputeCardData,enumerable:true},buildPartyMemberCard:{value:buildPartyMemberCard,enumerable:true},buildStudioVitalSignsCard:{value:buildStudioVitalSignsCard,enumerable:true},buildStudioDamageBar:{value:buildStudioDamageBar,enumerable:true},buildStudioMindBar:{value:buildStudioMindBar,enumerable:true},buildStudioVitalityBar:{value:buildStudioVitalityBar,enumerable:true},buildStudioPoolMeter:{value:buildStudioPoolMeter,enumerable:true},buildStudioPoolRow:{value:buildStudioPoolRow,enumerable:true},buildStudioAptitudeStrip:{value:buildStudioAptitudeStrip,enumerable:true},buildStudioReputation:{value:buildStudioReputation,enumerable:true},withStateAs:{value:withStateAs,enumerable:true},_playerOwnedPayload:{value:_playerOwnedPayload,enumerable:true},_isSuspended:{value:_isSuspended,enumerable:true},_setLastInputAt:{value:(t)=>{_lastInputAt=t;},enumerable:true},_getLastInputAt:{value:()=>_lastInputAt,enumerable:true},_setIdleCount:{value:(n)=>{_idleCount=n;},enumerable:true},_getIdleCount:{value:()=>_idleCount,enumerable:true},_setPollIntervalMs:{value:(n)=>{_pollIntervalMs=n;},enumerable:true},_getPollIntervalMs:{value:()=>_pollIntervalMs,enumerable:true},_AFK_THRESHOLD_MS:{value:AFK_THRESHOLD_MS,enumerable:true},_setState:{value:(v)=>{STATE=v;},enumerable:true}});\n";
 
 const sandbox = {
   console,
@@ -709,7 +709,7 @@ console.log("\n=== v0.10.2 — studioPcFromState produces a renderable pc from a
 console.log("\n=== v0.10.4 — toolVersion bumped to 0.10.4 ===");
 {
   const fresh = exp.newState();
-  assert("newState().meta.toolVersion is 0.10.5", fresh.meta.toolVersion === "0.10.5");
+  assert("newState().meta.toolVersion is 0.10.6", fresh.meta.toolVersion === "0.10.6");
 }
 
 console.log("\n=== v0.10.4 — hash-skip: same player-owned state → identical hash ===");
@@ -1000,6 +1000,93 @@ console.log("\n=== v0.10.5 — team card builds without throwing (self + FILE-im
     /vitalsOnly:\s*true/.test(cardSrc));
   assert("buildPartyMemberCard no longer recomputes wounds locally via Math.floor(data.wounds / data.WT)",
     /Math\.floor\(data\.wounds\s*\/\s*\(data\.WT/.test(cardSrc) === false);
+}
+
+// v0.10.6 — Aligned team card: vitals up top, rich aptitudes + reputation
+// embeds reusing studio panels, derived (×3) becomes the dominant number
+// because that's the value you actually roll under in play.
+
+console.log("\n=== v0.10.6 — buildStudioAptitudeStrip + Reputation are exposed and render ===");
+{
+  assert("buildStudioAptitudeStrip is exposed",
+    typeof exp.buildStudioAptitudeStrip === "function");
+  assert("buildStudioReputation is exposed",
+    typeof exp.buildStudioReputation === "function");
+  // Smoke check — full render against a fresh state shouldn't throw
+  exp._setState(exp.newState());
+  exp.STATE.morph.chosen = "exalt";
+  let threwApt = null;
+  try { exp.buildStudioAptitudeStrip(exp.studioPcFromState(), { readOnly: true }); }
+  catch (e) { threwApt = e; }
+  assert("buildStudioAptitudeStrip renders without throwing (readOnly)",
+    threwApt === null, threwApt ? (threwApt.message || String(threwApt)) : "");
+  let threwRep = null;
+  try { exp.buildStudioReputation(exp.studioPcFromState()); }
+  catch (e) { threwRep = e; }
+  assert("buildStudioReputation renders without throwing on empty rep",
+    threwRep === null, threwRep ? (threwRep.message || String(threwRep)) : "");
+}
+
+console.log("\n=== v0.10.6 — team card section order: vitals → aptitudes → coverage → skills → reputation ===");
+{
+  const cardSrc = exp.buildPartyMemberCard.toString();
+  assert("team card now includes buildStudioAptitudeStrip embed",
+    cardSrc.indexOf("buildStudioAptitudeStrip") !== -1);
+  assert("team card now includes buildStudioReputation embed",
+    cardSrc.indexOf("buildStudioReputation") !== -1);
+  assert("team card no longer renders text-only pc-apt-row",
+    cardSrc.indexOf("pc-apt-row") === -1);
+  const vIdx = cardSrc.indexOf("buildStudioVitalSignsCard");
+  const aIdx = cardSrc.indexOf("buildStudioAptitudeStrip");
+  const rIdx = cardSrc.indexOf("buildStudioReputation");
+  assert("vitals embed comes before aptitudes embed (vitals up top)",
+    vIdx > 0 && aIdx > vIdx, "vitalsIdx=" + vIdx + " aptIdx=" + aIdx);
+  assert("aptitudes embed comes before reputation embed",
+    aIdx > 0 && rIdx > aIdx, "aptIdx=" + aIdx + " repIdx=" + rIdx);
+}
+
+console.log("\n=== v0.10.6 — aptitude tile: derived (×3) is now the larger font ===");
+{
+  const src = exp.buildStudioAptitudeStrip.toString();
+  // The tile has two numeric spans. In v0.10.5 raw was 17px primary, derived
+  // 11px secondary. v0.10.6 flips: derived gets the dominant size, raw shrinks
+  // to a small parenthesised chip. Find the span whose value comes from
+  // `String(derived)` and the one whose value comes from `"(" + base + ")"`,
+  // then compare their fontSize values. Search by working back from those
+  // value-anchors rather than guessing punctuation between the style obj and
+  // the value arg (the closing `} }, ` between them tripped naive regexes).
+  function pxBefore(src, anchor) {
+    const idx = src.indexOf(anchor);
+    if (idx < 0) return null;
+    // Search backwards for the nearest fontSize:"Npx"
+    const before = src.slice(Math.max(0, idx - 600), idx);
+    const matches = before.match(/fontSize:"([\d.]+)px"/g) || [];
+    if (matches.length === 0) return null;
+    const last = matches[matches.length - 1];
+    const px = last.match(/([\d.]+)/)[1];
+    return parseFloat(px);
+  }
+  const dPx = pxBefore(src, "String(derived)");
+  const rPx = pxBefore(src, '"(" + base + ")"');
+  assert("derived font-size declaration found", typeof dPx === "number", "dPx=" + dPx);
+  assert("raw font-size declaration found", typeof rPx === "number", "rPx=" + rPx);
+  if (typeof dPx === "number" && typeof rPx === "number") {
+    assert("derived font size (" + dPx + "px) is larger than raw (" + rPx + "px)",
+      dPx > rPx);
+    assert("derived font size is >= 16px (still visually dominant)", dPx >= 16);
+  }
+}
+
+console.log("\n=== v0.10.6 — aptitude tile readOnly suppresses studioRollAptitude click ===");
+{
+  const src = exp.buildStudioAptitudeStrip.toString();
+  assert("buildStudioAptitudeStrip source mentions readOnly",
+    /readOnly/.test(src));
+  // The onClick only attaches when !readOnly
+  assert("onClick is guarded by !readOnly", /if\s*\(!readOnly\)[^{]*onClick/.test(src) || /if\s*\(!readOnly\)[\s\S]{0,80}onClick/.test(src));
+  // When readOnly, tile tag should switch to a non-button element
+  assert("readOnly path uses a non-button tag for the tile",
+    /tileTag\s*=\s*readOnly/.test(src) || /readOnly\s*\?\s*['"]div['"]/.test(src));
 }
 
 console.log("\n=========================================");
