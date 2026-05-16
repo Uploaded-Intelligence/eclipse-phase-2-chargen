@@ -6,7 +6,7 @@ const vm = require("vm");
 const html = fs.readFileSync(__dirname + "/index.html", "utf8");
 let js = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 js = js.replace(/^boot\(\);$/m, "// boot suppressed");
-js += "\nthis.__exports = Object.defineProperties({}, {STATE:{get:()=>STATE,enumerable:true},RULEBOOK_DATA:{value:RULEBOOK_DATA,enumerable:true},RULEBOOK_REFERENCE:{value:RULEBOOK_REFERENCE,enumerable:true},derived:{value:derived,enumerable:true},newState:{value:newState,enumerable:true},encodeShareUrl:{value:encodeShareUrl,enumerable:true},decodeShareUrl:{value:decodeShareUrl,enumerable:true},stripPortrait:{value:stripPortrait,enumerable:true},importShareSnapshot:{value:importShareSnapshot,enumerable:true},makeCharacterId:{value:makeCharacterId,enumerable:true},migrateV6ToV7:{value:migrateV6ToV7,enumerable:true},migrateToCurrent:{value:migrateToCurrent,enumerable:true},SCHEMA_VERSION:{value:SCHEMA_VERSION,enumerable:true},LZString:{value:LZString,enumerable:true},studioPcFromState:{value:studioPcFromState,enumerable:true},studioHealDamage:{value:studioHealDamage,enumerable:true},studioHealWound:{value:studioHealWound,enumerable:true},studioHealStress:{value:studioHealStress,enumerable:true},studioHealTrauma:{value:studioHealTrauma,enumerable:true},characterHasFabber:{value:characterHasFabber,enumerable:true},studioMeshAccess:{value:studioMeshAccess,enumerable:true},studioMeshOpsec:{value:studioMeshOpsec,enumerable:true},studioMeshApps:{value:studioMeshApps,enumerable:true},studioMeshImplants:{value:studioMeshImplants,enumerable:true},buildPartyImportEntry:{value:buildPartyImportEntry,enumerable:true},normalizePartyImportEntries:{value:normalizePartyImportEntries,enumerable:true},importJSON:{value:importJSON,enumerable:true},partyComputeCardData:{value:partyComputeCardData,enumerable:true},withStateAs:{value:withStateAs,enumerable:true},_playerOwnedPayload:{value:_playerOwnedPayload,enumerable:true},_isSuspended:{value:_isSuspended,enumerable:true},_setLastInputAt:{value:(t)=>{_lastInputAt=t;},enumerable:true},_getLastInputAt:{value:()=>_lastInputAt,enumerable:true},_setIdleCount:{value:(n)=>{_idleCount=n;},enumerable:true},_getIdleCount:{value:()=>_idleCount,enumerable:true},_setPollIntervalMs:{value:(n)=>{_pollIntervalMs=n;},enumerable:true},_getPollIntervalMs:{value:()=>_pollIntervalMs,enumerable:true},_AFK_THRESHOLD_MS:{value:AFK_THRESHOLD_MS,enumerable:true},_setState:{value:(v)=>{STATE=v;},enumerable:true}});\n";
+js += "\nthis.__exports = Object.defineProperties({}, {STATE:{get:()=>STATE,enumerable:true},RULEBOOK_DATA:{value:RULEBOOK_DATA,enumerable:true},RULEBOOK_REFERENCE:{value:RULEBOOK_REFERENCE,enumerable:true},derived:{value:derived,enumerable:true},newState:{value:newState,enumerable:true},encodeShareUrl:{value:encodeShareUrl,enumerable:true},decodeShareUrl:{value:decodeShareUrl,enumerable:true},stripPortrait:{value:stripPortrait,enumerable:true},importShareSnapshot:{value:importShareSnapshot,enumerable:true},makeCharacterId:{value:makeCharacterId,enumerable:true},migrateV6ToV7:{value:migrateV6ToV7,enumerable:true},migrateToCurrent:{value:migrateToCurrent,enumerable:true},SCHEMA_VERSION:{value:SCHEMA_VERSION,enumerable:true},LZString:{value:LZString,enumerable:true},studioPcFromState:{value:studioPcFromState,enumerable:true},studioHealDamage:{value:studioHealDamage,enumerable:true},studioHealWound:{value:studioHealWound,enumerable:true},studioHealStress:{value:studioHealStress,enumerable:true},studioHealTrauma:{value:studioHealTrauma,enumerable:true},studioSetDamage:{value:studioSetDamage,enumerable:true},studioSetWounds:{value:studioSetWounds,enumerable:true},studioSetStress:{value:studioSetStress,enumerable:true},studioSetTraumas:{value:studioSetTraumas,enumerable:true},characterHasFabber:{value:characterHasFabber,enumerable:true},studioMeshAccess:{value:studioMeshAccess,enumerable:true},studioMeshOpsec:{value:studioMeshOpsec,enumerable:true},studioMeshApps:{value:studioMeshApps,enumerable:true},studioMeshImplants:{value:studioMeshImplants,enumerable:true},buildPartyImportEntry:{value:buildPartyImportEntry,enumerable:true},normalizePartyImportEntries:{value:normalizePartyImportEntries,enumerable:true},importJSON:{value:importJSON,enumerable:true},partyComputeCardData:{value:partyComputeCardData,enumerable:true},buildPartyMemberCard:{value:buildPartyMemberCard,enumerable:true},buildStudioVitalSignsCard:{value:buildStudioVitalSignsCard,enumerable:true},buildStudioDamageBar:{value:buildStudioDamageBar,enumerable:true},buildStudioMindBar:{value:buildStudioMindBar,enumerable:true},buildStudioVitalityBar:{value:buildStudioVitalityBar,enumerable:true},buildStudioPoolMeter:{value:buildStudioPoolMeter,enumerable:true},buildStudioPoolRow:{value:buildStudioPoolRow,enumerable:true},withStateAs:{value:withStateAs,enumerable:true},_playerOwnedPayload:{value:_playerOwnedPayload,enumerable:true},_isSuspended:{value:_isSuspended,enumerable:true},_setLastInputAt:{value:(t)=>{_lastInputAt=t;},enumerable:true},_getLastInputAt:{value:()=>_lastInputAt,enumerable:true},_setIdleCount:{value:(n)=>{_idleCount=n;},enumerable:true},_getIdleCount:{value:()=>_idleCount,enumerable:true},_setPollIntervalMs:{value:(n)=>{_pollIntervalMs=n;},enumerable:true},_getPollIntervalMs:{value:()=>_pollIntervalMs,enumerable:true},_AFK_THRESHOLD_MS:{value:AFK_THRESHOLD_MS,enumerable:true},_setState:{value:(v)=>{STATE=v;},enumerable:true}});\n";
 
 const sandbox = {
   console,
@@ -709,7 +709,7 @@ console.log("\n=== v0.10.2 — studioPcFromState produces a renderable pc from a
 console.log("\n=== v0.10.4 — toolVersion bumped to 0.10.4 ===");
 {
   const fresh = exp.newState();
-  assert("newState().meta.toolVersion is 0.10.4", fresh.meta.toolVersion === "0.10.4");
+  assert("newState().meta.toolVersion is 0.10.5", fresh.meta.toolVersion === "0.10.5");
 }
 
 console.log("\n=== v0.10.4 — hash-skip: same player-owned state → identical hash ===");
@@ -859,6 +859,147 @@ console.log("\n=== v0.10.0 — STATE.team.teamName persists through save/load ro
   const serialized = JSON.parse(JSON.stringify(exp.STATE));
   const loaded = exp.migrateToCurrent(serialized);
   assert("teamName survives save/load roundtrip", loaded.team.teamName === "Bone Bird Brigade");
+}
+
+// v0.10.5 — Live vitals on team card: bar visualization + sync correction.
+// The earlier text-only YOU vitals one-liner recomputed wound count from raw
+// damage (`Math.floor(data.wounds / data.WT)`), ignoring the one-way ratchet
+// `STATE.play.woundsTaken` that studioSetDamage maintains. v0.10.5 routes
+// both YOU and FILE team cards through `studioPcFromState()` (the studio
+// sheet's projection), aligning the count and adding the segmented HP bars
+// to the team card surface. Tests below assert: opts plumbing is present,
+// the sync correction holds, the FILE branch reads entry.full not STATE,
+// the auto-bump ratchet still works (regression), and the misleading "Tick
+// a wound"/"Tick a trauma" banner copy is gone.
+
+console.log("\n=== v0.10.5 — readOnly opts plumbed through studio vitals stack ===");
+{
+  assert("buildStudioPoolMeter source mentions readOnly",
+    exp.buildStudioPoolMeter && /readOnly/.test(exp.buildStudioPoolMeter.toString()));
+  assert("buildStudioPoolRow source mentions readOnly (forwards opts)",
+    exp.buildStudioPoolRow && /readOnly/.test(exp.buildStudioPoolRow.toString()));
+  assert("buildStudioVitalityBar source mentions readOnly",
+    exp.buildStudioVitalityBar && /readOnly/.test(exp.buildStudioVitalityBar.toString()));
+  assert("buildStudioDamageBar source forwards readOnly to vitalityBar",
+    exp.buildStudioDamageBar && /readOnly/.test(exp.buildStudioDamageBar.toString()));
+  assert("buildStudioMindBar source forwards readOnly to vitalityBar",
+    exp.buildStudioMindBar && /readOnly/.test(exp.buildStudioMindBar.toString()));
+  assert("buildStudioVitalSignsCard accepts vitalsOnly + readOnly opts",
+    exp.buildStudioVitalSignsCard
+      && /vitalsOnly/.test(exp.buildStudioVitalSignsCard.toString())
+      && /readOnly/.test(exp.buildStudioVitalSignsCard.toString()));
+}
+
+console.log("\n=== v0.10.5 — wound-sync: studio reads latched woundsTaken, not recomputed from raw ===");
+{
+  // Scenario: user took peak damage that latched woundsTaken via studioSetDamage,
+  // then healed raw back down. Studio reads the latched count; old team-card
+  // formula `floor(wounds/WT)` would recompute a lower count from the post-heal
+  // raw and diverge. v0.10.5 routes the team card through studioPcFromState so
+  // both surfaces show the same number.
+  exp._setState(exp.newState());
+  exp.STATE.morph.chosen = "exalt";
+  exp.STATE.play.wounds = 6;            // raw after healing
+  exp.STATE.play.woundsTaken = 4;       // latched from prior peak
+  const pc = exp.studioPcFromState();
+  assert("studioPcFromState surfaces latched play.woundsTaken (=== 4)",
+    pc.woundsTaken === 4, "got " + pc.woundsTaken);
+  const WT = (pc.derived && pc.derived.wound_threshold) || 1;
+  const naive = Math.floor(6 / WT);
+  assert("naive recompute would have produced a SMALLER count (the v0.10.4 bug)",
+    naive < 4, "naive=" + naive + " (would have mismatched studio's 4)");
+}
+
+console.log("\n=== v0.10.5 — FILE-import vitals project from entry.full, not local STATE ===");
+{
+  // Local STATE has a player at damage=30; an imported entry has damage=5.
+  // Under withStateAs(entry.full, ...), pc.damageTaken must reflect the entry.
+  exp._setState(exp.newState());
+  exp.STATE.morph.chosen = "exalt";
+  exp.STATE.play.wounds = 30;
+  const entryFull = exp.newState();
+  entryFull.morph.chosen = "exalt";
+  entryFull.play.wounds = 5;
+  const pcOfImport = exp.withStateAs(entryFull, () => exp.studioPcFromState());
+  assert("withStateAs swaps STATE for projection (pc.damageTaken === 5)",
+    pcOfImport.damageTaken === 5, "got " + pcOfImport.damageTaken);
+  assert("STATE restored after withStateAs (local damage still 30)",
+    exp.STATE.play.wounds === 30, "got " + exp.STATE.play.wounds);
+}
+
+console.log("\n=== v0.10.5 — studioSetDamage auto-bump one-way ratchet (regression) ===");
+{
+  // The display alignment in v0.10.5 only works because the data ratchet still
+  // holds: studioSetDamage(v) sets woundsTaken = max(current, floor(v/WT)).
+  // Healing raw damage must NOT decrement woundsTaken.
+  exp._setState(exp.newState());
+  exp.STATE.morph.chosen = "exalt";
+  const ms = exp.derived.morphStats();
+  const WT = (ms && ms.morph && ms.morph.WT) || 1;
+  exp.studioSetDamage(WT * 3);
+  assert("studioSetDamage(WT*3) latches woundsTaken to 3",
+    exp.STATE.play.woundsTaken === 3, "got " + exp.STATE.play.woundsTaken);
+  exp.studioSetDamage(WT);
+  assert("healing damage does NOT decrement woundsTaken (ratchet held at 3)",
+    exp.STATE.play.woundsTaken === 3, "got " + exp.STATE.play.woundsTaken);
+}
+
+console.log("\n=== v0.10.5 — threshold banner copy: no more 'Tick a wound' call-to-action ===");
+{
+  const dSrc = exp.buildStudioDamageBar.toString();
+  const mSrc = exp.buildStudioMindBar.toString();
+  assert("DamageBar source no longer contains 'Tick a wound.'",
+    dSrc.indexOf("Tick a wound.") === -1);
+  assert("MindBar source no longer contains 'Tick a trauma'",
+    mSrc.indexOf("Tick a trauma") === -1);
+  assert("DamageBar still announces 'WOUND THRESHOLD' crossing (informational)",
+    /WOUND THRESHOLD/.test(dSrc));
+  assert("MindBar still announces 'TRAUMA THRESHOLD' crossing (informational)",
+    /TRAUMA THRESHOLD/.test(mSrc));
+  assert("MindBar still references WIL check vs disorientation (rules reminder)",
+    /WIL check vs disorientation/.test(mSrc));
+}
+
+console.log("\n=== v0.10.5 — team card builds without throwing (self + FILE-import) ===");
+{
+  // The harness's document.createElement stub eats child appends, so we can
+  // only smoke-check that the render path completes. The presence of the
+  // vitals embed is verified by inspecting buildPartyMemberCard's source.
+  exp._setState(exp.newState());
+  exp.STATE.ego.name = "Test Lead";
+  exp.STATE.morph.chosen = "exalt";
+  let threwSelf = null;
+  try { exp.buildPartyMemberCard(exp.STATE, null); }
+  catch (e) { threwSelf = e; }
+  assert("buildPartyMemberCard(STATE, null) does not throw for self",
+    threwSelf === null, threwSelf ? (threwSelf.message || String(threwSelf)) : "");
+
+  const importFull = exp.newState();
+  importFull.ego.name = "Test Mate";
+  importFull.morph.chosen = "exalt";
+  const fakeEntry = {
+    id: "test-id", name: "Test Mate", concept: "hacker",
+    source: "file", lastSyncedAt: new Date().toISOString(),
+    coverage: {combat:30,face:40,hacker:60,sci:50},
+    gmNotes: {wounds:0,stress:0,initiative:null,statusEffects:[],notes:""},
+    full: importFull
+  };
+  exp.STATE.partyImports.push(fakeEntry);
+  let threwImport = null;
+  try { exp.buildPartyMemberCard(importFull, fakeEntry); }
+  catch (e) { threwImport = e; }
+  assert("buildPartyMemberCard(entry.full, entry) does not throw for FILE import",
+    threwImport === null, threwImport ? (threwImport.message || String(threwImport)) : "");
+
+  const cardSrc = exp.buildPartyMemberCard.toString();
+  assert("buildPartyMemberCard now appends buildStudioVitalSignsCard",
+    cardSrc.indexOf("buildStudioVitalSignsCard") !== -1);
+  assert("buildPartyMemberCard passes readOnly:!isSelf for FILE imports",
+    /readOnly:\s*!isSelf|readOnly:\s*\(?!isSelf/.test(cardSrc));
+  assert("buildPartyMemberCard passes vitalsOnly:true (no recharge/healing on team card)",
+    /vitalsOnly:\s*true/.test(cardSrc));
+  assert("buildPartyMemberCard no longer recomputes wounds locally via Math.floor(data.wounds / data.WT)",
+    /Math\.floor\(data\.wounds\s*\/\s*\(data\.WT/.test(cardSrc) === false);
 }
 
 console.log("\n=========================================");

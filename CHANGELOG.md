@@ -2,6 +2,34 @@
 
 All notable changes to this project. Format follows the spirit of [Keep a Changelog](https://keepachangelog.com/), versioned by milestone.
 
+## [0.10.5] — 2026-05-17 — "Live Vitals on the Team Card"
+
+**Bars where there was text, one source of truth where there were two.** The team page in v0.10.4 was shipping live data but rendering it as flat numerical readouts (`wounds: 1 · raw 12/55`). The rich segmented HP bar, threshold markers, armor chip, and pool tiles existed in the studio sheet but never reached the team-card surface. Worse, the YOU card's wound count used a parallel projection (`Math.floor(data.wounds / data.WT)`) that ignored the one-way ratchet `STATE.play.woundsTaken` maintained by `studioSetDamage` — so after a damage-then-heal sequence, studio and team card disagreed about the same character at the same moment.
+
+### Fixed
+- **Wound-sync bug.** Team-card YOU vitals now route through `studioPcFromState()`, the same projection the studio sheet uses. `pc.woundsTaken` becomes the single source of truth across surfaces; the divergent local recompute is gone.
+
+### Added
+- **Live VITAL SIGNS panel on every team card.** Damage bar + stress bar with segmented threshold markers, armor chip, INSIGHT/MOXIE/VIGOR/FLEX pool tiles, durability/lucidity/insanity stat tiles. The visualization you already had on the studio sheet, dropped inline on the team page so the team's live state is at-a-glance during play.
+- **`readOnly` mode for the studio vitals stack.** New `opts.readOnly` plumbed through `buildStudioVitalSignsCard` → `DamageBar`/`MindBar`/`PoolRow` → `VitalityBar`/`PoolMeter`. When set, ± controls aren't rendered and pool segments aren't clickable. The team card uses this for FILE imports (local mutators would only mutate the snapshot, not push back to the teammate's `/api/share` blob). YOU cards stay interactive — clicking ± on your own damage edits your STATE and propagates via v0.10.4's auto-push.
+- **`vitalsOnly` opts** suppresses the Recharge + Healing sub-sections when the studio panel is embedded on a team card — those controls belong on the studio sheet surface; the team card is for visualization, not action.
+- **`.studio-readonly` CSS** for belt-and-suspender disabled-state styling.
+- **`.party-card .studio-sheet` overrides** strip the studio sheet's own chrome (padding, background, font reset) so the embedded panel sits flush inside the team card.
+
+### Changed
+- **Threshold banner copy.** The damage banner used to read `DAMAGE ≥ WOUND THRESHOLD. Tick a wound.` — implying a manual action even though `studioSetDamage` auto-bumps `woundsTaken` already. Now reads `DAMAGE ≥ WOUND THRESHOLD. // auto-ticked at WT.` Same correction on the mind/trauma banner; the WIL-check rule reminder stays. The misleading call-to-action is gone, the informational threshold + penalty math stays.
+- Team-card "VITAL STATUS · LIVE FROM SHEET" tracker block (the three numerical rows for FILE imports) replaced by the live bar panel above it. The Initiative widget + personal notes textarea remain as the "TEAM TOOLS" block beneath the vitals.
+
+### Why it matters
+*"I want the team view to actually display all these dynamic stats that we already have good design graphics for because it's a lot of fun. It makes it feel more like a live state of the team."* The team page is the live-play surface — at-a-glance HP/stress/pool readouts are first-class, not decoration. v0.10.5 brings the visceral immersion the user asked for: seeing teammates' health going down in real-time, not reading numbers.
+
+### What did NOT change
+- No data-model change. `STATE.play.woundsTaken`/`traumasTaken` stay where they are; the auto-ratchet rules in `studioSetDamage`/`studioSetStress` are untouched. v0.10.5 is a display-projection fix plus an embed.
+- No new schema version, no migration, no API change.
+- No new auto-sync rules — v0.10.4's hash-gated auto-push + adaptive poll + AFK suspend all still apply.
+
+---
+
 ## [0.10.4] — 2026-05-16 — "Quiet Sync"
 
 **The cost-aware live sync.** Wave D shipped the team-room infrastructure but had two distinct problems: (1) player edits never auto-propagated after the initial join push (functional gap — teammates saw a frozen snapshot), and (2) the 60s polling drained KV commands even when the team was idle or the user had walked away. v0.10.4 fixes both with three orthogonal mechanisms.

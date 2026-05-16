@@ -749,6 +749,38 @@ body.play-mode .preview-mech { background: transparent; padding: 0; border: none
 .studio-sheet .studio-pool-seg:not(.on) { background: transparent; }
 .studio-sheet .studio-pool-seg:disabled { opacity: 0.25; cursor: not-allowed; }
 
+/* v0.10.5 — readOnly mode for the studio vitals stack. Used by the team card
+   so we can drop the studio VITAL SIGNS panel inline for FILE imports without
+   exposing mutators that would only mutate the local snapshot (and not push
+   to the imported character's /api/share blob). The ± buttons are not even
+   rendered in JS when readOnly; these rules belt-and-suspender the pool
+   segments and any future leak. */
+.studio-sheet .studio-readonly .studio-vbar-step,
+.studio-sheet .studio-vbar.studio-readonly .studio-vbar-step { display: none; }
+.studio-sheet .studio-pool-meter.studio-readonly .studio-pool-seg {
+  cursor: default; pointer-events: none;
+}
+.studio-sheet .studio-readonly .studio-editable { cursor: default; }
+.studio-sheet .studio-readonly .studio-editable:hover {
+  background: transparent; outline: none;
+}
+
+/* v0.10.5 — when the studio vitals card is embedded inside a team card,
+   strip studio-sheet's own page chrome (padding, background, font reset)
+   so it sits flush inside the party-card surface. The CSS variables and
+   child styles inherit normally. */
+.party-card .studio-sheet {
+  padding: 0;
+  background: none;
+  background-image: none;
+  display: block;
+  gap: 0;
+  font-size: inherit;
+  margin-top: 8px;
+}
+.party-card .studio-sheet .studio-section { margin-bottom: 0; }
+.party-card .studio-sheet .studio-section-panel { padding: 10px; }
+
 /* Vitality bar — two-zone (operational | dying) accumulator with markers. */
 .studio-sheet .studio-vbar { display: flex; flex-direction: column; }
 .studio-sheet .studio-vbar-head {
@@ -4001,7 +4033,7 @@ function makeCharacterId() {
 }
 
 const newState = () => ({
-  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.10.4", mode:"chargen" },
+  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.10.5", mode:"chargen" },
   // v0.10: team-room metadata. Roomless local play has all nulls + empty teamName.
   // teamName persists locally even before joining a room (set it once, it sticks).
   team:{ roomId:null, teamName:"", lastPolledAt:null },
@@ -6741,12 +6773,14 @@ function buildStudioSectionIcon(kind, size) {
   return _svg('<svg width="'+size+'" height="'+size+'" viewBox="0 0 16 16" style="display:block;flex:0 0 auto;color:#fff">'+body+'</svg>');
 }
 
-/* ── PoolMeter — segmented sliding bar ────────────────────────── */
-function buildStudioPoolMeter({ label, k, pool, tone, source }) {
+/* ── PoolMeter — segmented sliding bar ──────────────────────────
+   v0.10.5: opts.readOnly disables interaction (used by team-card render
+   for FILE imports — the player ows their own pool state on /api/share). */
+function buildStudioPoolMeter({ label, k, pool, tone, source, readOnly }) {
   const segs = Math.max(pool.max, 1);
   const remaining = Math.max(0, pool.max - pool.spent);
   const meter = h("div", {
-    class: "studio-pool-meter",
+    class: "studio-pool-meter" + (readOnly ? " studio-readonly" : ""),
     style: { color: tone, background: "linear-gradient(180deg, "+tone+"10 0%, var(--st-paper) 60%)" },
     "data-tip": "pools." + (label[0].toUpperCase() + label.slice(1).toLowerCase())
   });
@@ -6763,13 +6797,13 @@ function buildStudioPoolMeter({ label, k, pool, tone, source }) {
   const segContainer = h("div", { class: "studio-pool-segs" });
   for (let i = 0; i < segs; i++) {
     const filled = i < remaining;
-    const seg = h("button", {
+    const segProps = {
       class: "studio-pool-seg" + (filled ? " on" : ""),
-      disabled: pool.max === 0,
-      title: filled ? "Spend 1 " + label : "Refund 1 " + label,
-      onClick: () => studioSpendPool(k, filled ? 1 : -1)
-    });
-    segContainer.appendChild(seg);
+      disabled: pool.max === 0 || readOnly,
+      title: readOnly ? label + " " + remaining + "/" + pool.max : (filled ? "Spend 1 " + label : "Refund 1 " + label)
+    };
+    if (!readOnly) segProps.onClick = () => studioSpendPool(k, filled ? 1 : -1);
+    segContainer.appendChild(h("button", segProps));
   }
   if (pool.max === 0) {
     segContainer.appendChild(h("span", { style:{fontSize:"10px",color:"var(--st-ink-mute)",alignSelf:"center",marginLeft:"6px"} }, "none"));
@@ -6778,8 +6812,10 @@ function buildStudioPoolMeter({ label, k, pool, tone, source }) {
   return meter;
 }
 
-/* ── PoolRow — all 4 pools side-by-side ──────────────────────── */
-function buildStudioPoolRow(pc) {
+/* ── PoolRow — all 4 pools side-by-side ────────────────────────
+   v0.10.5: opts.readOnly forwards to each PoolMeter. */
+function buildStudioPoolRow(pc, opts) {
+  opts = opts || {};
   const row = h("div", { style:{display:"grid",gridTemplateColumns:"repeat(4, 1fr)",gap:"10px"} });
   const pools = [
     { label:"INSIGHT", k:"insight", tone:"var(--st-insight)", source:"COG · INT" },
@@ -6787,12 +6823,14 @@ function buildStudioPoolRow(pc) {
     { label:"VIGOR",   k:"vigor",   tone:"var(--st-vigor)",   source:"REF · SOM" },
     { label:"FLEX",    k:"flex",    tone:"var(--st-flex)",    source:"Ego Flex" }
   ];
-  pools.forEach(p => row.appendChild(buildStudioPoolMeter({ ...p, pool: pc.pools[p.k] })));
+  pools.forEach(p => row.appendChild(buildStudioPoolMeter({ ...p, pool: pc.pools[p.k], readOnly: opts.readOnly })));
   return row;
 }
 
-/* ── VitalityBar — generic engine for damage + mind tracks ───── */
-function buildStudioVitalityBar({ label, doneLabel, deadLabel, value, ticks, down, dead, tickLabel, tickTaken, setValue, setTicks, accent, dyingAccent, extra, dataTip }) {
+/* ── VitalityBar — generic engine for damage + mind tracks ─────
+   v0.10.5: readOnly skips ± buttons and editable text — used by team-card
+   render for FILE imports. The bar visual stays so live HP is at-a-glance. */
+function buildStudioVitalityBar({ label, doneLabel, deadLabel, value, ticks, down, dead, tickLabel, tickTaken, setValue, setTicks, accent, dyingAccent, extra, dataTip, readOnly }) {
   const pct = Math.min(100, (value / Math.max(1, dead)) * 100);
   const downPct = (down / Math.max(1, dead)) * 100;
   const isDown = value >= down;
@@ -6802,30 +6840,36 @@ function buildStudioVitalityBar({ label, doneLabel, deadLabel, value, ticks, dow
     ? "linear-gradient(90deg, var(--st-amber)cc 0%, var(--st-amber)cc " + ((down/Math.max(1,value))*100) + "%, var(--st-red) " + (((down/Math.max(1,value))*100) + 1) + "%, var(--st-red)ee 100%)"
     : "linear-gradient(90deg, " + tone + "cc, " + tone + ")";
 
-  const wrap = h("div", { class: "studio-vbar", "data-tip": dataTip || null });
+  const wrap = h("div", { class: "studio-vbar" + (readOnly ? " studio-readonly" : ""), "data-tip": dataTip || null });
 
   // Header — value + ticks + extra slot
   const head = h("div", { class: "studio-vbar-head" });
   // Value block
   const valBlock = h("div");
   valBlock.appendChild(h("div", { class: "studio-vbar-mini-label" }, label));
-  valBlock.appendChild(h("div", { class: "studio-vbar-stack" },
-    h("button", { class: "studio-vbar-step", style:{color:tone}, onClick: () => setValue(value - 1) }, "−"),
-    buildStudioEditableText({ value, format: "int", onCommit: (v) => setValue(v), style: { fontSize:"36px",fontWeight:800,color:isDown?"var(--st-red)":"var(--st-ink)",lineHeight:1,fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontVariantNumeric:"tabular-nums",minWidth:"50px",textAlign:"center",display:"inline-block"} }),
-    h("span", { class: "studio-vbar-of" }, "/ " + dead),
-    h("button", { class: "studio-vbar-step", style:{color:tone}, onClick: () => setValue(value + 1) }, "+")
-  ));
+  const valStack = h("div", { class: "studio-vbar-stack" });
+  if (!readOnly) valStack.appendChild(h("button", { class: "studio-vbar-step", style:{color:tone}, onClick: () => setValue(value - 1) }, "−"));
+  valStack.appendChild(readOnly
+    ? h("span", { style: { fontSize:"36px",fontWeight:800,color:isDown?"var(--st-red)":"var(--st-ink)",lineHeight:1,fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontVariantNumeric:"tabular-nums",minWidth:"50px",textAlign:"center",display:"inline-block"} }, String(value))
+    : buildStudioEditableText({ value, format: "int", onCommit: (v) => setValue(v), style: { fontSize:"36px",fontWeight:800,color:isDown?"var(--st-red)":"var(--st-ink)",lineHeight:1,fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontVariantNumeric:"tabular-nums",minWidth:"50px",textAlign:"center",display:"inline-block"} })
+  );
+  valStack.appendChild(h("span", { class: "studio-vbar-of" }, "/ " + dead));
+  if (!readOnly) valStack.appendChild(h("button", { class: "studio-vbar-step", style:{color:tone}, onClick: () => setValue(value + 1) }, "+"));
+  valBlock.appendChild(valStack);
   head.appendChild(valBlock);
   // Extra slot (e.g. Armor chip in damage bar)
   if (extra) head.appendChild(extra);
   // Ticks block
   const ticksBlock = h("div", { style:{textAlign:"right"} });
   ticksBlock.appendChild(h("div", { class: "studio-vbar-mini-label" }, tickLabel));
-  ticksBlock.appendChild(h("div", { class: "studio-vbar-stack", style:{justifyContent:"flex-end"} },
-    h("button", { class: "studio-vbar-step", style:{color:dyingAccent}, onClick: () => setTicks(ticks - 1) }, "−"),
-    buildStudioEditableText({ value: ticks, format: "int", onCommit: (v) => setTicks(v), style: { fontSize:"36px",fontWeight:800,color:ticks>0?dyingAccent:"var(--st-ink)",lineHeight:1,fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontVariantNumeric:"tabular-nums",minWidth:"30px",textAlign:"center",display:"inline-block"} }),
-    h("button", { class: "studio-vbar-step", style:{color:dyingAccent}, onClick: () => setTicks(ticks + 1) }, "+")
-  ));
+  const tickStack = h("div", { class: "studio-vbar-stack", style:{justifyContent:"flex-end"} });
+  if (!readOnly) tickStack.appendChild(h("button", { class: "studio-vbar-step", style:{color:dyingAccent}, onClick: () => setTicks(ticks - 1) }, "−"));
+  tickStack.appendChild(readOnly
+    ? h("span", { style: { fontSize:"36px",fontWeight:800,color:ticks>0?dyingAccent:"var(--st-ink)",lineHeight:1,fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontVariantNumeric:"tabular-nums",minWidth:"30px",textAlign:"center",display:"inline-block"} }, String(ticks))
+    : buildStudioEditableText({ value: ticks, format: "int", onCommit: (v) => setTicks(v), style: { fontSize:"36px",fontWeight:800,color:ticks>0?dyingAccent:"var(--st-ink)",lineHeight:1,fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontVariantNumeric:"tabular-nums",minWidth:"30px",textAlign:"center",display:"inline-block"} })
+  );
+  if (!readOnly) tickStack.appendChild(h("button", { class: "studio-vbar-step", style:{color:dyingAccent}, onClick: () => setTicks(ticks + 1) }, "+"));
+  ticksBlock.appendChild(tickStack);
   head.appendChild(ticksBlock);
   wrap.appendChild(head);
 
@@ -6866,8 +6910,11 @@ function buildStudioVitalityBar({ label, doneLabel, deadLabel, value, ticks, dow
   return wrap;
 }
 
-/* ── DamageBar — HP specialization + Armor chip + auto-warnings ── */
-function buildStudioDamageBar(pc) {
+/* ── DamageBar — HP specialization + Armor chip + auto-warnings ──
+   v0.10.5: opts.readOnly forwards to vitalityBar (hides ± controls);
+   banner copy no longer says "Tick a wound" — auto-tick already happens. */
+function buildStudioDamageBar(pc, opts) {
+  opts = opts || {};
   const dt = pc.damageTaken || 0;
   const wt = pc.derived.wound_threshold || 1;
   const dur = pc.derived.durability || 0;
@@ -6897,20 +6944,24 @@ function buildStudioDamageBar(pc) {
     setTicks: (v) => studioSetWounds(v),
     accent: "var(--st-green)", dyingAccent: "var(--st-rose)",
     extra: armorChip,
-    dataTip: "derivedStats.DUR"
+    dataTip: "derivedStats.DUR",
+    readOnly: !!opts.readOnly
   }));
   if (isDown || woundCrossed || pc.woundsTaken > 0) {
     wrap.appendChild(h("div", { class: "studio-vbar-warning" + (isDown ? " dead" : "") },
       isDown ? h("span", null, "⚠ MORPH DOWN · INCAPACITATED · " + (nearDeath ? "DEATH IMMINENT" : "stabilize to revive")) : null,
-      !isDown && woundCrossed ? h("span", null, h("b", null, "DAMAGE ≥ WOUND THRESHOLD."), " Tick a wound.") : null,
+      !isDown && woundCrossed ? h("span", null, h("b", null, "DAMAGE ≥ WOUND THRESHOLD."), " // auto-ticked at WT.") : null,
       pc.woundsTaken > 0 ? h("span", { style:{opacity:0.85} }, pc.woundsTaken + " wound" + (pc.woundsTaken > 1 ? "s" : "") + " · " + (pc.woundsTaken*-10) + " to all actions") : null
     ));
   }
   return wrap;
 }
 
-/* ── MindBar — mental analogue, mirrors DamageBar exactly ────── */
-function buildStudioMindBar(pc) {
+/* ── MindBar — mental analogue, mirrors DamageBar exactly ──────
+   v0.10.5: opts.readOnly forwards to vitalityBar; banner copy no longer
+   says "Tick a trauma" — WIL check reminder stays. */
+function buildStudioMindBar(pc, opts) {
+  opts = opts || {};
   const st = pc.stressTaken || 0;
   const tt = pc.derived.trauma_threshold || 1;
   const luc = pc.derived.lucidity || 0;
@@ -6927,12 +6978,13 @@ function buildStudioMindBar(pc) {
     setValue: (v) => studioSetStress(v),
     setTicks: (v) => studioSetTraumas(v),
     accent: "#6b9eff", dyingAccent: "#9333ea",
-    dataTip: "derivedStats.LUC"
+    dataTip: "derivedStats.LUC",
+    readOnly: !!opts.readOnly
   }));
   if (isBroken || traumaCrossed || pc.traumasTaken > 0) {
     wrap.appendChild(h("div", { class: "studio-vbar-warning stress" + (isBroken ? " dead" : "") },
       isBroken ? h("span", null, "⚠ MENTAL BREAKDOWN · CATATONIC 1d6 HRS · " + (nearMeltdown ? "EGO MELTDOWN IMMINENT" : "shock state")) : null,
-      !isBroken && traumaCrossed ? h("span", null, h("b", null, "STRESS ≥ TRAUMA THRESHOLD."), " Tick a trauma · WIL check vs disorientation.") : null,
+      !isBroken && traumaCrossed ? h("span", null, h("b", null, "STRESS ≥ TRAUMA THRESHOLD."), " // auto-ticked · WIL check vs disorientation.") : null,
       pc.traumasTaken > 0 ? h("span", { style:{opacity:0.85} }, pc.traumasTaken + " trauma" + (pc.traumasTaken > 1 ? "s" : "") + " · " + (pc.traumasTaken*-10) + " to actions · −" + pc.traumasTaken + " init") : null
     ));
   }
@@ -7798,62 +7850,37 @@ function buildPartyMemberCard(stateLike, entry) {
     )
   ));
 
-  // Vitals (current wounds/stress against WT/DUR).
-  // v0.10 B: imported members now show a richer auto-derived VITAL STATUS block
-  // below (with wounds/stress/traumas + thresholds). Keep this inline summary
-  // for the self card only — there's no tracker block on self.
-  if (isSelf && data.DUR > 0) {
-    const woundDisplay = data.isSwarm ? (data.wounds + " / " + data.DUR + " DUR (swarm)") : ("wounds: " + Math.floor(data.wounds / (data.WT||1)) + " · raw " + data.wounds + "/" + data.DUR);
-    card.appendChild(h("div", {class:"pc-section"},
-      h("div", {class:"pc-section-label"}, "▸ VITALS"),
-      h("div", {style:{fontFamily:"var(--mono)",fontSize:"11px",color:"rgba(220,235,238,0.75)"}}, woundDisplay)
-    ));
+  // v0.10.5: LIVE VITALS PANEL — the rich segmented-bar studio-sheet panel
+  // (damage + stress + pools + threshold markers + warnings) dropped inline
+  // on every team card. YOU is mutable (it's your STATE); FILE imports are
+  // read-only (controls would only mutate the local snapshot, not push back).
+  // Replaces the v0.10 thin VITALS one-liner (YOU) + VITAL STATUS tracker (FILE).
+  // Sync correction: studioPcFromState() reads STATE.play.woundsTaken directly,
+  // so the team-card wound count now matches the studio sheet (was using a
+  // recompute-from-raw-damage formula that ignored the latched override).
+  if (isSelf || (entry && entry.full)) {
+    const vitalsWrap = h("div", { class:"studio-sheet pc-vitals-embed" });
+    const renderVitals = () => {
+      const pc = studioPcFromState();
+      if (!pc || !pc.derived) return;
+      vitalsWrap.appendChild(buildStudioVitalSignsCard(pc, { vitalsOnly: true, readOnly: !isSelf }));
+    };
+    if (isSelf) renderVitals();
+    else withStateAs(entry.full, renderVitals);
+    card.appendChild(vitalsWrap);
   }
 
-  // v0.10 B: VITAL STATUS — auto-derived from teammate's live sheet, no manual GM tracking.
-  // Reads wounds/stress/traumas straight from entry.full.play; falls back to gmNotes only
-  // for legacy file-imports that pre-date the play substate. Initiative stays manual
-  // (becomes shared in Wave D). Notes textarea kept as personal/private annotation.
+  // v0.10.5: TEAM TOOLS — initiative + personal notes for imported members.
+  // Vitals moved up into the live panel above; this block keeps the manual
+  // initiative tracker (still per-card, shared rollout deferred) and the
+  // local-only personal notes textarea.
   if (!isSelf) {
     const idx = STATE.partyImports.indexOf(entry);
-    const play = (entry.full && entry.full.play) || {};
-    // Auto-derived current values (live from sheet); fallback to gmNotes for legacy entries.
-    const woundsCur = (typeof play.woundsTaken === "number") ? play.woundsTaken : (gm.wounds || 0);
-    const stressCur = (typeof play.stress === "number") ? play.stress : (gm.stress || 0);
-    const traumasCur = (typeof play.traumasTaken === "number") ? play.traumasTaken : 0;
-    // Thresholds from morph + ego derivation
-    const maxWounds = data.maxWounds || 0;
-    const lucMax = data.lucidity || 0;
-    const traumaMax = data.traumaThreshold || 0;
-    // Did this entry have live play data?
-    const hasLivePlay = !!(entry.full && entry.full.play && typeof entry.full.play.woundsTaken === "number");
 
     const tracker = h("div", {class:"gm-tracker"});
-    tracker.appendChild(h("div", {class:"gm-tracker-label"},
-      hasLivePlay ? "▾ VITAL STATUS · LIVE FROM SHEET" : "▾ VITAL STATUS · LEGACY (no live play data)"
-    ));
+    tracker.appendChild(h("div", {class:"gm-tracker-label"}, "▾ TEAM TOOLS · initiative · personal notes"));
 
-    // Read-only derived rows. Format: "VALUE / MAX" with a subtitle showing what it means.
-    const mkDerivedRow = (label, cur, max, subtitle, tone) => {
-      const ratioText = max > 0 ? (cur + " / " + max) : String(cur);
-      // Tone: amber when over half, red when at/over max
-      let color = "rgba(220,235,238,0.85)";
-      if (max > 0) {
-        if (cur >= max) color = tone === "wound" ? "#ff7077" : tone === "stress" ? "#ff9d54" : "#ffb84d";
-        else if (cur >= max / 2) color = "rgba(255,180,80,0.85)";
-      }
-      return h("div", {class:"gm-stat-row", style:{alignItems:"baseline"}},
-        h("label", null, label),
-        h("div", {style:{fontFamily:"var(--mono)",fontSize:"14px",fontWeight:700,letterSpacing:"1px",color}}, ratioText),
-        subtitle ? h("span", {style:{fontFamily:"var(--mono)",fontSize:"9.5px",color:"rgba(220,235,238,0.45)",letterSpacing:"1px",textTransform:"uppercase"}}, "// " + subtitle) : null
-      );
-    };
-
-    tracker.appendChild(mkDerivedRow("Wounds", woundsCur, maxWounds, maxWounds ? "max wounds = DUR/WT" : null, "wound"));
-    tracker.appendChild(mkDerivedRow("Stress", stressCur, lucMax, lucMax ? "stress / lucidity (WIL×2)" : null, "stress"));
-    tracker.appendChild(mkDerivedRow("Traumas", traumasCur, traumaMax, traumaMax ? "trauma threshold = LUC/5" : null, "trauma"));
-
-    // Initiative row (still manual — shared in Wave D)
+    // Initiative row (still manual — shared rollout deferred to a later wave)
     const initRow = h("div", {class:"gm-stat-row"},
       h("label", null, "Initiative"),
       h("input", {type:"number", value: gm.initiative !== null ? gm.initiative : "",
@@ -7927,7 +7954,7 @@ function buildPartyMemberCard(stateLike, entry) {
       onClick: () => showShareModal()
     }, "↗ Share"));
   }
-  if (actions.children.length > 0) card.appendChild(actions);
+  card.appendChild(actions);
 
   return card;
 }
@@ -8395,20 +8422,27 @@ function buildStudioHealing(pc) {
   return section;
 }
 
-/* ── Vital Signs Section — DamageBar + MindBar + PoolRow + Recharge + Healing + StatTiles ── */
-function buildStudioVitalSignsCard(pc) {
-  return buildStudioSection({ key:"vitals", title:"Vital Signs", color:"var(--st-teal)", icon:"vitals", kicker:"body · mind · pools · recharge · healing" },
-    buildStudioDamageBar(pc),
+/* ── Vital Signs Section — DamageBar + MindBar + PoolRow + Recharge + Healing + StatTiles ──
+   v0.10.5: opts.readOnly forwards through the stack (used by team-card render
+   for FILE imports); opts.vitalsOnly suppresses Recharge + Healing (the team
+   card uses this so the rest/heal controls stay on the studio sheet surface). */
+function buildStudioVitalSignsCard(pc, opts) {
+  opts = opts || {};
+  const ro = !!opts.readOnly;
+  const vitalsOnly = !!opts.vitalsOnly;
+  const kicker = vitalsOnly ? "body · mind · pools" : "body · mind · pools · recharge · healing";
+  return buildStudioSection({ key:"vitals", title:"Vital Signs", color:"var(--st-teal)", icon:"vitals", kicker },
+    buildStudioDamageBar(pc, { readOnly: ro }),
     h("div", { style:{borderTop:"1px dashed var(--st-line)",paddingTop:"14px",marginTop:"14px"} },
-      buildStudioMindBar(pc)
+      buildStudioMindBar(pc, { readOnly: ro })
     ),
-    h("div", { style:{marginTop:"14px"} }, buildStudioPoolRow(pc)),
-    h("div", { style:{paddingTop:"10px",marginTop:"10px",borderTop:"1px dashed var(--st-line)",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"12px",flexWrap:"wrap"} },
+    h("div", { style:{marginTop:"14px"} }, buildStudioPoolRow(pc, { readOnly: ro })),
+    vitalsOnly ? null : h("div", { style:{paddingTop:"10px",marginTop:"10px",borderTop:"1px dashed var(--st-line)",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"12px",flexWrap:"wrap"} },
       buildStudioRecharge(pc)
     ),
     // v0.8 — Healing mini-section. The explicit body+mind heal buttons EP2 rules say
     // are needed but the UI never exposed. Closes the wound-vs-damage divergence loop.
-    h("div", { style:{paddingTop:"10px",marginTop:"10px",borderTop:"1px dashed var(--st-line)"} },
+    vitalsOnly ? null : h("div", { style:{paddingTop:"10px",marginTop:"10px",borderTop:"1px dashed var(--st-line)"} },
       h("div", { style:{fontFamily:'"Share Tech Mono", ui-monospace, monospace',fontSize:"10px",letterSpacing:"1.6px",color:"var(--st-teal-deep)",fontWeight:800,textTransform:"uppercase",marginBottom:"8px"} }, "▾ HEALING · BODY · MIND"),
       buildStudioHealing(pc)
     ),
