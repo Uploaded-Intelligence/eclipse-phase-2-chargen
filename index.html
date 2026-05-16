@@ -4751,7 +4751,7 @@ function makeCharacterId() {
 }
 
 const newState = () => ({
-  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.11.0", mode:"chargen" },
+  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.11.1", mode:"chargen" },
   // v0.10: team-room metadata. Roomless local play has all nulls + empty teamName.
   // teamName persists locally even before joining a room (set it once, it sticks).
   team:{ roomId:null, teamName:"", lastPolledAt:null },
@@ -8643,7 +8643,7 @@ function buildStudioArmamentCard(entryKey, entry, opts) {
     "data-fab-ready": fabReady ? "true" : "false",
     "data-tip": "gear_items." + slug,
     style: { padding:"10px 12px", marginBottom:"8px", background:"linear-gradient(180deg, rgba(7,24,29,0.5), rgba(7,24,29,0.3))",
-             borderLeft:"4px solid " + tone, border:"1px solid rgba(127,212,226,0.22)", borderLeftWidth:"4px",
+             border:"1px solid rgba(127,212,226,0.22)", borderLeft:"4px solid " + tone,
              borderRadius:"3px" }
   }, headerRow, statChipsRow, modesLine, traitsRow, footer, tierFabRow);
 }
