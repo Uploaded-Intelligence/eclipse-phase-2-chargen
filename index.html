@@ -80,6 +80,47 @@ body.party-mode .rail,
 body.party-mode .play-mode-banner,
 body.party-mode .layout { display: none; }
 .party-page { max-width: 1500px; margin: 0 auto; padding: 16px 18px 80px; color: var(--fg); font-family: var(--font); position: relative; }
+
+/* v0.12 Armoury — full-surface tab for the Nanofab Armaments codex.
+   Same hide-pattern as party-mode: chargen wizard + play sheet hidden when in
+   armoury mode. Multi-column responsive grid for cards inside class groups.
+   Sticky filter strip stays visible while scrolling. Per [[feedback_full-surface-tabs]]. */
+body.armoury-mode .rail,
+body.armoury-mode .play-mode-banner,
+body.armoury-mode .layout { display: none; }
+.armoury-window { max-width: 1500px; margin: 0 auto; padding: 16px 18px 60px; color: var(--st-ink); font-family: var(--font); }
+.armoury-window .armoury-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+  padding-bottom: 12px; margin-bottom: 8px;
+  border-bottom: 1px solid var(--st-line);
+}
+.armoury-window .armoury-filter-strip {
+  position: sticky; top: 0; z-index: 5;
+  padding: 10px 12px;
+  margin: 0 0 16px;
+  background: linear-gradient(180deg, rgba(7,24,29,0.96), rgba(7,24,29,0.90));
+  border: 1px solid rgba(127,212,226,0.20);
+  border-radius: 3px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.armoury-window .armaments-class-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.armoury-window .armament-card { margin-bottom: 0; }  /* grid gap replaces card-internal margin */
+.armoury-window .armaments-group-header { margin: 24px 0 10px; }
+.armoury-window .armaments-group-header:first-of-type { margin-top: 4px; }
+
+@media (max-width: 720px) {
+  .armoury-window { padding: 10px 12px 30px; }
+  .armoury-window .armoury-header { gap: 10px; }
+  .armoury-window .armoury-filter-strip { padding: 6px 8px; }
+  .armoury-window .armaments-class-grid { grid-template-columns: 1fr; gap: 8px; }
+}
 .party-page.team-dropzone--active { outline: 2px dashed var(--accent); outline-offset: -10px; background: rgba(127,212,226,0.04); }
 .party-page.team-dropzone--active .team-dropzone-hint { color: var(--accent); border-color: var(--accent); background: rgba(127,212,226,0.08); }
 /* v0.10 C: team-drawer-body — disable mutating interactions on the embedded
@@ -4751,7 +4792,7 @@ function makeCharacterId() {
 }
 
 const newState = () => ({
-  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.11.1", mode:"chargen" },
+  meta:{ schemaVersion:SCHEMA_VERSION, savedAt:null, advancedMode:false, campaignType:"firewall", previewTab:"mech", toolVersion:"0.12.0", mode:"chargen" },
   // v0.10: team-room metadata. Roomless local play has all nulls + empty teamName.
   // teamName persists locally even before joining a room (set it once, it sticks).
   team:{ roomId:null, teamName:"", lastPolledAt:null },
@@ -7050,6 +7091,7 @@ function rerender() {
   app.innerHTML = "";
   document.body.classList.toggle("play-mode", STATE.meta.mode === "play");
   document.body.classList.toggle("party-mode", STATE.meta.mode === "party");
+  document.body.classList.toggle("armoury-mode", STATE.meta.mode === "armoury");
   // v0.7 — start/stop live polling on mode transitions
   if (STATE.meta.mode === "party") {
     try { startPartyPolling(); } catch(e) { /* polling helpers defined below */ }
@@ -7063,7 +7105,9 @@ function rerender() {
       h("a", {href:"#", onClick: (ev) => { ev.preventDefault(); dispatch(s => { s.meta.mode = "chargen"; }); }}, "Chargen"),
       " to edit lifepath, aptitudes, or skills. Use the sheet's pool / wound / stress counters to track session state."));
   }
-  if (STATE.meta.mode === "party") {
+  if (STATE.meta.mode === "armoury") {
+    app.appendChild(buildArmouryWindow(studioPcFromState()));
+  } else if (STATE.meta.mode === "party") {
     app.appendChild(buildPartyPage());
   } else {
     app.appendChild(buildStepRail());
@@ -7099,7 +7143,11 @@ function buildChrome() {
       h("button", {class:"mode" + (STATE.meta.mode === "party" ? " active" : ""),
         onClick: () => dispatch(s => { s.meta.mode = "party"; }),
         title: "Team Page · Command Centre — all teammates + live coverage"
-      }, "Team")
+      }, "Team"),
+      h("button", {class:"mode" + (STATE.meta.mode === "armoury" ? " active" : ""),
+        onClick: () => dispatch(s => { s.meta.mode = "armoury"; }),
+        title: "Nanofab · Armaments — browse the full blueprint library (73+ items, 11 classes)"
+      }, "Armoury")
     ),
     h("div", {class:"actions"},
       h("button", {class:"icon lex-btn",
@@ -8746,6 +8794,136 @@ function buildStudioArmaments(pc) {
 
   // CSS-driven tab switching: react to data-armaments-tab on wrap
   // Inline-driven for harness compatibility — toggles display:none / display:block on bodies
+  const observer = (typeof MutationObserver !== "undefined") ? new MutationObserver(() => {
+    const t = wrap.getAttribute("data-armaments-tab");
+    codexBody.style.display = (t === "codex") ? "" : "none";
+    loadoutBody.style.display = (t === "loadout") ? "" : "none";
+  }) : null;
+  if (observer && typeof wrap.setAttribute === "function" && wrap.addEventListener) {
+    try { observer.observe(wrap, { attributes: true, attributeFilter: ["data-armaments-tab"] }); } catch(e) {}
+  }
+
+  return wrap;
+}
+
+/* ── v0.12 Armoury Window ──────────────────────────────────────────────
+   Full-surface mode for the Nanofab Armaments codex. Promotes the v0.11
+   right-rail panel into its own top-level tab (alongside Chargen / Play /
+   Team). Same content (73+ entries, 11 classes, ownership/tier/fab badges,
+   status blocks, trait pills, filters, Codex/Loadout toggle) — but rendered
+   in a 1500px-max-width window with cards laid out as a multi-column
+   responsive grid per class group. Sticky filter strip stays visible while
+   scrolling. Per [[feedback_full-surface-tabs]]: codex deserves its own
+   surface, not an in-page panel that clutters play. */
+function buildArmouryWindow(pc) {
+  pc = pc || {};
+  // Outer carries BOTH `.armoury-window` (full-surface styling) AND
+  // `.armaments-panel` (reuses the existing v0.11 CSS filter rules verbatim).
+  const wrap = h("div", {
+    class: "armoury-window armaments-panel",
+    "data-armaments-tab": "codex",
+    "data-filter-class": "all",
+    "data-filter-lethal": "all",
+    "data-filter-owned": "all",
+    "data-filter-fab": "all"
+  });
+
+  // --- Header strip: title + tab toggle (Codex / Loadout) ---
+  const headerRow = h("div", { class: "armoury-header" });
+  headerRow.appendChild(h("div", { class: "armoury-header-title" },
+    h("h1", { style: { margin: 0, fontSize: "20px", letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--st-teal)", fontFamily: '"Share Tech Mono", ui-monospace, monospace', fontWeight: 800 } }, "Nanofab · Armaments"),
+    h("div", { style: { fontSize: "11px", color: "var(--st-ink-mute)", marginTop: "4px", fontFamily: '"Share Tech Mono", ui-monospace, monospace', letterSpacing: "0.04em" } },
+      "blueprint library — codex · 73+ items · 11 classes")
+  ));
+  const tabRow = h("div", { class: "armoury-tabs", style: { display: "flex", gap: "6px" } });
+  const tabCodex = h("button", { class: "armaments-tab armaments-tab--active", "data-tab": "codex",
+    style: { padding: "8px 18px", background: "rgba(79,212,224,0.18)", color: "var(--st-teal)", border: "1px solid rgba(127,212,226,0.55)", borderRadius: "3px", fontFamily: '"Share Tech Mono", ui-monospace, monospace', fontSize: "11px", fontWeight: 800, letterSpacing: "1.5px", textTransform: "uppercase", cursor: "pointer" },
+    onClick: () => { wrap.setAttribute("data-armaments-tab", "codex"); tabCodex.classList.add("armaments-tab--active"); tabLoadout.classList.remove("armaments-tab--active"); tabCodex.style.background = "rgba(79,212,224,0.18)"; tabCodex.style.color = "var(--st-teal)"; tabLoadout.style.background = "rgba(7,24,29,0.3)"; tabLoadout.style.color = "var(--st-ink-soft)"; }
+  }, "Codex");
+  const tabLoadout = h("button", { class: "armaments-tab", "data-tab": "loadout",
+    style: { padding: "8px 18px", background: "rgba(7,24,29,0.3)", color: "var(--st-ink-soft)", border: "1px solid rgba(127,212,226,0.30)", borderRadius: "3px", fontFamily: '"Share Tech Mono", ui-monospace, monospace', fontSize: "11px", fontWeight: 800, letterSpacing: "1.5px", textTransform: "uppercase", cursor: "pointer" },
+    onClick: () => { wrap.setAttribute("data-armaments-tab", "loadout"); tabLoadout.classList.add("armaments-tab--active"); tabCodex.classList.remove("armaments-tab--active"); tabLoadout.style.background = "rgba(79,212,224,0.18)"; tabLoadout.style.color = "var(--st-teal)"; tabCodex.style.background = "rgba(7,24,29,0.3)"; tabCodex.style.color = "var(--st-ink-soft)"; }
+  }, "My Loadout");
+  tabRow.appendChild(tabCodex);
+  tabRow.appendChild(tabLoadout);
+  headerRow.appendChild(tabRow);
+  wrap.appendChild(headerRow);
+
+  // --- Sticky filter strip ---
+  const filtersRow = h("div", { class: "armoury-filter-strip armaments-filters", style: { display: "flex", flexWrap: "wrap", gap: "5px", alignItems: "center" } });
+  const mkFilterChip = (groupAttr, value, label) => {
+    const chip = h("button", { class: "armaments-filter-chip", "data-group": groupAttr, "data-value": value,
+      style: { padding: "5px 11px", background: value === "all" ? "rgba(79,212,224,0.20)" : "rgba(7,24,29,0.4)", color: value === "all" ? "var(--st-teal)" : "var(--st-ink-soft)", border: "1px solid rgba(127,212,226,0.30)", borderRadius: "3px", fontFamily: '"Share Tech Mono", ui-monospace, monospace', fontSize: "10px", fontWeight: 700, letterSpacing: "1.0px", textTransform: "uppercase", cursor: "pointer" },
+      onClick: () => {
+        wrap.setAttribute("data-filter-" + groupAttr, value);
+        const groupChips = filtersRow.querySelectorAll('button[data-group="' + groupAttr + '"]');
+        groupChips.forEach(c => { c.style.background = "rgba(7,24,29,0.4)"; c.style.color = "var(--st-ink-soft)"; });
+        chip.style.background = "rgba(79,212,224,0.20)";
+        chip.style.color = "var(--st-teal)";
+      }
+    }, label);
+    return chip;
+  };
+  filtersRow.appendChild(mkFilterChip("class", "all", "All"));
+  ARMAMENT_CLASS_GROUPS.forEach(g => filtersRow.appendChild(mkFilterChip("class", g.key, g.label)));
+  filtersRow.appendChild(h("span", { style: { width: "1px", alignSelf: "stretch", background: "rgba(127,212,226,0.20)", margin: "0 6px" } }));
+  filtersRow.appendChild(mkFilterChip("lethal", "all", "Lethal+Non"));
+  filtersRow.appendChild(mkFilterChip("lethal", "lethal", "Lethal"));
+  filtersRow.appendChild(mkFilterChip("lethal", "non-lethal", "Non-Lethal"));
+  filtersRow.appendChild(h("span", { style: { width: "1px", alignSelf: "stretch", background: "rgba(127,212,226,0.20)", margin: "0 6px" } }));
+  filtersRow.appendChild(mkFilterChip("owned", "all", "All Items"));
+  filtersRow.appendChild(mkFilterChip("owned", "true", "Owned Only"));
+  filtersRow.appendChild(h("span", { style: { width: "1px", alignSelf: "stretch", background: "rgba(127,212,226,0.20)", margin: "0 6px" } }));
+  filtersRow.appendChild(mkFilterChip("fab", "all", "Any Fab"));
+  filtersRow.appendChild(mkFilterChip("fab", "true", "Fab-Ready"));
+  wrap.appendChild(filtersRow);
+
+  // --- Codex body — 11 class groups, each with a header + grid of cards ---
+  const codexBody = h("div", { class: "armoury-body armaments-codex-body", "data-armaments-view": "codex" });
+  const entries = studioArmamentEntries();
+  ARMAMENT_CLASS_GROUPS.forEach(group => {
+    const groupEntries = entries.filter(({ entry }) => group.match(entry));
+    if (groupEntries.length === 0) return;
+    const ownedCount = groupEntries.filter(({ key, entry }) => {
+      const s = studioArmamentOwnership(pc, key, entry);
+      return s === "equipped" || s === "stowed";
+    }).length;
+    const header = h("div", { class: "armaments-group-header", "data-class": group.key,
+      style: { padding: "6px 10px", margin: "20px 0 8px", background: "rgba(7,24,29,0.6)",
+               borderLeft: "3px solid " + (ARMAMENT_CLASS_TONES[group.key] || "#4fd4e0"),
+               fontFamily: '"Share Tech Mono", ui-monospace, monospace',
+               fontSize: "11.5px", fontWeight: 800, letterSpacing: "2.0px",
+               color: "var(--st-teal)", textTransform: "uppercase" } },
+      "▸ " + group.label + " · " + groupEntries.length + " blueprints · " + ownedCount + " owned");
+    codexBody.appendChild(header);
+    const grid = h("div", { class: "armaments-class-grid", "data-class-grid": group.key });
+    groupEntries.forEach(({ key, entry }) => {
+      grid.appendChild(buildStudioArmamentCard(key, entry, { mode: "codex", pc }));
+    });
+    codexBody.appendChild(grid);
+  });
+  wrap.appendChild(codexBody);
+
+  // --- Loadout body — PC's equipped weapons only, also in grid form ---
+  const loadoutBody = h("div", { class: "armoury-body armaments-loadout-body", "data-armaments-view": "loadout", style: { display: "none" } });
+  const pcWeapons = ((pc && pc.gear) || []).filter(g => g && g.weapon);
+  if (pcWeapons.length === 0) {
+    loadoutBody.appendChild(h("div", { style: { padding: "32px 14px", fontSize: "13px", color: "var(--st-ink-mute)", fontStyle: "italic", textAlign: "center" } },
+      "No weapons in loadout. Switch to ", h("strong", { style: { color: "var(--st-teal)" } }, "Codex"), " to browse the full blueprint library."));
+  } else {
+    const loadoutGrid = h("div", { class: "armaments-class-grid", "data-class-grid": "loadout" });
+    pcWeapons.forEach(g => {
+      const slug = (g.id) || (g.name || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      const refEntry = (RULEBOOK_REFERENCE && RULEBOOK_REFERENCE.gear_items && RULEBOOK_REFERENCE.gear_items[slug])
+        ? RULEBOOK_REFERENCE.gear_items[slug]
+        : { name: g.name, weapon: g.weapon, cost: g.cost || "—", category: "Weapons" };
+      loadoutGrid.appendChild(buildStudioArmamentCard(slug, refEntry, { mode: "loadout", pc, owned: g.equipped ? "equipped" : "stowed" }));
+    });
+    loadoutBody.appendChild(loadoutGrid);
+  }
+  wrap.appendChild(loadoutBody);
+
+  // Tab switching observer (same pattern as the v0.11 panel)
   const observer = (typeof MutationObserver !== "undefined") ? new MutationObserver(() => {
     const t = wrap.getAttribute("data-armaments-tab");
     codexBody.style.display = (t === "codex") ? "" : "none";
@@ -10626,16 +10804,11 @@ function buildStudioSheet() {
       buildStudioTurnCoach(pc)
     ));
   }
-  // v0.11 Nanofab · Armaments — codex of weapons/grenades/missiles/explosives/
-  // mines/ammo/mods. Codex (default) tab browses the full blueprint library;
-  // Loadout tab filters to PC's equipped weapons. Open by default in play,
-  // collapsed in chargen but kicker advertises catalog reach.
-  rightRail.appendChild(buildStudioSection({ key:"armaments", title:"Nanofab · Armaments", color:"var(--st-teal)", icon:"combat",
-    kicker:"codex · 70+ blueprints · 11 classes · loadout view",
-    defaultOpen: isPlay,
-    panelStyle:{ maxHeight:"640px", overflowY:"auto" } },
-    buildStudioArmaments(pc)
-  ));
+  // v0.12 — Nanofab Armaments was promoted from a right-rail section to its
+  // own top-level tab (alongside Chargen / Play / Team). The codex lives at
+  // STATE.meta.mode === "armoury" via buildArmouryWindow(pc). See
+  // [[feedback_full-surface-tabs]]: codex deserves its own surface, not an
+  // in-page panel that clutters play.
   // Roll Log — always visible (helps both chargen [verify mechanic] and play).
   rightRail.appendChild(buildStudioSection({ key:"rollLog", title:"Roll Log", color:"var(--st-teal)", icon:"log", kicker:"last 12 rolls", defaultOpen: isPlay },
     buildStudioRollLog(pc)

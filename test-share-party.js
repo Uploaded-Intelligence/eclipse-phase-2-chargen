@@ -6,7 +6,7 @@ const vm = require("vm");
 const html = fs.readFileSync(__dirname + "/index.html", "utf8");
 let js = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 js = js.replace(/^boot\(\);$/m, "// boot suppressed");
-js += "\nthis.__exports = Object.defineProperties({}, {STATE:{get:()=>STATE,enumerable:true},RULEBOOK_DATA:{value:RULEBOOK_DATA,enumerable:true},RULEBOOK_REFERENCE:{value:RULEBOOK_REFERENCE,enumerable:true},derived:{value:derived,enumerable:true},newState:{value:newState,enumerable:true},encodeShareUrl:{value:encodeShareUrl,enumerable:true},decodeShareUrl:{value:decodeShareUrl,enumerable:true},stripPortrait:{value:stripPortrait,enumerable:true},importShareSnapshot:{value:importShareSnapshot,enumerable:true},makeCharacterId:{value:makeCharacterId,enumerable:true},migrateV6ToV7:{value:migrateV6ToV7,enumerable:true},migrateToCurrent:{value:migrateToCurrent,enumerable:true},SCHEMA_VERSION:{value:SCHEMA_VERSION,enumerable:true},LZString:{value:LZString,enumerable:true},studioPcFromState:{value:studioPcFromState,enumerable:true},studioHealDamage:{value:studioHealDamage,enumerable:true},studioHealWound:{value:studioHealWound,enumerable:true},studioHealStress:{value:studioHealStress,enumerable:true},studioHealTrauma:{value:studioHealTrauma,enumerable:true},studioSetDamage:{value:studioSetDamage,enumerable:true},studioSetWounds:{value:studioSetWounds,enumerable:true},studioSetStress:{value:studioSetStress,enumerable:true},studioSetTraumas:{value:studioSetTraumas,enumerable:true},characterHasFabber:{value:characterHasFabber,enumerable:true},studioMeshAccess:{value:studioMeshAccess,enumerable:true},studioMeshOpsec:{value:studioMeshOpsec,enumerable:true},studioMeshApps:{value:studioMeshApps,enumerable:true},studioMeshImplants:{value:studioMeshImplants,enumerable:true},buildPartyImportEntry:{value:buildPartyImportEntry,enumerable:true},normalizePartyImportEntries:{value:normalizePartyImportEntries,enumerable:true},importJSON:{value:importJSON,enumerable:true},partyComputeCardData:{value:partyComputeCardData,enumerable:true},buildPartyMemberCard:{value:buildPartyMemberCard,enumerable:true},buildStudioVitalSignsCard:{value:buildStudioVitalSignsCard,enumerable:true},buildStudioDamageBar:{value:buildStudioDamageBar,enumerable:true},buildStudioMindBar:{value:buildStudioMindBar,enumerable:true},buildStudioVitalityBar:{value:buildStudioVitalityBar,enumerable:true},buildStudioPoolMeter:{value:buildStudioPoolMeter,enumerable:true},buildStudioPoolRow:{value:buildStudioPoolRow,enumerable:true},buildStudioPoolGlyph:{value:buildStudioPoolGlyph,enumerable:true},buildStudioFeedBreak:{value:buildStudioFeedBreak,enumerable:true},buildStudioVbarSectionHead:{value:buildStudioVbarSectionHead,enumerable:true},buildPartyMemberCoverage:{value:buildPartyMemberCoverage,enumerable:true},buildStudioAptitudeStrip:{value:buildStudioAptitudeStrip,enumerable:true},buildStudioReputation:{value:buildStudioReputation,enumerable:true},buildStudioArmaments:{value:buildStudioArmaments,enumerable:true},buildStudioArmamentCard:{value:buildStudioArmamentCard,enumerable:true},buildStudioArmamentStatChips:{value:buildStudioArmamentStatChips,enumerable:true},buildStudioArmamentFooter:{value:buildStudioArmamentFooter,enumerable:true},buildStudioArmamentDefenderResponse:{value:buildStudioArmamentDefenderResponse,enumerable:true},buildStudioWeaponTraitBadge:{value:buildStudioWeaponTraitBadge,enumerable:true},buildStudioWeaponOwnershipChip:{value:buildStudioWeaponOwnershipChip,enumerable:true},buildStudioWeaponTierBadge:{value:buildStudioWeaponTierBadge,enumerable:true},buildStudioWeaponFabBadge:{value:buildStudioWeaponFabBadge,enumerable:true},buildStudioRangeBands:{value:buildStudioRangeBands,enumerable:true},studioArmamentOwnership:{value:studioArmamentOwnership,enumerable:true},studioArmamentFabReady:{value:studioArmamentFabReady,enumerable:true},studioArmamentEntries:{value:studioArmamentEntries,enumerable:true},studioArmamentClassOf:{value:studioArmamentClassOf,enumerable:true},ARMAMENT_CLASS_TONES:{value:ARMAMENT_CLASS_TONES,enumerable:true},ARMAMENT_CLASS_GROUPS:{value:ARMAMENT_CLASS_GROUPS,enumerable:true},withStateAs:{value:withStateAs,enumerable:true},_playerOwnedPayload:{value:_playerOwnedPayload,enumerable:true},_isSuspended:{value:_isSuspended,enumerable:true},_setLastInputAt:{value:(t)=>{_lastInputAt=t;},enumerable:true},_getLastInputAt:{value:()=>_lastInputAt,enumerable:true},_setIdleCount:{value:(n)=>{_idleCount=n;},enumerable:true},_getIdleCount:{value:()=>_idleCount,enumerable:true},_setPollIntervalMs:{value:(n)=>{_pollIntervalMs=n;},enumerable:true},_getPollIntervalMs:{value:()=>_pollIntervalMs,enumerable:true},_AFK_THRESHOLD_MS:{value:AFK_THRESHOLD_MS,enumerable:true},_setState:{value:(v)=>{STATE=v;},enumerable:true}});\n";
+js += "\nthis.__exports = Object.defineProperties({}, {STATE:{get:()=>STATE,enumerable:true},RULEBOOK_DATA:{value:RULEBOOK_DATA,enumerable:true},RULEBOOK_REFERENCE:{value:RULEBOOK_REFERENCE,enumerable:true},derived:{value:derived,enumerable:true},newState:{value:newState,enumerable:true},encodeShareUrl:{value:encodeShareUrl,enumerable:true},decodeShareUrl:{value:decodeShareUrl,enumerable:true},stripPortrait:{value:stripPortrait,enumerable:true},importShareSnapshot:{value:importShareSnapshot,enumerable:true},makeCharacterId:{value:makeCharacterId,enumerable:true},migrateV6ToV7:{value:migrateV6ToV7,enumerable:true},migrateToCurrent:{value:migrateToCurrent,enumerable:true},SCHEMA_VERSION:{value:SCHEMA_VERSION,enumerable:true},LZString:{value:LZString,enumerable:true},studioPcFromState:{value:studioPcFromState,enumerable:true},studioHealDamage:{value:studioHealDamage,enumerable:true},studioHealWound:{value:studioHealWound,enumerable:true},studioHealStress:{value:studioHealStress,enumerable:true},studioHealTrauma:{value:studioHealTrauma,enumerable:true},studioSetDamage:{value:studioSetDamage,enumerable:true},studioSetWounds:{value:studioSetWounds,enumerable:true},studioSetStress:{value:studioSetStress,enumerable:true},studioSetTraumas:{value:studioSetTraumas,enumerable:true},characterHasFabber:{value:characterHasFabber,enumerable:true},studioMeshAccess:{value:studioMeshAccess,enumerable:true},studioMeshOpsec:{value:studioMeshOpsec,enumerable:true},studioMeshApps:{value:studioMeshApps,enumerable:true},studioMeshImplants:{value:studioMeshImplants,enumerable:true},buildPartyImportEntry:{value:buildPartyImportEntry,enumerable:true},normalizePartyImportEntries:{value:normalizePartyImportEntries,enumerable:true},importJSON:{value:importJSON,enumerable:true},partyComputeCardData:{value:partyComputeCardData,enumerable:true},buildPartyMemberCard:{value:buildPartyMemberCard,enumerable:true},buildStudioVitalSignsCard:{value:buildStudioVitalSignsCard,enumerable:true},buildStudioDamageBar:{value:buildStudioDamageBar,enumerable:true},buildStudioMindBar:{value:buildStudioMindBar,enumerable:true},buildStudioVitalityBar:{value:buildStudioVitalityBar,enumerable:true},buildStudioPoolMeter:{value:buildStudioPoolMeter,enumerable:true},buildStudioPoolRow:{value:buildStudioPoolRow,enumerable:true},buildStudioPoolGlyph:{value:buildStudioPoolGlyph,enumerable:true},buildStudioFeedBreak:{value:buildStudioFeedBreak,enumerable:true},buildStudioVbarSectionHead:{value:buildStudioVbarSectionHead,enumerable:true},buildPartyMemberCoverage:{value:buildPartyMemberCoverage,enumerable:true},buildStudioAptitudeStrip:{value:buildStudioAptitudeStrip,enumerable:true},buildStudioReputation:{value:buildStudioReputation,enumerable:true},buildStudioArmaments:{value:buildStudioArmaments,enumerable:true},buildArmouryWindow:{value:buildArmouryWindow,enumerable:true},buildStudioArmamentCard:{value:buildStudioArmamentCard,enumerable:true},buildStudioArmamentStatChips:{value:buildStudioArmamentStatChips,enumerable:true},buildStudioArmamentFooter:{value:buildStudioArmamentFooter,enumerable:true},buildStudioArmamentDefenderResponse:{value:buildStudioArmamentDefenderResponse,enumerable:true},buildStudioWeaponTraitBadge:{value:buildStudioWeaponTraitBadge,enumerable:true},buildStudioWeaponOwnershipChip:{value:buildStudioWeaponOwnershipChip,enumerable:true},buildStudioWeaponTierBadge:{value:buildStudioWeaponTierBadge,enumerable:true},buildStudioWeaponFabBadge:{value:buildStudioWeaponFabBadge,enumerable:true},buildStudioRangeBands:{value:buildStudioRangeBands,enumerable:true},studioArmamentOwnership:{value:studioArmamentOwnership,enumerable:true},studioArmamentFabReady:{value:studioArmamentFabReady,enumerable:true},studioArmamentEntries:{value:studioArmamentEntries,enumerable:true},studioArmamentClassOf:{value:studioArmamentClassOf,enumerable:true},ARMAMENT_CLASS_TONES:{value:ARMAMENT_CLASS_TONES,enumerable:true},ARMAMENT_CLASS_GROUPS:{value:ARMAMENT_CLASS_GROUPS,enumerable:true},withStateAs:{value:withStateAs,enumerable:true},_playerOwnedPayload:{value:_playerOwnedPayload,enumerable:true},_isSuspended:{value:_isSuspended,enumerable:true},_setLastInputAt:{value:(t)=>{_lastInputAt=t;},enumerable:true},_getLastInputAt:{value:()=>_lastInputAt,enumerable:true},_setIdleCount:{value:(n)=>{_idleCount=n;},enumerable:true},_getIdleCount:{value:()=>_idleCount,enumerable:true},_setPollIntervalMs:{value:(n)=>{_pollIntervalMs=n;},enumerable:true},_getPollIntervalMs:{value:()=>_pollIntervalMs,enumerable:true},_AFK_THRESHOLD_MS:{value:AFK_THRESHOLD_MS,enumerable:true},_setState:{value:(v)=>{STATE=v;},enumerable:true}});\n";
 
 const sandbox = {
   console,
@@ -709,7 +709,7 @@ console.log("\n=== v0.10.2 — studioPcFromState produces a renderable pc from a
 console.log("\n=== v0.10.4 — toolVersion bumped to 0.10.4 ===");
 {
   const fresh = exp.newState();
-  assert("newState().meta.toolVersion is 0.11.1", fresh.meta.toolVersion === "0.11.1");
+  assert("newState().meta.toolVersion is 0.12.0", fresh.meta.toolVersion === "0.12.0");
 }
 
 console.log("\n=== v0.10.4 — hash-skip: same player-owned state → identical hash ===");
@@ -1677,17 +1677,16 @@ console.log("\n=== v0.11 — Back-compat ===");
   });
 }
 
-console.log("\n=== v0.11 — Wire-in to right rail ===");
+console.log("\n=== v0.12 — Armaments promoted to a full-surface tab (not in right rail) ===");
 {
-  // buildStudioSheet source should reference buildStudioArmaments
-  // Find buildStudioSheet — it's not on __exports directly, so check via window-of-source
-  // (we patch __exports for many things, but the wire-in is in the sheet builder.)
   const html = require("fs").readFileSync(__dirname + "/index.html", "utf8");
-  assert("buildStudioSheet wires in buildStudioArmaments between Combat ALI and Roll Log",
-    html.indexOf('key:"armaments"') !== -1
-    && html.indexOf('buildStudioArmaments(pc)') !== -1);
-  assert("Armaments section title is 'Nanofab · Armaments'",
-    html.indexOf('"Nanofab · Armaments"') !== -1);
+  // The v0.11 right-rail wire-in is GONE — Armaments now lives at its own
+  // top-level mode (STATE.meta.mode === "armoury"), not as a section.
+  assert("buildStudioSheet no longer wires in an Armaments studio-section",
+    html.indexOf('key:"armaments", title:"Nanofab · Armaments"') === -1);
+  // The window-builder vocabulary is what's present now.
+  assert("buildArmouryWindow defined as a top-level builder",
+    html.indexOf("function buildArmouryWindow(pc)") !== -1);
 }
 
 console.log("\n=== v0.11.1 — Class-tone left border applies (no shorthand override) ===");
@@ -1710,11 +1709,70 @@ console.log("\n=== v0.11.1 — Class-tone left border applies (no shorthand over
     uniqueTones.size >= 11, "got " + uniqueTones.size);
 }
 
-console.log("\n=== v0.11 — toolVersion bumped to 0.11.1 ===");
+console.log("\n=== v0.12 — Armoury full-surface tab ===");
+{
+  // The new top-level mode + builder
+  assert("buildArmouryWindow is exposed",
+    typeof exp.buildArmouryWindow === "function");
+
+  let armoury;
+  try { armoury = exp.buildArmouryWindow(exp.studioPcFromState(exp.STATE)); } catch(e) { console.log("buildArmouryWindow threw:", e.message); }
+  assert("buildArmouryWindow renders without throwing",
+    armoury != null);
+
+  assert("buildArmouryWindow doesn't throw on null pc",
+    (() => { try { exp.buildArmouryWindow(null); return true; } catch(e) { return false; } })());
+
+  const winSrc = exp.buildArmouryWindow.toString();
+  assert("buildArmouryWindow source uses class 'armoury-window'",
+    winSrc.indexOf("armoury-window") !== -1);
+  assert("buildArmouryWindow renders cards inside .armaments-class-grid containers",
+    winSrc.indexOf("armaments-class-grid") !== -1);
+  assert("buildArmouryWindow uses ARMAMENT_CLASS_GROUPS to iterate",
+    winSrc.indexOf("ARMAMENT_CLASS_GROUPS") !== -1);
+  assert("buildArmouryWindow calls buildStudioArmamentCard for entries",
+    winSrc.indexOf("buildStudioArmamentCard") !== -1);
+  assert("buildArmouryWindow includes a sticky filter strip",
+    winSrc.indexOf("armoury-filter-strip") !== -1);
+  assert("buildArmouryWindow includes header strip ('Nanofab · Armaments')",
+    winSrc.indexOf("Nanofab · Armaments") !== -1);
+
+  // Mode toggle should now have 4 buttons including Armoury
+  const html = require("fs").readFileSync(__dirname + "/index.html", "utf8");
+  assert("Mode toggle includes a 4th 'Armoury' button",
+    html.indexOf('s.meta.mode = "armoury"') !== -1
+    && html.indexOf('}, "Armoury")') !== -1);
+
+  // Rerender routing
+  assert("rerender adds 'armoury-mode' body class for STATE.meta.mode === 'armoury'",
+    html.indexOf('document.body.classList.toggle("armoury-mode"') !== -1);
+  assert("rerender routes armoury mode to buildArmouryWindow",
+    html.indexOf('STATE.meta.mode === "armoury"') !== -1
+    && html.indexOf("buildArmouryWindow(studioPcFromState())") !== -1);
+
+  // CSS for the new full-surface mode
+  assert("CSS includes .armoury-window rules",
+    html.indexOf(".armoury-window {") !== -1
+    && html.indexOf("max-width: 1500px") !== -1);
+  assert("CSS includes responsive grid for class-grid",
+    html.indexOf(".armaments-class-grid") !== -1
+    && html.indexOf("repeat(auto-fill, minmax(320px, 1fr))") !== -1);
+  assert("CSS hides chargen + play surfaces in armoury-mode",
+    html.indexOf("body.armoury-mode .layout { display: none; }") !== -1);
+
+  // Render check — armoury window contains class grids
+  if (armoury && armoury.children) {
+    const childClasses = Array.from(armoury.children).map(c => c.className || "").join(" ");
+    assert("buildArmouryWindow renders header + filter-strip + codex body",
+      /armoury-header/.test(childClasses) && /armoury-filter-strip/.test(childClasses) && /armoury-body/.test(childClasses));
+  }
+}
+
+console.log("\n=== v0.12 — toolVersion bumped to 0.12.0 ===");
 {
   const fresh = exp.newState();
-  assert("newState().meta.toolVersion is 0.11.1",
-    fresh.meta.toolVersion === "0.11.1");
+  assert("newState().meta.toolVersion is 0.12.0",
+    fresh.meta.toolVersion === "0.12.0");
 }
 
 console.log("\n=========================================");
