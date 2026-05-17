@@ -2,6 +2,29 @@
 
 All notable changes to this project. Format follows the spirit of [Keep a Changelog](https://keepachangelog.com/), versioned by milestone.
 
+## [0.12.0] — 2026-05-17 — "Armoury · full-surface tab"
+
+User's correction after v0.11.1 shipped: *"no. I want this to be like a new 'tab'. A full space window to scroll and see multiple rows of armaments. Currently this clutters up regular play."*
+
+Per [[feedback_full-surface-tabs]] — multi-mode UX gives each mode its own full surface with the inactive mode hidden. The v0.11 Armaments codex was structurally wrong: a 640px collapsible panel inside the play-mode right rail, with cards stacked single-column inside a 340px-wide column. Browsing 73 cards meant scrolling inside a small box inside a long page.
+
+**Structural fix.** Promote the codex from a section to a top-level mode, alongside Chargen / Play / Team. Remove it from the right rail entirely. Build a full-window surface with multi-column responsive grid.
+
+**What changed:**
+
+- **Mode toggle now has 4 buttons** (Chargen / Play / Team / **Armoury**). Same chrome strip, one more button. `STATE.meta.mode` accepts `"armoury"` as a new value.
+- **New top-level surface** — `buildArmouryWindow(pc)` mounts a full-page `.armoury-window` (max-width 1500px, centered, padded) with: header strip (title + Codex/Loadout tab toggle), sticky filter chip row (class × 12, lethality × 2, owned, fab-ready), and class groups each rendered as `.armaments-class-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }`.
+- **Sticky filter strip** — chips stay visible at the top while scrolling 73 cards. No more scrolling back to the top to flip Spray → Beam.
+- **Multi-column grid** — 3-4 cards per row on desktop (1500px window, 320px min-width per card), 2 cards on tablet, 1 card on mobile. Auto-fill adapts to viewport.
+- **Right-rail removal** — `buildStudioSheet` no longer wires in an Armaments section. Play mode goes back to: Vital Signs → Aptitudes → Reputation → Party Coverage → Combat ALI → Roll Log → Combat 101. Clean.
+- **Body-class added** — `body.armoury-mode` hides `.rail`, `.play-mode-banner`, `.layout` (same pattern as `body.party-mode`). Each mode owns its own surface; inactive modes are display:none, not overlayed.
+- **All v0.11 helpers reused** — `buildStudioArmamentCard`, `buildStudioWeaponOwnershipChip`, `buildStudioWeaponTierBadge`, `buildStudioWeaponFabBadge`, `buildStudioRangeBands`, `studioArmamentEntries`, `studioArmamentOwnership`, `studioArmamentFabReady`, `ARMAMENT_CLASS_GROUPS`, `ARMAMENT_CLASS_TONES`. The wrap carries both `.armoury-window` (full-surface styling) and `.armaments-panel` (reuses the v0.11 CSS filter rules verbatim) — no CSS duplication.
+- **Tests** — added 14 assertions for the new mode + builder + grid layout + body-class + CSS rules. Inverted the old "buildStudioSheet wires in buildStudioArmaments" assertion to its complement ("no longer wires it in"). `buildStudioArmaments` (the original panel builder) stays defined and exposed — back-compat for the `__exports` table — but nothing mounts it.
+
+**No schema-version bump.** `STATE.meta.mode` is a string; migrations don't need to know about new mode values. Legacy saves with `mode: "armoury"` would round-trip cleanly through the existing migration path.
+
+**Captured as memory:** [[feedback_full-surface-tabs]] already documents this preference (codified during v0.5.1's CHARGEN ↔ PLAY rework). Cross-link added in [[feedback_game-dev-catalogs]]: codex = full-surface window, not in-page panel — the panel was a structural mistake recoverable in one wave.
+
 ## [0.11.1] — 2026-05-17 — "Class-tone hotfix"
 
 Visual verifier caught one CSS bug after v0.11.0 shipped: all 73 armament cards rendered with the same teal-cyan left border instead of the intended per-class tones (Kinetic red, Beam blue, Spray cyan, Seeker purple, Melee amber, Implant green, Grenade orange, Missile deep-purple, Explosive dark-orange, Mine slate, Ammo grey-blue, Mod deep-teal).
